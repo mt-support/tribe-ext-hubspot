@@ -10,23 +10,23 @@ $I->loginAsAdmin();
 $I->amOnPluginsPage();
 $I->seePluginDeactivated( 'event-tickets' );
 $I->seePluginDeactivated( 'event-tickets-plus' );
-$I->seePluginDeactivated( 'tribe-ext-hubspot' );
+$I->seePluginDeactivated( 'event-tickets-hubspot-integration' );
 
-$I->activatePlugin( [ 'event-tickets', 'event-tickets-plus', 'tribe-ext-hubspot' ] );
+$I->activatePlugin( [ 'event-tickets', 'event-tickets-plus', 'event-tickets-hubspot-integration' ] );
 
 // to get back to the plugins page if redirected after the plugin activation
 $I->amOnPluginsPage();
 
 $I->seePluginActivated( 'event-tickets' );
 $I->seePluginActivated( 'event-tickets-plus' );
-$I->seePluginActivated( 'tribe-ext-hubspot' );
+$I->seePluginActivated( 'event-tickets-hubspot-integration' );
 
-$I->deactivatePlugin( 'tribe-ext-hubspot' );
+$I->deactivatePlugin( 'event-tickets-hubspot-integration' );
 
 // to get back to the plugins page if redirected after the plugin activation
 $I->amOnPluginsPage();
 
-$I->seePluginDeactivated( 'tribe-ext-hubspot' );
+$I->seePluginDeactivated( 'event-tickets-hubspot-integration' );
 
 // and we stop here: verifying Event Tickets and Event Tickets Plus plugin deactivation should be handled in
 // their respective tests
