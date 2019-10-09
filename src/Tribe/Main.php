@@ -2,8 +2,6 @@
 
 namespace Tribe\HubSpot;
 
-use Tribe\HubSpot\Admin\Settings;
-
 class Main {
 
 	/**
