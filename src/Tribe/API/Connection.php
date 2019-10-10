@@ -8,12 +8,11 @@ use SevenShores\Hubspot\Resources\OAuth2;
 
 /**
  * todo HUBSPOT Connection BUILD
- * Initial Connection - Callback, Get Code, Save Code
- * Refresh - Hook into Automatically Refresh
- * Add Admin Notice if Connection Not Set or Connection Not Authorized
+ * Add Admin Notice if Connection Not Set or Connection Not Authorized or Token is Expired and Cannot Refresh
+ * Review and Get to Fatals with No or Partial Settings In Place
  * Goal|Last Part - Ready to get data from a common class
  *
- * Maybe
+ * Maybe to Do:
  * Disconnect
  */
 class Connection {
@@ -53,28 +52,62 @@ class Connection {
 	 */
 	protected $token_expires = '';
 
+	/**
+	 * Connection constructor.
+	 *
+	 * @since TBD
+	 *
+	 */
 	public function __construct() {
 
-		//todo add a callback handler on a specific url that then redirects to settings page
-		$this->callback      = \Tribe__Settings::instance()->get_url( [ 'tab' => 'addons' ] );
+		$this->callback      = get_home_url( null, '/tribe-hubspot/' );
 		$this->options       = tribe( 'tickets.hubspot' )->get_all_options();
 		$this->opts_prefix   = tribe( 'tickets.hubspot.settings' )->get_options_prefix();
-		$this->access_token  = $this->options['access_token'];
-		$this->client_id     = $this->options['client_id'];
-		$this->client_secret = $this->options['client_secret'];
-		$this->refresh_token = $this->options['refresh_token'];
-		$this->token_expires = $this->options['token_expires'];
+		$this->access_token  = isset( $this->options['access_token'] ) ? $this->options['access_token'] : '';
+		$this->client_id     = isset( $this->options['client_id'] ) ? $this->options['client_id'] : '';
+		$this->client_secret = isset( $this->options['client_secret'] ) ? $this->options['client_secret'] : '';
+		$this->refresh_token = isset( $this->options['refresh_token'] ) ? $this->options['refresh_token'] : '';
+		$this->token_expires = isset( $this->options['token_expires'] ) ? $this->options['token_expires'] : '';
 
-		//todo add handler for options that do not exist to prevent undefinded notices
-		//$this->hapi_key = $this->options['hapi_key'];
+		if ( ! $this->has_required_fields() ) {
+			return;
+		}
 
 		$this->client = new Client( [ 'key' => $this->client_secret ] );
 		$this->oauth2 = new OAuth2( $this->client );
 
 	}
 
+	/**
+	 * Check if the Required Fields Are Available to Authorize
+	 *
+	 * @since TBD
+	 *
+	 * @return bool
+	 */
+	public function has_required_fields() {
+
+		if (
+			empty( $this->client_id ) ||
+			empty( $this->client_secret )
+		) {
+			return false;
+		}
+
+		return true;
+
+	}
+
+	/**
+	 * Check if HubSpot is Authorized
+	 *
+	 * @since TBD
+	 *
+	 * @return bool
+	 */
 	public function is_authorized() {
 
+		// If missing any of these fields then the site is Not Authorized.
 		if (
 			empty( $this->client_id ) ||
 			empty( $this->client_secret ) ||
@@ -89,12 +122,30 @@ class Connection {
 
 	}
 
+	/**
+	 * Get the HubSpot Authorization URL
+	 *
+	 * @since TBD
+	 *
+	 * @return \SevenShores\Hubspot\Http\Response|void
+	 */
 	public function get_authorized_url() {
+
+		// If No Client ID then Return Empty to Prevent Errors.
+		if ( empty( $this->client_id ) ) {
+			return;
+		}
 
 		return $this->oauth2->getAuthUrl( $this->client_id, $this->callback, $this->scope );
 	}
 
-
+	/**
+	 * Update the Access Token Options
+	 *
+	 * @since TBD
+	 *
+	 * @param object $access_tokens A data object with access token, refresh token, and expiration duration
+	 */
 	protected function update_tokens( $access_tokens ) {
 
 		tribe_update_option( $this->opts_prefix . 'access_token', sanitize_text_field( $access_tokens->data->access_token ) );
@@ -102,28 +153,55 @@ class Connection {
 		tribe_update_option( $this->opts_prefix . 'token_expires', sanitize_text_field( current_time( 'timestamp' ) + $access_tokens->data->expires_in ) );
 	}
 
+	/**
+	 * Save The HubSpot Code Token Sent during the Authorization Process
+	 *
+	 * @since TBD
+	 *
+	 */
 	public function save_access_token() {
 
 		// Sanitize GET Before Use.
 		$safe_get   = filter_input_array( INPUT_GET, FILTER_SANITIZE_STRING );
 		$token_code = $safe_get['code'];
-		log_me( '$safe_get' );
-		log_me( $safe_get );
-		log_me( $this->client_id );
-		log_me( $this->client_secret );
-		log_me( $this->callback );
 
 		// Get Access Tokens from HubSpot.
-		//todo add try exception here
-		$access_tokens = $this->oauth2->getTokensByCode( $this->client_id, $this->client_secret, $this->callback, $token_code );
+		//todo add try exception here - revise text or remove all together
+		/*
+		 * Since `file_get_contents` would fail silently we set an explicit
+		 * error handler to catch the content of error.s.
+		 */
+		//set_error_handler( array( $this, 'handle_error' ) );
 
+		try {
+			$access_tokens = $this->oauth2->getTokensByCode( $this->client_id, $this->client_secret, $this->callback, $token_code );
+
+		} catch ( Exception $e ) {
+			$message = sprintf( 'Could not complete authorization with HubSpot, error message %s', $e->getMessage() );
+			tribe( 'logger' )->log_error( $message, 'HubSpot Authorization Tokens' );
+
+			//restore_error_handler();
+			return;
+		}
+
+		// Additional Safety Check to Verify Status Code.
 		if ( $access_tokens->getStatusCode() !== 200 ) {
-			log_me( "Could not refresh access! Please re-connect." );
-		} // http_code => 400 means the user disconnected from HS platform | all refresh tokens will be revoked | You will still have access until the access token expires.
+
+			$message = sprintf( 'Could not complete authorization with HubSpot, error code %s', $access_tokens->getStatusCode());
+			tribe( 'logger' )->log_error( $message, 'HubSpot Authorization Tokens' );
+
+			return;
+		}
 
 		$this ->update_tokens( $access_tokens );
 	}
 
+	/**
+	 * Maybe Refresh the Token if Expired or within a Minute of Expiring
+	 *
+	 * @since TBD
+	 *
+	 */
 	protected function maybe_refresh() {
 
 		// If there is no refresh token then there is nothing to do.
@@ -136,13 +214,28 @@ class Connection {
 			return;
 		}
 
-		$access_tokens = $this->oauth2->getTokensByRefresh( $this->client_id, $this->client_secret, $this->refresh_token );
-		if ( $access_tokens->getStatusCode() !== 200 ) {
-			log_me( "Could not refresh access! Please re-connect." );
+		try {
+			$access_tokens = $this->oauth2->getTokensByRefresh( $this->client_id, $this->client_secret, $this->refresh_token );
+
+		} catch ( Exception $e ) {
+			$message = sprintf( 'Could not complete refresh with HubSpot, error message %s', $e->getMessage() );
+			tribe( 'logger' )->log_error( $message, 'HubSpot Refresh Tokens' );
+
+			//restore_error_handler();
+			return;
 		}
 
-		$this ->update_tokens( $access_tokens );
+		// Additional Safety Check to Verify Status Code.
+		if ( $access_tokens->getStatusCode() !== 200 ) {
 
+			$message = sprintf( 'Could not complete refresh with HubSpot, error code %s', $access_tokens->getStatusCode());
+			tribe( 'logger' )->log_error( $message, 'HubSpot Refresh Tokens' );
+
+			return;
+		}
+
+
+		$this ->update_tokens( $access_tokens );
 	}
 
 	public function test() {

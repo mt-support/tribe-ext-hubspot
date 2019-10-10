@@ -227,7 +227,7 @@ class Settings {
 			$this->opts_prefix . 'token_expires'  => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Expires', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION  - 1570705589', 'tribe-ext-hubspot' ) ),
+				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION  - 1570732141', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
 			]
 		];
@@ -254,6 +254,10 @@ class Settings {
 	}
 
 	private function get_authorize_fields() {
+
+		if (  ! tribe( 'tickets.hubspot.api' )->has_required_fields() ) {
+			return;
+		}
 
 		$missing_hubspot_credentials = ! tribe( 'tickets.hubspot.api' )->is_authorized();
 
@@ -286,11 +290,6 @@ class Settings {
 			</fieldset>
 		</div>
 		<?php
-
-		//todo add save handler here
-		if ( isset( $_GET['code'] ) ) {
-			tribe( 'tickets.hubspot.api' )->save_access_token();
-		}
 
 		//todo remove test coding
 		tribe( 'tickets.hubspot.api' )->test();

@@ -18,12 +18,14 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 	 * Binds and sets up implementations.
 	 *
 	 * @since TBD
+	 *
 	 */
 	public function register() {
 
 		$this->container->singleton( 'tickets.hubspot', Main::instance() );
 		$this->container->singleton( 'tickets.hubspot.settings', Admin\Settings::class );
 		$this->container->singleton( 'tickets.hubspot.api', API\Connection::class );
+		$this->container->singleton( 'tickets.hubspot.oauth', API\Oauth::class, array( 'hook' ) );
 
 		$this->hook();
 	}
@@ -34,9 +36,12 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 	 * In place of delegating the hooking responsibility to the single classes they are all hooked here.
 	 *
 	 * @since TBD
+	 *
 	 */
 	protected function hook() {
 
 		tribe( 'tickets.hubspot.api' );
+		tribe( 'tickets.hubspot.oauth' );
+
 	}
 }
