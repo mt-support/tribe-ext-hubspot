@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Tribe\HubSpot;
 
 use Tribe\HubSpot\Main;

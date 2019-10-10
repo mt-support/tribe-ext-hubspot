@@ -45,14 +45,14 @@ class Main {
 
 		$this->init();
 
-		// Intialize the Service Provider for Event Tickets HubSpot Integration
-		tribe_register_provider( 'Service_Provider' );
 	}
 
 	public function init() {
 
 		$this->get_settings();
 
+		// Intialize the Service Provider for Event Tickets HubSpot Integration
+		//tribe_register_provider( Service_Provider::class );
 	}
 
 	/**
