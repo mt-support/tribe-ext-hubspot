@@ -3,7 +3,6 @@
 namespace Tribe\HubSpot;
 
 use Tribe\HubSpot\Admin\Settings;
-use Tribe\HubSpot\Service_Provider;
 
 class Main {
 
@@ -11,13 +10,6 @@ class Main {
 	 * @var Settings
 	 */
 	private $settings;
-
-	/**
-	 * Custom options prefix (without trailing underscore).
-	 *
-	 * Should leave blank unless you want to set it to something custom, such as if migrated from old extension.
-	 */
-	private $opts_prefix = 'tribe_hubspot';
 
 	/**
 	 * Static Singleton Holder
@@ -49,10 +41,23 @@ class Main {
 
 	public function init() {
 
-		$this->get_settings();
+		// Setup bootstrap on earliest hook available to the extension.
+		add_action( 'tribe_plugins_loaded', [ $this, 'bootstrap' ], 11 );
 
-		// Intialize the Service Provider for Event Tickets HubSpot Integration
-		//tribe_register_provider( Service_Provider::class );
+		$this->get_settings();
+	}
+
+	/**
+	 * Bootstrap Plugin
+	 *
+	 * @since TBD
+	 *
+	 */
+	public function bootstrap() {
+
+		// Intialize the Service Provider for Event Tickets HubSpot Integration.
+		tribe_register_provider( Service_Provider::class );
+
 	}
 
 	/**
@@ -62,7 +67,7 @@ class Main {
 	 */
 	private function get_settings() {
 		if ( empty( $this->settings ) ) {
-			$this->settings = new Settings( $this->opts_prefix );
+			$this->settings = new Settings();
 		}
 
 		return $this->settings;

@@ -2,8 +2,6 @@
 
 namespace Tribe\HubSpot;
 
-use Tribe\HubSpot\Main;
-
 /**
  * Class Tribe\HubSpot\Service_Provider
  *
@@ -24,9 +22,10 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 	public function register() {
 
 		$this->container->singleton( 'tickets.hubspot', Main::instance() );
-		//$this->container->singleton( 'tickets.hubspot', 'Tribe__Tickets__Tickets_Handler' );
+		$this->container->singleton( 'tickets.hubspot.settings', Admin\Settings::class );
+		$this->container->singleton( 'tickets.hubspot.api', API\Connection::class );
 
-		//$this->hook();
+		$this->hook();
 	}
 
 	/**
@@ -38,5 +37,6 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 	 */
 	protected function hook() {
 
+		tribe( 'tickets.hubspot.api' );
 	}
 }
