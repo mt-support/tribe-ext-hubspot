@@ -5,7 +5,7 @@
  * GitHub Plugin URI: https://github.com/mt-support/tribe-ext-hubspot
  * Description:       Event Tickets and Event Tickets Plus HubSpot Integration
  * Version:           1.0.0
- * Extension Class:   Tribe\Extensions\HubSpot\Setup
+ * Extension Class:   Tribe\HubSpot\Setup
  * Author:            Modern Tribe, Inc.
  * Author URI:        http://m.tri.be/1971
  * License:           GPL version 3 or any later version
