@@ -3,6 +3,7 @@
 namespace Tribe\HubSpot;
 
 use Tribe\HubSpot\Admin\Settings;
+use Tribe\HubSpot\Service_Provider;
 
 class Main {
 
@@ -16,7 +17,7 @@ class Main {
 	 *
 	 * Should leave blank unless you want to set it to something custom, such as if migrated from old extension.
 	 */
-	private $opts_prefix = 'tribe_hubspot_';
+	private $opts_prefix = 'tribe_hubspot';
 
 	/**
 	 * Static Singleton Holder
@@ -42,15 +43,15 @@ class Main {
 	 */
 	protected function __construct() {
 
-		//$this->init();
+		$this->init();
 
-		new Settings( $this->opts_prefix );
-
+		// Intialize the Service Provider for Event Tickets HubSpot Integration
+		tribe_register_provider( 'Service_Provider' );
 	}
 
 	public function init() {
 
-		//$this->get_settings();
+		$this->get_settings();
 
 	}
 
@@ -65,19 +66,6 @@ class Main {
 		}
 
 		return $this->settings;
-	}
-
-	/**
-	 * Demonstration of getting this extension's `a_setting` option value.
-	 *
-	 * TODO: Rework or remove this.
-	 *
-	 * @return mixed
-	 */
-	public function get_one_custom_option() {
-		$settings = $this->get_settings();
-
-		return $settings->get_option( 'a_setting', 'https://theeventscalendar.com/' );
 	}
 
 	/**

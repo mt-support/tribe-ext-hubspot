@@ -2,6 +2,9 @@
 
 namespace Tribe\HubSpot\Admin;
 
+use SevenShores\Hubspot\Http\Client;
+use SevenShores\Hubspot\Resources\OAuth2;
+use SevenShores\Hubspot\Factory;
 use Tribe__Settings_Manager;
 
 /**
@@ -174,40 +177,57 @@ class Settings {
 
 		$fields = [
 
-			$this->opts_prefix . 'HubSpot' => [
+			$this->opts_prefix . 'hubspot_header' => [
 				'type' => 'html',
 				'html' => $this->get_example_intro_text(),
+			],
+
+			$this->opts_prefix . 'hubspot_authorize' => [
+				'type' => 'html',
+				'html' => $this->get_authorize_fields(),
 			],
 
 			$this->opts_prefix . 'hapi_key'       => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Developer HAPIkey', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'Enter your Developer HAPIkey', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'string',
+				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
 			],
 			$this->opts_prefix . 'application_id' => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'ID of the OAuth app', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'string',
+				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
+			],
+			$this->opts_prefix . 'client_id'      => [
+				'type'            => 'text',
+				'label'           => esc_html__( 'Client ID of the OAuth app', 'tribe-ext-hubspot' ),
+				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
+				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
+			],
+			$this->opts_prefix . 'client_secret'  => [
+				'type'            => 'text',
+				'label'           => esc_html__( 'Client Secret of the OAuth app', 'tribe-ext-hubspot' ),
+				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
+				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
 			],
 			$this->opts_prefix . 'access_token'   => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Access Token', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'string',
+				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
 			],
 			$this->opts_prefix . 'refresh_token'  => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Refresh Token', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'string',
+				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
 			],
 			$this->opts_prefix . 'token_expires'  => [
 				'type'            => 'text',
-				'label'           => esc_html__( 'ID of the OAuth app', 'tribe-ext-hubspot' ),
+				'label'           => esc_html__( 'Expires', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'number',
+				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
 			]
 		];
 
@@ -219,6 +239,7 @@ class Settings {
 	 *
 	 * @return string
 	 */
+	 // todo clean this up and move to a admin-views directory?
 	private function get_example_intro_text() {
 		$result = '<h3>' . esc_html_x( 'HubSpot', 'API connection header', 'tribe-ext-hubspot' ) . '</h3>';
 		$result .= '<div style="margin-left: 20px;">';
@@ -227,7 +248,133 @@ class Settings {
 		$result .= '</p>';
 		$result .= '</div>';
 
+
 		return $result;
+	}
+
+	private function get_authorize_fields() {
+
+		$options = $this->get_all_options();
+
+		$callback      = \Tribe__Settings::instance()->get_url( [ 'tab' => 'addons' ] );
+		$client_id     = $options['client_id'];
+		$client_secret = $options['client_secret'];
+		$access_token  = $options['access_token'];
+
+		$missing_hubspot_credentials = false;
+
+		if ( empty( $access_token ) ) {
+			$missing_hubspot_credentials = true;
+		}
+
+
+		// Scope. Use what you need here check:
+		// https://developers.hubspot.com/docs/methods/oauth2/initiate-oauth-integration#scopes
+		$scope = [ 'contacts', 'timeline' ];
+
+		$my_client = new Client( [ 'key' => $client_secret ] );
+		$my_oauth2 = new OAuth2( $my_client );
+
+		//todo remove outside div
+		ob_start();
+		?>
+		<div>
+			<fieldset id="tribe-field-hubspot_token" class="tribe-field tribe-field-text tribe-size-medium">
+				<legend class="tribe-field-label"><?php esc_html_e( 'HubSpot Token', 'tribe-ext-hubspot' ) ?></legend>
+				<div class="tribe-field-wrap">
+					<?php
+					if ( $missing_hubspot_credentials ) {
+						echo '<p>' . esc_html__( 'You need to connect to HubSpot.' ) . '</p>';
+						$hubspot_button_label = __( 'Connect to HubSpot', 'tribe-ext-hubspot' );
+						$authorizeLink        = $my_oauth2->getAuthUrl( $client_id, $callback, $scope );
+					} else {
+						$hubspot_button_label     = __( 'Refresh your connection to HubSpot', 'tribe-ext-hubspot' );
+						$hubspot_disconnect_label = __( 'Disconnect', 'tribe-ext-hubspot' );
+						$hubspot_disconnect_url   = \Tribe__Settings::instance()->get_url( [ 'tab' => 'addons' ] );
+					}
+					?>
+					<a target="_blank" class="tribe-ea-eventbrite-button" href="<?php echo esc_url( $authorizeLink ); ?>"><?php esc_html_e( $hubspot_button_label ); ?></a>
+					<!--					<?php /*if ( ! $missing_eb_credentials ) : */ ?>
+					<a href="<?php /*echo esc_url( $hubspot_disconnect_url ); */ ?>" class="tribe-ea-hubspot-disconnect"><?php /*echo esc_html( $hubspot_disconnect_label ); */ ?></a>
+				--><?php /*endif; */ ?>
+				</div>
+			</fieldset>
+		</div>
+		<?php
+
+
+		if ( isset( $_GET['code'] ) ) {
+
+			// sanitize GET
+			$safeGet   = filter_input_array( INPUT_GET, FILTER_SANITIZE_STRING );
+			$tokenCode = $safeGet['code'];
+
+			// get access tokens
+			$access_tokens = $my_oauth2->getTokensByCode( $client_id, $client_secret, $callback, $tokenCode );
+
+			tribe_update_option( $this->opts_prefix . 'access_token', $access_tokens->data->access_token );
+			tribe_update_option( $this->opts_prefix . 'refresh_token', $access_tokens->data->refresh_token );
+			tribe_update_option( $this->opts_prefix . 'token_expires', current_time( 'timestamp' ) + $access_tokens->data->expires_in );
+
+		}
+
+		//todo remove test coding
+		$this->get_data();
+
+		return ob_get_clean();
+	}
+
+	private function get_data() {
+
+		$options       = $this->get_all_options();
+		$access_token  = $options['access_token'];
+		$client_id = $options['client_id'];
+		$client_secret = $options['client_secret'];
+		$refresh_token = $options['refresh_token'];
+		$token_expires = $options['token_expires'];
+
+		if ( empty( $access_token ) ) {
+			return;
+		}
+
+		$my_client = new Client( [ 'key' => $client_secret ] );
+		$my_oauth2 = new OAuth2( $my_client );
+
+		if ( current_time( 'timestamp' ) + 60 >= $token_expires ) {
+
+			$refreshToken = $options['refresh_token'];
+
+			$access_tokens =  $my_oauth2->getTokensByRefresh($client_id, $client_secret, $refresh_token);
+			if ( $access_tokens->getStatusCode() !== 200 ) {
+				log_me( "Could not refresh access! Please re-connect." );
+			} // http_code => 400 means the user disconnected from HS platform | all refresh tokens will be revoked | You will still have access until the access token expires.
+
+			tribe_update_option( $this->opts_prefix . 'access_token', $access_tokens->data->access_token );
+			tribe_update_option( $this->opts_prefix . 'refresh_token', $access_tokens->data->refresh_token );
+			tribe_update_option( $this->opts_prefix . 'token_expires', current_time( 'timestamp' ) + $access_tokens->data->expires_in );
+
+			// Use New Access Token
+			$access_token = $access_tokens->data->access_token;
+
+		}
+
+		// update my_client to use oauth2
+		$my_client->key    = $access_token;
+		$my_client->oauth2 = true;
+
+		// create Factory using createWithToken and my_client as client
+		$hubspot = Factory::createWithToken( $access_token, $my_client );
+
+		// test Factory
+		$response = $hubspot->contacts()->all( [
+			'count'    => 10,
+			'property' => [ 'firstname', 'lastname' ],
+		] );
+
+		foreach ( $response->contacts as $contact ) {
+			log_me( sprintf( "Contact name is %s %s." . PHP_EOL, $contact->properties->firstname->value, $contact->properties->lastname->value ) );
+		}
+
 	}
 
 }
