@@ -12,7 +12,7 @@ class Oauth {
 	/**
 	 * Setup Hooks for OAuth
 	 *
-	 * @since TBD
+	 * @since 1.0
 	 *
 	 */
 	public function hook() {
@@ -23,7 +23,7 @@ class Oauth {
 	/**
 	 * Add HubSpot OAuth Endpoint to Root of Site
 	 *
-	 * @since TBD
+	 * @since 1.0
 	 *
 	 */
 	public function add_endpoint() {
@@ -33,7 +33,7 @@ class Oauth {
 	/**
 	 * Detect if HubSpot Endpoint and Save Access Token then Redirect to Settings
 	 *
-	 * @since TBD
+	 * @since 1.0
 	 *
 	 * @param object $wp An object of the WordPress Query.
 	 */

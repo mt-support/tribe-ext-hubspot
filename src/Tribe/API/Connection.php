@@ -7,14 +7,9 @@ use SevenShores\Hubspot\Http\Client;
 use SevenShores\Hubspot\Resources\OAuth2;
 
 /**
- * todo HUBSPOT Connection BUILD
+ * Class Connection
  *
- * Clean up Settings
- *
- * Goal|Last Part - Ready to get|create data from a common class for next ticket
- *
- * Maybe to Do:
- * Disconnect
+ * @package Tribe\HubSpot\API
  */
 class Connection {
 
@@ -56,7 +51,7 @@ class Connection {
 	/**
 	 * Connection constructor.
 	 *
-	 * @since TBD
+	 * @since 1.0
 	 *
 	 */
 	public function __construct() {
@@ -82,7 +77,7 @@ class Connection {
 	/**
 	 * Check if the Required Fields Are Available to Authorize
 	 *
-	 * @since TBD
+	 * @since 1.0
 	 *
 	 * @return bool
 	 */
@@ -104,7 +99,7 @@ class Connection {
 	/**
 	 * Check if HubSpot is Authorized
 	 *
-	 * @since TBD
+	 * @since 1.0
 	 *
 	 * @return bool
 	 */
@@ -130,7 +125,7 @@ class Connection {
 	/**
 	 * Get the HubSpot Authorization URL
 	 *
-	 * @since TBD
+	 * @since 1.0
 	 *
 	 * @return \SevenShores\Hubspot\Http\Response|void
 	 */
@@ -147,7 +142,7 @@ class Connection {
 	/**
 	 * Update the Access Token Options
 	 *
-	 * @since TBD
+	 * @since 1.0
 	 *
 	 * @param object $access_tokens A data object with access token, refresh token, and expiration duration
 	 */
@@ -161,7 +156,7 @@ class Connection {
 	/**
 	 * Save The HubSpot Code Token Sent during the Authorization Process
 	 *
-	 * @since TBD
+	 * @since 1.0
 	 *
 	 */
 	public function save_access_token() {
@@ -196,19 +191,19 @@ class Connection {
 	/**
 	 * Maybe Refresh the Token if Expired or within a Minute of Expiring
 	 *
-	 * @since TBD
+	 * @since 1.0
 	 *
 	 */
-	protected function maybe_refresh() {
+	protected function maybe_refresh( $access_token ) {
 
 		// If there is no refresh token then there is nothing to do.
 		if ( empty( $this->refresh_token ) ) {
-			return;
+			return $access_token;
 		}
 
 		// Refresh Any Token that is Expired or within a Minute of Expiring.
 		if ( current_time( 'timestamp' ) + 60 <= $this->token_expires ) {
-			return;
+			return $access_token;
 		}
 
 		try {
@@ -218,7 +213,7 @@ class Connection {
 			$message = sprintf( 'Could not complete refresh with HubSpot, error message %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Refresh Tokens' );
 
-			return;
+			return $access_token;
 		}
 
 		// Additional Safety Check to Verify Status Code.
@@ -227,22 +222,26 @@ class Connection {
 			$message = sprintf( 'Could not complete refresh with HubSpot, error code %s', $access_tokens->getStatusCode());
 			tribe( 'logger' )->log_error( $message, 'HubSpot Refresh Tokens' );
 
-			return;
+			return $access_token;
 		}
 
 
 		$this ->update_tokens( $access_tokens );
+
+		return sanitize_text_field( $access_tokens->data->access_token );
 	}
 
-	public function test() {
+
+	//todo remove test code
+	public function sample_connection() {
 
 		if ( ! $this->is_authorized() ) {
 			return;
 		}
 
-		$this->maybe_refresh();
+		$access_token = $this->maybe_refresh( $this->access_token );
 
-		$this->client->key    = $this->access_token;
+		$this->client->key    = $access_token;
 		$this->client->oauth2 = true;
 
 		$hubspot = Factory::createWithToken( $this->access_token, $this->client );

@@ -54,6 +54,8 @@ class Settings {
 	 *
 	 * This automatically prepends this extension's option prefix so you can just do `$this->get_option( 'a_setting' )`.
 	 *
+	 * @since 1.0
+	 *
 	 * @param string $key
 	 *
 	 * @return mixed
@@ -68,6 +70,8 @@ class Settings {
 
 	/**
 	 * Get an option key after ensuring it is appropriately prefixed.
+	 *
+	 * @since 1.0
 	 *
 	 * @param string $key
 	 *
@@ -86,6 +90,8 @@ class Settings {
 	/**
 	 * Get this extension's options prefix.
 	 *
+	 * @since 1.0
+	 *
 	 * @return string
 	 */
 	public function get_options_prefix() {
@@ -98,6 +104,8 @@ class Settings {
 
 	/**
 	 * Get an array of all of this extension's options without array keys having the redundant prefix.
+	 *
+	 * @since 1.0
 	 *
 	 * @return array
 	 */
@@ -118,6 +126,8 @@ class Settings {
 
 	/**
 	 * Get an array of all of this extension's raw options (i.e. the ones starting with its prefix).
+	 *
+	 * @since 1.0
 	 *
 	 * @return array
 	 */
@@ -144,6 +154,8 @@ class Settings {
 	 *
 	 * This automatically prepends this extension's option prefix so you can just do `$this->delete_option( 'a_setting' )`.
 	 *
+	 * @since 1.0
+	 *
 	 * @param string $key
 	 *
 	 * @return mixed
@@ -159,45 +171,40 @@ class Settings {
 	}
 
 	/**
-	 * Adds a new section of fields to Events > Settings > General tab, appearing after the "Map Settings" section and
-	 * before the "Miscellaneous Settings" section.
+	 * Adds HubSpot Settings
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $fields An array of the settings already in the tab.
+	 *
+	 * @return array An array of settings.
 	 */
-	public function add_settings( array $addon_fields ) {
+	public function add_settings( array $fields ) {
 
 		$hubspot_fields = [
 			$this->opts_prefix . 'hubspot_header' => [
 				'type' => 'html',
-				'html' => $this->get_example_intro_text(),
+				'html' => $this->get_intro_text(),
 			],
 			$this->opts_prefix . 'hubspot_authorize' => [
 				'type' => 'html',
 				'html' => $this->get_authorize_fields(),
 			],
 
-/*			$this->opts_prefix . 'hapi_key'       => [
-				'type'            => 'text',
-				'label'           => esc_html__( 'Developer HAPIkey', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'Enter your Developer HAPIkey', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'html',
-			],
-			$this->opts_prefix . 'application_id' => [
-				'type'            => 'text',
-				'label'           => esc_html__( 'ID of the OAuth app', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'html',
-			],*/
 			$this->opts_prefix . 'client_id'      => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Client ID of the OAuth app', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
+				'tooltip'         => sprintf( esc_html__( 'Enter the client id from the application created in HubSpot', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			],
 			$this->opts_prefix . 'client_secret'  => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Client Secret of the OAuth app', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
+				'tooltip'         => sprintf( esc_html__( 'Enter the client secret from the application created in HubSpot', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			],
+
+			//todo the next 3 fields are visible for development these will be hidden or removed
 			$this->opts_prefix . 'access_token'   => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Access Token', 'tribe-ext-hubspot' ),
@@ -213,33 +220,36 @@ class Settings {
 			$this->opts_prefix . 'token_expires'  => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Expires', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION  - 1570732141', 'tribe-ext-hubspot' ) ),
+				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			]
 		];
 
-		log_me($addon_fields);
-		log_me($hubspot_fields);
-
-		return array_merge( (array) $addon_fields, $hubspot_fields );
+		return array_merge( (array) $fields, $hubspot_fields );
 	}
 
 	/**
+	 * Get HubSpot Setting Intro Text
 	 *
+	 * @since 1.0
 	 *
 	 * @return string
 	 */
-	 // todo clean this up and move to a admin-views directory?
-	private function get_example_intro_text() {
-		$result = '<h3 id="tribe-hubspot-application-credientials">' . esc_html_x( 'HubSpot', 'API connection header', 'tribe-ext-hubspot' ) . '</h3>';
-		$result .= '<div style="margin-left: 20px;">';
-		$result .= '<p>';
-		$result .= esc_html_x( 'You need to connect to your HubSpot account to be able to subscribe to actions.', 'Settings', 'tribe-ext-hubspot' );
-		$result .= '</p>';
-		$result .= '</div>';
+	private function get_intro_text() {
 
+		ob_start();
+		?>
+		<h3 id="tribe-hubspot-application-credientials">
+			<?php echo esc_html_x( 'HubSpot', 'API connection header', 'tribe-ext-hubspot' ) ?>
+		</h3>
+		<div style="margin-left: 20px;">
+			<p>
+				<?php echo esc_html_x( 'You need to connect to your HubSpot account to be able to subscribe to actions.', 'Settings', 'tribe-ext-hubspot' ); ?>
+			</p>
+		</div>
+		<?php
 
-		return $result;
+		return ob_get_clean();
 	}
 
 	private function get_authorize_fields() {
@@ -250,7 +260,6 @@ class Settings {
 
 		$missing_hubspot_credentials = ! tribe( 'tickets.hubspot.api' )->is_authorized();
 
-		//todo remove outside div
 		ob_start();
 		?>
 		<fieldset id="tribe-field-hubspot_token" class="tribe-field tribe-field-text tribe-size-medium">
@@ -264,22 +273,25 @@ class Settings {
 					$hubspot_button_label = __( 'Connect to HubSpot', 'tribe-ext-hubspot' );
 				} else {
 					$hubspot_button_label     = __( 'Refresh your connection to HubSpot', 'tribe-ext-hubspot' );
-					$hubspot_disconnect_label = __( 'Disconnect', 'tribe-ext-hubspot' );
 
-					//todo add in code to remove the access token, refresh, and expires - maybe clear with HubSpot too
+					//todo add in code to disconnect - ie clear  the current connection with hubspot and remove access token, refresh token, and expiration timestamp
+					$hubspot_disconnect_label = __( 'Disconnect', 'tribe-ext-hubspot' );
 					$hubspot_disconnect_url   = \Tribe__Settings::instance()->get_url( [ 'tab' => 'addons' ] );
 				}
 				?>
 				<a target="_blank" class="tribe-button" href="<?php echo esc_url( $authorize_link ); ?>"><?php esc_html_e( $hubspot_button_label ); ?></a>
-				<!--					<?php /*if ( ! $missing_eb_credentials ) : */ ?>
-				<a href="<?php /*echo esc_url( $hubspot_disconnect_url ); */ ?>" class="tribe-ea-hubspot-disconnect"><?php /*echo esc_html( $hubspot_disconnect_label ); */ ?></a>
+
+				<!--<?php /*if ( ! $missing_hubspot_credentials ) : */ ?>
+				<a href="<?php /*echo esc_url( $hubspot_disconnect_url ); */ ?>" class="tribe-hubspot-disconnect"><?php /*echo esc_html( $hubspot_disconnect_label ); */ ?></a>
 			--><?php /*endif; */ ?>
+
 			</div>
 		</fieldset>
+		<div class="clear"></div>
 		<?php
 
 		//todo remove test coding
-		tribe( 'tickets.hubspot.api' )->test();
+		tribe( 'tickets.hubspot.api' )->sample_connection();
 
 		return ob_get_clean();
 	}

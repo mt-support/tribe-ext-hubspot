@@ -10,14 +10,15 @@ namespace Tribe\HubSpot;
  * This class should handle implementation binding, builder functions and hooking for any first-level hook and be
  * devoid of business logic.
  *
- * @since TBD
+ * @since 1.0
+ *
  */
 class Service_Provider extends \tad_DI52_ServiceProvider {
 
 	/**
 	 * Binds and sets up implementations.
 	 *
-	 * @since TBD
+	 * @since 1.0
 	 *
 	 */
 	public function register() {
@@ -38,7 +39,7 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 	 *
 	 * In place of delegating the hooking responsibility to the single classes they are all hooked here.
 	 *
-	 * @since TBD
+	 * @since 1.0
 	 *
 	 */
 	protected function hook() {
