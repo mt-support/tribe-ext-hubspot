@@ -256,5 +256,22 @@ class Connection {
 			log_me( sprintf( "Contact name is %s %s." . PHP_EOL, $contact->properties->firstname->value, $contact->properties->lastname->value ) );
 		}
 
+		$properties = [
+			[
+				'property' => 'firstname',
+                'value' =>  'HubSpot',
+			],
+			[
+				'property' => 'lastname',
+                'value' =>  'test',
+			],
+		];
+
+		// todo add try/exception for invalid email - tribeTest@email
+		// todo make the first subscription
+		//$response = $hubspot->contacts()->createOrUpdate( 'tribeTest@tri.be', $properties );
+
+		//log_me($response);
+
 	}
 }
