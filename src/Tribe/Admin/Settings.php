@@ -2,22 +2,12 @@
 
 namespace Tribe\HubSpot\Admin;
 
-use SevenShores\Hubspot\Http\Client;
-use SevenShores\Hubspot\Resources\OAuth2;
-use SevenShores\Hubspot\Factory;
 use Tribe__Settings_Manager;
 
 /**
  * Do the Settings.
  */
 class Settings {
-
-	/**
-	 * The Settings Helper class.
-	 *
-	 * @var Settings_Helper
-	 */
-	protected $settings_helper;
 
 	/**
 	 * The prefix for our settings keys.
@@ -37,14 +27,10 @@ class Settings {
 	 */
 	public function __construct() {
 
-		//todo change to singleton so this only runs once
-
-		$this->settings_helper = new Settings_Helper();
-
+		//todo change to singleton so this only runs once?
 		$this->set_options_prefix( $this->opts_prefix );
 
-		// Add settings specific to APIs Tab
-		add_action( 'admin_init', [ $this, 'add_settings' ] );
+		add_filter( 'tribe_addons_tab_fields', array( $this, 'add_settings' ) );
 	}
 
 	/**
@@ -176,9 +162,9 @@ class Settings {
 	 * Adds a new section of fields to Events > Settings > General tab, appearing after the "Map Settings" section and
 	 * before the "Miscellaneous Settings" section.
 	 */
-	public function add_settings() {
+	public function add_settings( array $addon_fields ) {
 
-		$fields = [
+		$hubspot_fields = [
 			$this->opts_prefix . 'hubspot_header' => [
 				'type' => 'html',
 				'html' => $this->get_example_intro_text(),
@@ -192,57 +178,60 @@ class Settings {
 				'type'            => 'text',
 				'label'           => esc_html__( 'Developer HAPIkey', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'Enter your Developer HAPIkey', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
+				'validation_type' => 'html',
 			],
 			$this->opts_prefix . 'application_id' => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'ID of the OAuth app', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
+				'validation_type' => 'html',
 			],*/
 			$this->opts_prefix . 'client_id'      => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Client ID of the OAuth app', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
+				'validation_type' => 'html',
 			],
 			$this->opts_prefix . 'client_secret'  => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Client Secret of the OAuth app', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
+				'validation_type' => 'html',
 			],
 			$this->opts_prefix . 'access_token'   => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Access Token', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
+				'validation_type' => 'html',
 			],
 			$this->opts_prefix . 'refresh_token'  => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Refresh Token', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
+				'validation_type' => 'html',
 			],
 			$this->opts_prefix . 'token_expires'  => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Expires', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION  - 1570732141', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'alpha_numeric_with_dashes_and_underscores',
+				'validation_type' => 'html',
 			]
 		];
 
-		$this->settings_helper->add_fields( $fields, 'addons' );
+		log_me($addon_fields);
+		log_me($hubspot_fields);
+
+		return array_merge( (array) $addon_fields, $hubspot_fields );
 	}
 
 	/**
-	 * Here is an example of getting some HTML for the Settings Header.
+	 *
 	 *
 	 * @return string
 	 */
 	 // todo clean this up and move to a admin-views directory?
 	private function get_example_intro_text() {
-		$result = '<h3>' . esc_html_x( 'HubSpot', 'API connection header', 'tribe-ext-hubspot' ) . '</h3>';
+		$result = '<h3 id="tribe-hubspot-application-credientials">' . esc_html_x( 'HubSpot', 'API connection header', 'tribe-ext-hubspot' ) . '</h3>';
 		$result .= '<div style="margin-left: 20px;">';
 		$result .= '<p>';
 		$result .= esc_html_x( 'You need to connect to your HubSpot account to be able to subscribe to actions.', 'Settings', 'tribe-ext-hubspot' );
@@ -264,31 +253,29 @@ class Settings {
 		//todo remove outside div
 		ob_start();
 		?>
-		<div>
-			<fieldset id="tribe-field-hubspot_token" class="tribe-field tribe-field-text tribe-size-medium">
-				<legend class="tribe-field-label"><?php esc_html_e( 'HubSpot Token', 'tribe-ext-hubspot' ) ?></legend>
-				<div class="tribe-field-wrap">
-					<?php
-					$authorize_link        = tribe( 'tickets.hubspot.api' )->get_authorized_url();
+		<fieldset id="tribe-field-hubspot_token" class="tribe-field tribe-field-text tribe-size-medium">
+			<legend class="tribe-field-label"><?php esc_html_e( 'HubSpot Token', 'tribe-ext-hubspot' ) ?></legend>
+			<div class="tribe-field-wrap">
+				<?php
+				$authorize_link        = tribe( 'tickets.hubspot.api' )->get_authorized_url();
 
-					if ( $missing_hubspot_credentials ) {
-						echo '<p>' . esc_html__( 'You need to connect to HubSpot.' ) . '</p>';
-						$hubspot_button_label = __( 'Connect to HubSpot', 'tribe-ext-hubspot' );
-					} else {
-						$hubspot_button_label     = __( 'Refresh your connection to HubSpot', 'tribe-ext-hubspot' );
-						$hubspot_disconnect_label = __( 'Disconnect', 'tribe-ext-hubspot' );
+				if ( $missing_hubspot_credentials ) {
+					echo '<p>' . esc_html__( 'You need to connect to HubSpot.' ) . '</p>';
+					$hubspot_button_label = __( 'Connect to HubSpot', 'tribe-ext-hubspot' );
+				} else {
+					$hubspot_button_label     = __( 'Refresh your connection to HubSpot', 'tribe-ext-hubspot' );
+					$hubspot_disconnect_label = __( 'Disconnect', 'tribe-ext-hubspot' );
 
-						//todo add in code to remove the access token, refresh, and expires - maybe clear with HubSpot too
-						$hubspot_disconnect_url   = \Tribe__Settings::instance()->get_url( [ 'tab' => 'addons' ] );
-					}
-					?>
-					<a target="_blank" class="tribe-button" href="<?php echo esc_url( $authorize_link ); ?>"><?php esc_html_e( $hubspot_button_label ); ?></a>
-					<!--					<?php /*if ( ! $missing_eb_credentials ) : */ ?>
-					<a href="<?php /*echo esc_url( $hubspot_disconnect_url ); */ ?>" class="tribe-ea-hubspot-disconnect"><?php /*echo esc_html( $hubspot_disconnect_label ); */ ?></a>
-				--><?php /*endif; */ ?>
-				</div>
-			</fieldset>
-		</div>
+					//todo add in code to remove the access token, refresh, and expires - maybe clear with HubSpot too
+					$hubspot_disconnect_url   = \Tribe__Settings::instance()->get_url( [ 'tab' => 'addons' ] );
+				}
+				?>
+				<a target="_blank" class="tribe-button" href="<?php echo esc_url( $authorize_link ); ?>"><?php esc_html_e( $hubspot_button_label ); ?></a>
+				<!--					<?php /*if ( ! $missing_eb_credentials ) : */ ?>
+				<a href="<?php /*echo esc_url( $hubspot_disconnect_url ); */ ?>" class="tribe-ea-hubspot-disconnect"><?php /*echo esc_html( $hubspot_disconnect_label ); */ ?></a>
+			--><?php /*endif; */ ?>
+			</div>
+		</fieldset>
 		<?php
 
 		//todo remove test coding

@@ -8,9 +8,10 @@ use SevenShores\Hubspot\Resources\OAuth2;
 
 /**
  * todo HUBSPOT Connection BUILD
- * Add Admin Notice if Connection Not Set or Connection Not Authorized or Token is Expired and Cannot Refresh
- * Review and Get to Fatals with No or Partial Settings In Place
- * Goal|Last Part - Ready to get data from a common class
+ *
+ * Clean up Settings
+ *
+ * Goal|Last Part - Ready to get|create data from a common class for next ticket
  *
  * Maybe to Do:
  * Disconnect
@@ -62,7 +63,7 @@ class Connection {
 
 		$this->callback      = get_home_url( null, '/tribe-hubspot/' );
 		$this->options       = tribe( 'tickets.hubspot' )->get_all_options();
-		$this->opts_prefix   = tribe( 'tickets.hubspot.settings' )->get_options_prefix();
+		$this->opts_prefix   = tribe( 'tickets.hubspot.admin.settings' )->get_options_prefix();
 		$this->access_token  = isset( $this->options['access_token'] ) ? $this->options['access_token'] : '';
 		$this->client_id     = isset( $this->options['client_id'] ) ? $this->options['client_id'] : '';
 		$this->client_secret = isset( $this->options['client_secret'] ) ? $this->options['client_secret'] : '';
@@ -91,6 +92,8 @@ class Connection {
 			empty( $this->client_id ) ||
 			empty( $this->client_secret )
 		) {
+			tribe( 'tickets.hubspot.admin.notices' )->show_missing_application_credentials_notice();
+
 			return false;
 		}
 
@@ -115,6 +118,8 @@ class Connection {
 			empty( $this->refresh_token ) ||
 			empty( $this->token_expires )
 		) {
+			tribe( 'tickets.hubspot.admin.notices' )->should_render_missing_application_credentials_notice();
+
 			return false;
 		}
 
@@ -166,13 +171,6 @@ class Connection {
 		$token_code = $safe_get['code'];
 
 		// Get Access Tokens from HubSpot.
-		//todo add try exception here - revise text or remove all together
-		/*
-		 * Since `file_get_contents` would fail silently we set an explicit
-		 * error handler to catch the content of error.s.
-		 */
-		//set_error_handler( array( $this, 'handle_error' ) );
-
 		try {
 			$access_tokens = $this->oauth2->getTokensByCode( $this->client_id, $this->client_secret, $this->callback, $token_code );
 
@@ -180,7 +178,6 @@ class Connection {
 			$message = sprintf( 'Could not complete authorization with HubSpot, error message %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Authorization Tokens' );
 
-			//restore_error_handler();
 			return;
 		}
 
@@ -221,7 +218,6 @@ class Connection {
 			$message = sprintf( 'Could not complete refresh with HubSpot, error message %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Refresh Tokens' );
 
-			//restore_error_handler();
 			return;
 		}
 
@@ -239,6 +235,10 @@ class Connection {
 	}
 
 	public function test() {
+
+		if ( ! $this->is_authorized() ) {
+			return;
+		}
 
 		$this->maybe_refresh();
 
