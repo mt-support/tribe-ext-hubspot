@@ -31,6 +31,8 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 		$this->container->singleton( 'tickets.hubspot.api', API\Connection::class );
 		$this->container->singleton( 'tickets.hubspot.oauth', API\Oauth::class, array( 'hook' ) );
 
+		$this->container->singleton( 'tickets.hubspot.subscribe.purchase', Subscribe\Purchase::class, array( 'hook' ) );
+
 		$this->hook();
 	}
 
@@ -46,6 +48,7 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 
 		tribe( 'tickets.hubspot.api' );
 		tribe( 'tickets.hubspot.oauth' );
+		tribe( 'tickets.hubspot.subscribe.purchase' );
 
 		if ( is_admin() ) {
 			tribe( 'tickets.hubspot.admin.settings' );

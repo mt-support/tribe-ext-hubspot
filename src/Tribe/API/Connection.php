@@ -2,7 +2,6 @@
 
 namespace Tribe\HubSpot\API;
 
-use SevenShores\Hubspot\Factory;
 use SevenShores\Hubspot\Http\Client;
 use SevenShores\Hubspot\Resources\OAuth2;
 
@@ -151,6 +150,9 @@ class Connection {
 		tribe_update_option( $this->opts_prefix . 'access_token', sanitize_text_field( $access_tokens->data->access_token ) );
 		tribe_update_option( $this->opts_prefix . 'refresh_token', sanitize_text_field( $access_tokens->data->refresh_token ) );
 		tribe_update_option( $this->opts_prefix . 'token_expires', sanitize_text_field( current_time( 'timestamp' ) + $access_tokens->data->expires_in ) );
+
+		//todo add check if authorized before and if not then create properties
+		//todo add additional check just to make sure properties are created
 	}
 
 	/**
@@ -231,47 +233,27 @@ class Connection {
 		return sanitize_text_field( $access_tokens->data->access_token );
 	}
 
-
-	//todo remove test code
-	public function sample_connection() {
+	/**
+	 * Maybe Refresh the Token if Expired or within a Minute of Expiring
+	 *
+	 * @since 1.0
+	 *
+	 */
+	public function is_ready() {
 
 		if ( ! $this->is_authorized() ) {
-			return;
+			return false;
 		}
 
 		$access_token = $this->maybe_refresh( $this->access_token );
 
+		if ( ! $access_token ) {
+			return false;
+		}
+
 		$this->client->key    = $access_token;
 		$this->client->oauth2 = true;
 
-		$hubspot = Factory::createWithToken( $this->access_token, $this->client );
-
-		// test Factory
-		$response = $hubspot->contacts()->all( [
-			'count'    => 10,
-			'property' => [ 'firstname', 'lastname' ],
-		] );
-
-		foreach ( $response->contacts as $contact ) {
-			log_me( sprintf( "Contact name is %s %s." . PHP_EOL, $contact->properties->firstname->value, $contact->properties->lastname->value ) );
-		}
-
-		$properties = [
-			[
-				'property' => 'firstname',
-                'value' =>  'HubSpot',
-			],
-			[
-				'property' => 'lastname',
-                'value' =>  'test',
-			],
-		];
-
-		// todo add try/exception for invalid email - tribeTest@email
-		// todo make the first subscription
-		//$response = $hubspot->contacts()->createOrUpdate( 'tribeTest@tri.be', $properties );
-
-		//log_me($response);
-
+		return $access_token;
 	}
 }
