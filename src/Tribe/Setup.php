@@ -71,7 +71,7 @@ class Setup extends Tribe__Extension {
 			) {
 				$message = '<p>';
 
-				$message .= sprintf( __( '%s requires PHP version %s or newer to work. Please contact your website host and inquire about updating PHP.', 'tribe-ext-hubspot' ), $this->get_name(), $php_required_version );
+				$message .= sprintf( __( '%1$s requires PHP version %2$s or newer to work. Please contact your website host and inquire about updating PHP.', 'tribe-ext-hubspot' ), $this->get_name(), $php_required_version );
 
 				$message .= sprintf( ' <a href="%1$s">%1$s</a>', 'https://wordpress.org/about/requirements/' );
 
