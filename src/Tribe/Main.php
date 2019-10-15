@@ -44,7 +44,6 @@ class Main {
 		// Setup bootstrap on earliest hook available to the extension.
 		add_action( 'tribe_plugins_loaded', [ $this, 'bootstrap' ], 11 );
 
-		$this->get_settings();
 	}
 
 	/**
@@ -61,25 +60,12 @@ class Main {
 	}
 
 	/**
-	 * Get Settings instance.
-	 *
-	 * @return Settings
-	 */
-	private function get_settings() {
-		if ( empty( $this->settings ) ) {
-			$this->settings = new Settings();
-		}
-
-		return $this->settings;
-	}
-
-	/**
 	 * Get all of this extension's options.
 	 *
 	 * @return array
 	 */
 	public function get_all_options() {
-		$settings = $this->get_settings();
+		$settings = tribe( 'tickets.hubspot.admin.settings' );
 
 		return $settings->get_all_options();
 	}
