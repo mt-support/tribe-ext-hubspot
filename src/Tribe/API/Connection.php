@@ -55,7 +55,7 @@ class Connection {
 	 */
 	public function __construct() {
 
-		$this->callback      = get_home_url( null, '/tribe-hubspot/' );
+		$this->callback      = wp_nonce_url( get_home_url( null, '/tribe-hubspot/' ), 'hubspot-oauth-action', 'hubspot-oauth-nonce' );
 		$this->options       = tribe( 'tickets.hubspot' )->get_all_options();
 		$this->opts_prefix   = tribe( 'tickets.hubspot.admin.settings' )->get_options_prefix();
 		$this->access_token  = isset( $this->options['access_token'] ) ? $this->options['access_token'] : '';

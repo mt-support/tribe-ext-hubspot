@@ -33,82 +33,41 @@ class Purchase {
 	 */
 	public function connect( $attendee_id, $post_id, $order, $product_id ) {
 
-		//log_me($attendee_id);
-		//log_me($post_id);
-		//log_me($order);
-		//log_me($product_id);
-
 		if ( ! $access_token = tribe( 'tickets.hubspot.api' )->is_ready() ) {
 			return;
 		}
 
 		$client = tribe( 'tickets.hubspot.api' )->client;
-		$attendee = tribe( 'tickets-plus.commerce.woo' )->get_attendee( $attendee_id, $post_id );
+		$contact = $order->get_billing_email();
 
-		//log_me($attendee);
-		$contact =  $attendee['purchaser_email'];
-
-
-		//todo get
 		$properties = [
 			[
 				'property' => 'firstname',
-				'value'    => $attendee['holder_name'],
+				'value'    => $order->get_billing_first_name(),
 			],
 			[
 				'property' => 'lastname',
-				'value'    => $attendee['holder_name'],
+				'value'    => $order->get_billing_last_name(),
 			],
 		];
 
-		// todo add try/exception for invalid email - tribeTest@email
-		$hubspot = Factory::createWithToken( $access_token, $client );
-		//$response = $hubspot->contacts()->createOrUpdate( $contact, $properties );
+		try {
+			$hubspot = Factory::createWithToken( $access_token, $client );
+			$response = $hubspot->contacts()->createOrUpdate( $contact, $properties );
+		} catch ( Exception $e ) {
+			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );
+			tribe( 'logger' )->log_error( $message, 'HubSpot Contact' );
 
-		//log_me($response);
-
-	}
-
-	//todo remove test code
-	public function sample_connection() {
-
-		if ( ! tribe( 'tickets.hubspot.api' )->is_authorized() ) {
 			return;
 		}
 
-		$access_token = tribe( 'tickets.hubspot.api' )->maybe_refresh( tribe( 'tickets.hubspot.api' )->access_token );
+		// Additional Safety Check to Verify Status Code.
+		if ( $response->getStatusCode() !== 200 ) {
+			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $response->getStatusCode());
+			tribe( 'logger' )->log_error( $message, 'HubSpot Contact' );
 
-		tribe( 'tickets.hubspot.api' )->client->key    = $access_token;
-		tribe( 'tickets.hubspot.api' )->client->oauth2 = true;
-
-		$hubspot = Factory::createWithToken( tribe( 'tickets.hubspot.api' )->access_token, tribe( 'tickets.hubspot.api' )->client );
-
-		// test Factory
-		$response = $hubspot->contacts()->all( [
-			'count'    => 10,
-			'property' => [ 'firstname', 'lastname' ],
-		] );
-
-		foreach ( $response->contacts as $contact ) {
-			log_me( sprintf( "Contact name is %s %s." . PHP_EOL, $contact->properties->firstname->value, $contact->properties->lastname->value ) );
+			return;
 		}
-
-		$properties = [
-			[
-				'property' => 'firstname',
-				'value'    => 'HubSpot',
-			],
-			[
-				'property' => 'lastname',
-				'value'    => 'test',
-			],
-		];
-
-		// todo add try/exception for invalid email - tribeTest@email
-		// todo make the first subscription
-		//$response = $hubspot->contacts()->createOrUpdate( 'tribeTest@tri.be', $properties );
-
-		//log_me($response);
 
 	}
 }

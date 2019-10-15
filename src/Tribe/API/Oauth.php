@@ -43,8 +43,16 @@ class Oauth {
 			return;
 		}
 
-		//If missing essential fields then stop here
+		// If missing essential field, stop
 		if ( empty( $_GET['code'] ) ) {
+			die();
+		}
+
+		// Pass nonce check or stop
+		if (
+			! isset( $_GET['hubspot-oauth-nonce'] ) ||
+			! wp_verify_nonce( $_GET['hubspot-oauth-nonce'], 'hubspot-oauth-action' )
+		) {
 			die();
 		}
 
