@@ -51,5 +51,8 @@
     "psr-4": {
       "Tribe\\HubSpot\\": "src/Tribe/"
     }
+  },
+  "require": {
+    "ryanwinchester/hubspot-php": "v1.2.0"
   }
 }

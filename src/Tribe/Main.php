@@ -2,19 +2,14 @@
 
 namespace Tribe\HubSpot;
 
+use Tribe\HubSpot\Admin\Settings;
+
 class Main {
 
 	/**
 	 * @var Settings
 	 */
 	private $settings;
-
-	/**
-	 * Custom options prefix (without trailing underscore).
-	 *
-	 * Should leave blank unless you want to set it to something custom, such as if migrated from old extension.
-	 */
-	private $opts_prefix = 'tribe_hubspot_';
 
 	/**
 	 * Static Singleton Holder
@@ -40,12 +35,39 @@ class Main {
 	 */
 	protected function __construct() {
 
+		$this->init();
 
 	}
 
 	public function init() {
 
+		// Setup bootstrap on earliest hook available to the extension.
+		add_action( 'tribe_plugins_loaded', [ $this, 'bootstrap' ], 11 );
 
+	}
+
+	/**
+	 * Bootstrap Plugin
+	 *
+	 * @since TBD
+	 *
+	 */
+	public function bootstrap() {
+
+		// Intialize the Service Provider for Event Tickets HubSpot Integration.
+		tribe_register_provider( Service_Provider::class );
+
+	}
+
+	/**
+	 * Get all of this extension's options.
+	 *
+	 * @return array
+	 */
+	public function get_all_options() {
+		$settings = tribe( 'tickets.hubspot.admin.settings' );
+
+		return $settings->get_all_options();
 	}
 
 }
