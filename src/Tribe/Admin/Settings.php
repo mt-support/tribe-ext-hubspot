@@ -290,9 +290,6 @@ class Settings {
 		<div class="clear"></div>
 		<?php
 
-		//todo remove test coding
-		tribe( 'tickets.hubspot.api' )->sample_connection();
-
 		return ob_get_clean();
 	}
 
