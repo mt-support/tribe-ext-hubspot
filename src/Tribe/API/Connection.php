@@ -231,30 +231,4 @@ class Connection {
 		return sanitize_text_field( $access_tokens->data->access_token );
 	}
 
-
-	//todo remove test code
-	public function sample_connection() {
-
-		if ( ! $this->is_authorized() ) {
-			return;
-		}
-
-		$access_token = $this->maybe_refresh( $this->access_token );
-
-		$this->client->key    = $access_token;
-		$this->client->oauth2 = true;
-
-		$hubspot = Factory::createWithToken( $this->access_token, $this->client );
-
-		// test Factory
-		$response = $hubspot->contacts()->all( [
-			'count'    => 10,
-			'property' => [ 'firstname', 'lastname' ],
-		] );
-
-		foreach ( $response->contacts as $contact ) {
-			log_me( sprintf( "Contact name is %s %s." . PHP_EOL, $contact->properties->firstname->value, $contact->properties->lastname->value ) );
-		}
-
-	}
 }
