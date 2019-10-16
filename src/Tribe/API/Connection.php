@@ -238,6 +238,7 @@ class Connection {
 	 *
 	 * @since 1.0
 	 *
+	 * @return string|false Refreshed access token or false if not ready.
 	 */
 	public function is_ready() {
 

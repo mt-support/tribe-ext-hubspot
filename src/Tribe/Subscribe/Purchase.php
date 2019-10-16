@@ -33,11 +33,14 @@ class Purchase {
 	 */
 	public function connect( $attendee_id, $post_id, $order, $product_id ) {
 
-		if ( ! $access_token = tribe( 'tickets.hubspot.api' )->is_ready() ) {
+		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
+		$hubspot_api = tribe( 'tickets.hubspot.api' );
+
+		if ( ! $access_token = $hubspot_api->is_ready() ) {
 			return;
 		}
 
-		$client = tribe( 'tickets.hubspot.api' )->client;
+		$client = $hubspot_api->client;
 		$contact = $order->get_billing_email();
 
 		$properties = [
