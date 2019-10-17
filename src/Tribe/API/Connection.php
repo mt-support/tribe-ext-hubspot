@@ -2,7 +2,6 @@
 
 namespace Tribe\HubSpot\API;
 
-use SevenShores\Hubspot\Factory;
 use SevenShores\Hubspot\Http\Client;
 use SevenShores\Hubspot\Resources\OAuth2;
 
@@ -56,7 +55,7 @@ class Connection {
 	 */
 	public function __construct() {
 
-		$this->callback      = get_home_url( null, '/tribe-hubspot/' );
+		$this->callback      = wp_nonce_url( get_home_url( null, '/tribe-hubspot/' ), 'hubspot-oauth-action', 'hubspot-oauth-nonce' );
 		$this->options       = tribe( 'tickets.hubspot' )->get_all_options();
 		$this->opts_prefix   = tribe( 'tickets.hubspot.admin.settings' )->get_options_prefix();
 		$this->access_token  = isset( $this->options['access_token'] ) ? $this->options['access_token'] : '';
@@ -151,6 +150,9 @@ class Connection {
 		tribe_update_option( $this->opts_prefix . 'access_token', sanitize_text_field( $access_tokens->data->access_token ) );
 		tribe_update_option( $this->opts_prefix . 'refresh_token', sanitize_text_field( $access_tokens->data->refresh_token ) );
 		tribe_update_option( $this->opts_prefix . 'token_expires', sanitize_text_field( current_time( 'timestamp' ) + $access_tokens->data->expires_in ) );
+
+		//todo add check if authorized before and if not then create properties
+		//todo add additional check just to make sure properties are created
 	}
 
 	/**
@@ -231,4 +233,28 @@ class Connection {
 		return sanitize_text_field( $access_tokens->data->access_token );
 	}
 
+	/**
+	 * Maybe Refresh the Token if Expired or within a Minute of Expiring
+	 *
+	 * @since 1.0
+	 *
+	 * @return string|false Refreshed access token or false if not ready.
+	 */
+	public function is_ready() {
+
+		if ( ! $this->is_authorized() ) {
+			return false;
+		}
+
+		$access_token = $this->maybe_refresh( $this->access_token );
+
+		if ( ! $access_token ) {
+			return false;
+		}
+
+		$this->client->key    = $access_token;
+		$this->client->oauth2 = true;
+
+		return $access_token;
+	}
 }
