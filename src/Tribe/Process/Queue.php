@@ -155,7 +155,7 @@ class Queue {
 	 */
 	protected function next_waiting_item() {
 
-		// TODO add query to get next waiting item set current id and return true or falsex
+		// TODO add query to get next waiting item set current id and return true or false
 
 		return false;
 	}

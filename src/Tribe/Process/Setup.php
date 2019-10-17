@@ -2,9 +2,11 @@
 
 namespace Tribe\HubSpot\Process;
 
-
-use Tribe\Community\Tickets\Payouts;
-
+/**
+ * Class Setup
+ *
+ * @package Tribe\HubSpot\Process
+ */
 class Setup {
 
 	/**
@@ -89,7 +91,7 @@ class Setup {
 		];
 
 		/**
-		 * Filter the arguments that craft the payout post type.
+		 * Filter the arguments that craft the HubSpot Subscription post type.
 		 *
 		 * @since 1.0
 		 *
@@ -134,16 +136,16 @@ class Setup {
 		];
 
 		/**
-		 * Filter the arguments that craft the hubspot subscription post statuses.
+		 * Filter the arguments that craft the HubSpot Subscription post statuses.
 		 *
 		 * @since 1.0
 		 *
-		 * @param array $stati List of post status arguments that will be looped and passed to register_post_status()
+		 * @param array $statuses List of post status arguments that will be looped and passed to register_post_status()
 		 *
 		 * @see   register_post_type
 		 *
 		 */
-		$this->supported_statuses = apply_filters( 'tribe_hubspot_register_subscription_post_stati', $statuses );
+		$this->supported_statuses = apply_filters( 'tribe_hubspot_register_subscription_post_statuses', $statuses );
 	}
 
 	/**
@@ -165,13 +167,13 @@ class Setup {
 	}
 
 	/**
-	 * Get status label from payout status.
+	 * Get status label from HubSpot Subscription status.
 	 *
 	 * @since 1.0
 	 *
-	 * @param string Payout status.
+	 * @param string HubSpot Subscription status.
 	 *
-	 * @return string|null Status label for payout status, or null if not found.
+	 * @return string|null Status label for HubSpot Subscription status, or null if not found.
 	 */
 	public function get_status_label( $status ) {
 		// Maybe register post statuses.
