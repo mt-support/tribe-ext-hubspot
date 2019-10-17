@@ -52,6 +52,10 @@ class Purchase {
 				'property' => 'lastname',
 				'value'    => $order->get_billing_last_name(),
 			],
+			[
+				'property' => 'newcustomproperty',
+				'value'    => 'Custom Property Test',
+			],
 		];
 
 		try {
