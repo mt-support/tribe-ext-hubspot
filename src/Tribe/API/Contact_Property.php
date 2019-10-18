@@ -11,6 +11,8 @@ use SevenShores\Hubspot\Factory;
  */
 class Contact_Property {
 
+	protected $properties = [];
+
 	/**
 	 * Setup Hooks for Contact_Property
 	 *
@@ -19,6 +21,9 @@ class Contact_Property {
 	 */
 	public function hook() {
 		//add_action( 'admin_init', [ $this, 'create' ], 10, 0 );
+
+		$this->last_registered_event = tribe( 'tickets.hubspot.properties.last_registered_event' );
+		$this->last_attended_event = tribe( 'tickets.hubspot.properties.last_attended_event' );
 	}
 
 	public function create() {
