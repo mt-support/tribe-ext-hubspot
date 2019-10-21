@@ -16,6 +16,8 @@ class Queue {
 	/**
 	 * Number of items to be processed in a single batch.
 	 *
+	 * @since 1.0
+	 *
 	 * @var int
 	 */
 	protected $batch_size = 500;
@@ -23,12 +25,16 @@ class Queue {
 	/**
 	 * Number of items in the current batch processed so far.
 	 *
+	 * @since 1.0
+	 *
 	 * @var int
 	 */
 	protected $processed = 0;
 
 	/**
 	 * Current Post ID being Processed.
+	 *
+	 * @since 1.0
 	 *
 	 * @var int
 	 */
