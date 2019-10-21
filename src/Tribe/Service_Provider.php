@@ -56,8 +56,11 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 
 		tribe( 'tickets.hubspot.api' );
 		tribe( 'tickets.hubspot.oauth' );
-		tribe( 'tickets.hubspot.contact.property' );
+		add_action( 'tribe_hubspot_authorize_site', tribe_callback( 'tickets.hubspot.api', 'save_access_token' ) );
+
 		tribe( 'tickets.hubspot.contact.property.group' );
+		tribe( 'tickets.hubspot.contact.property' );
+
 		tribe( 'tickets.hubspot.process.setup' );
 		tribe( 'tickets.hubspot.subscribe.purchase' );
 

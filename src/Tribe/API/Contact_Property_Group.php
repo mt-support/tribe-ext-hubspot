@@ -28,10 +28,10 @@ class Contact_Property_Group {
 	 *
 	 */
 	public function hook() {
-		//add_action( 'admin_init', [ $this, 'create' ], 10, 0 );
+		add_action( 'tribe_hubspot_authorize_site', [ $this, 'setup_group' ], 20 );
 	}
 
-	public function create() {
+	public function setup_group() {
 
 		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
 		$hubspot_api = tribe( 'tickets.hubspot.api' );
