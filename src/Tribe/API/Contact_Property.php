@@ -20,25 +20,35 @@ class Contact_Property {
 	 *
 	 */
 	public function hook() {
-		//add_action( 'admin_init', [ $this, 'setup_properties' ], 30 );
+
 		add_action( 'tribe_hubspot_authorize_site', [ $this, 'setup_properties' ], 30 );
 
-		$this->properties[ 'last_registered_event' ] = tribe( 'tickets.hubspot.properties.last_registered_event' );
-		$this->properties[ 'last_attended_event' ] = tribe( 'tickets.hubspot.properties.last_attended_event' );
+		$this->properties['last_registered_event']  = tribe( 'tickets.hubspot.properties.last_registered_event' );
+		$this->properties['last_attended_event']    = tribe( 'tickets.hubspot.properties.last_attended_event' );
+		$this->properties['first_order']            = tribe( 'tickets.hubspot.properties.first_order' );
+		$this->properties['last_order']             = tribe( 'tickets.hubspot.properties.last_order' );
+		$this->properties['last_registered_ticket'] = tribe( 'tickets.hubspot.properties.last_registered_ticket' );
+		$this->properties['event_data']             = tribe( 'tickets.hubspot.properties.event_data' );
 	}
 
+	/**
+	 * Setup Custom Properties with HubSpot
+	 *
+	 * @since 1.0
+	 *
+	 */
 	public function setup_properties() {
-		log_me('setup_properties');
 
-		//todo check here for group added
+		/** @var \Tribe\HubSpot\API\Contact_Property_Group $hubspot_api_group */
+		if ( ! $hubspot_api_group = tribe( 'tickets.hubspot.contact.property.group' )->has_group() ) {
+			return;
+		}
 
 		// Get all properties created for our group name.
 		$created_fields = $this->get_created_properties();
 
 		// Create or Update Properties
 		$this->create_all_properties( $created_fields );
-
-		return;
 
 	}
 
@@ -58,12 +68,10 @@ class Contact_Property {
 			return [];
 		}
 
-		$client = $hubspot_api->client;
-
 		try {
-			$hubspot = Factory::createWithToken( $access_token, $client );
+			$hubspot  = Factory::createWithToken( $access_token, $hubspot_api->client );
 			$response = $hubspot->contactProperties()->all();
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			$message = sprintf( 'Could not access custom properties: %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Properties' );
 
@@ -71,59 +79,74 @@ class Contact_Property {
 		}
 
 		if ( $response->getStatusCode() !== 200 ) {
-			$message = sprintf( 'Could not access custom properties: %s', $response->getStatusCode());
+			$message = sprintf( 'Could not access custom properties: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Properties' );
 
 			return [];
 		}
 
-		$created_fields = wp_filter_object_list(
-			$response->data,
-			[ 'groupName' => 'event_tickets' ],
-			'and',
-			'name'
-		 );
+		$created_fields = wp_filter_object_list( $response->data, [ 'groupName' => 'event_tickets' ], 'and', 'name' );
 
 		return array_flip( $created_fields );
-
 	}
 
+	/**
+	 * Create All Properties by Grouping
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $created_fields An array of created properties from HubSpot.
+	 */
 	public function create_all_properties( $created_fields ) {
 
-		//todo get rid of double foreach?
-		foreach( $this->properties as $properties ) {
+		foreach ( $this->properties as $properties ) {
 
-			foreach( $properties->get_properties() as $name => $property ) {
+			$this->create_properties_for_grouping( $properties->get_properties(), $created_fields );
 
-				log_me( $name );
-				if ( isset( $created_fields[$name] ) ) {
-					log_me('created');
-					//todo add call to update
-					$this->create_property( $property, true );
-
-					continue;
-				} else {
-					log_me('not');
-				}
-
-				// add name from key for HubSpot
-				//todo maybe because the name is required as a seperate field for update I leave it out and end it in the create_property method
-				$property[ 'name' ] = $name;
-				$this->create_property( $property );
-
-			}
 		}
-
 	}
 
+	/**
+	 * Create or Update Properties for a Grouping
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $properties     An array of properties defined by their class.
+	 * @param array $created_fields An array of created properties from HubSpot.
+	 */
+	public function create_properties_for_grouping( $properties, $created_fields ) {
 
-	public function create_property( $property, $update = false ) {
+		foreach ( $properties as $name => $property ) {
 
-		if ( empty( $property['name'] ) ) {
+			if ( isset( $created_fields[ $name ] ) ) {
+
+				$this->create_property( $name, $property, true );
+
+				continue;
+			} else {
+
+				$this->create_property( $name, $property );
+
+			}
+
+		}
+	}
+
+	/**
+	 * Create or Update Property with HubSpot
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $name     The name of the property,used as the ID in HubSpot.
+	 * @param array  $property An array of attributes defined for the property.
+	 * @param bool   $update   Whether this is an update or created a new property in HubSpot.
+	 */
+	public function create_property( $name, $property, $update = false ) {
+
+		if ( empty( $name ) ) {
 			return;
 		}
 
-		return;
 		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
 		$hubspot_api = tribe( 'tickets.hubspot.api' );
 
@@ -131,30 +154,18 @@ class Contact_Property {
 			return;
 		}
 
-		$client = $hubspot_api->client;
-
-/*		$properties = [
-			'name'        => "newcustomproperty",
-			'label' => "A New Custom Property",
-			'description' => "A new property for you", //optional
-			'groupName' => 'event_tickets',
-			'type' => "string",
-			'fieldType' => "text",
-			'formField' => false, //optional
-			'displayOrder' => 6, //optional
-			'options' => [] //optional
-		];*/
-
 		try {
-			$hubspot = Factory::createWithToken( $access_token, $client );
+			$hubspot = Factory::createWithToken( $access_token, $hubspot_api->client );
 
 			if ( $update ) {
-				$response = $hubspot->contactProperties()->update( $property['name'], $property );
+				$response = $hubspot->contactProperties()->update( $name, $property );
 			} else {
-				$response = $hubspot->contactProperties()->create( $property );
+				$property['name'] = $name;
+				$response         = $hubspot->contactProperties()->create( $property );
 			}
-		} catch ( Exception $e ) {
-			$message = sprintf( 'Could not create a contact property, error code: %s', $e->getMessage() );
+
+		} catch ( \Exception $e ) {
+			$message = sprintf( 'Could not create custom contact property ' . esc_html( $name ) . ', error code: %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Property' );
 
 			return;
@@ -162,7 +173,7 @@ class Contact_Property {
 
 		// Additional Safety Check to Verify Status Code.
 		if ( $response->getStatusCode() !== 200 ) {
-			$message = sprintf( 'Could not create a contact property, error code: %s', $response->getStatusCode());
+			$message = sprintf( 'Could not create custom contact property ' . esc_html( $name ) . ', error code: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Property' );
 
 			return;

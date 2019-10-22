@@ -28,18 +28,27 @@ class Contact_Property_Group {
 	 *
 	 */
 	public function hook() {
-		add_action( 'tribe_hubspot_authorize_site', [ $this, 'setup_group' ], 20 );
+
+		add_action( 'tribe_hubspot_authorize_site', [ $this, 'create' ], 20 );
 	}
 
-	public function setup_group() {
+	/**
+	 * Create HubSpot Group if not Already Created
+	 *
+	 * @since 1.0
+	 *
+	 */
+	public function create() {
+
+		if ( $hubspot_api_group = $this->has_group() ) {
+			return;
+		}
 
 		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
 		$hubspot_api = tribe( 'tickets.hubspot.api' );
 		if ( ! $access_token = $hubspot_api->is_ready() ) {
-			return;
+			return false;
 		}
-
-		$client = $hubspot_api->client;
 
 		$properties = [
 			'name'        => $this->group_name,
@@ -47,24 +56,62 @@ class Contact_Property_Group {
 		];
 
 		try {
-			$hubspot = Factory::createWithToken( $access_token, $client );
+			$hubspot  = Factory::createWithToken( $access_token, $hubspot_api->client );
 			$response = $hubspot->contactProperties()->createGroup( $properties );
-		} catch ( Exception $e ) {
+
+		} catch ( \Exception $e ) {
 			$message = sprintf( 'Could not create a contact property group, error code: %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Property Group' );
 
 			return;
 		}
 
-		//todo handle 409 Conflict, field already created
-
 		// Additional Safety Check to Verify Status Code.
 		if ( $response->getStatusCode() !== 200 ) {
-			$message = sprintf( 'Could not create a contact property group, error code: %s', $response->getStatusCode());
+			$message = sprintf( 'Could not create a contact property group, error code: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Property Group' );
 
 			return;
 		}
 
+	}
+
+	/**
+	 * Check if HubSpot Group Created
+	 *
+	 * @since 1.0
+	 *
+	 * @return bool true|false if group is created
+	 */
+	public function has_group() {
+
+		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
+		$hubspot_api = tribe( 'tickets.hubspot.api' );
+		if ( ! $access_token = $hubspot_api->is_ready() ) {
+			return false;
+		}
+
+		try {
+			$hubspot  = Factory::createWithToken( $access_token, $hubspot_api->client );
+			$response = $hubspot->contactProperties()->getGroups( true );
+
+		} catch ( \Exception $e ) {
+			$message = sprintf( 'Could not determine if the Event Tickets Contact Property Group is Created in HubSpot, error code: %s', $e->getMessage() );
+			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Property Group' );
+
+			return false;
+		}
+
+		// Additional Safety Check to Verify Status Code.
+		if ( $response->getStatusCode() !== 200 ) {
+			$message = sprintf( 'Could not determine if the Event Tickets Contact Property Group is Created in HubSpot, error code: %s', $response->getStatusCode() );
+			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Property Group' );
+
+			return false;
+		}
+
+		$event_group = wp_filter_object_list( $response->data, [ 'name' => $this->group_name ], 'and', 'name' );
+
+		return ! empty( $event_group );
 	}
 }
