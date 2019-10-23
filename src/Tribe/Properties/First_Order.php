@@ -33,26 +33,26 @@ class First_Order extends Base {
 	public function set_properties() {
 
 		$this->properties = [
-			'first_order_date_utc'                   => [
+			'first_order_date_utc'             => [
 				'label'     => 'First Order Date (UTC)',
 				'groupName' => $this->group_name,
 				'type'      => 'datetime',
 				'fieldType' => 'date',
 			],
-			'first_order_total'                 => [
-				'label'     => 'First Order Total',
-				'groupName' => $this->group_name,
+			'first_order_total'                => [
+				'label'       => 'First Order Total',
+				'groupName'   => $this->group_name,
 				'description' => 'Total amount in cents.',
-				'type'      => 'number',
-				'fieldType' => 'number',
+				'type'        => 'number',
+				'fieldType'   => 'number',
 			],
-			'first_order_ticket_quantity'                => [
+			'first_order_ticket_quantity'      => [
 				'label'     => 'First Order Ticket Quantity',
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
-			'first_order_ticket_type_quantity'        => [
+			'first_order_ticket_type_quantity' => [
 				'label'     => 'First Order Ticket Type Quantity',
 				'groupName' => $this->group_name,
 				'type'      => 'number',

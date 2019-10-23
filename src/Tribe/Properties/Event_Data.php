@@ -34,10 +34,10 @@ class Event_Data extends Base {
 
 		$this->properties = [
 			'total_registered_events'   => [
-				'label'       => 'Total Registered Events',
-				'groupName'   => $this->group_name,
-				'type'        => 'number',
-				'fieldType'   => 'number',
+				'label'     => 'Total Registered Events',
+				'groupName' => $this->group_name,
+				'type'      => 'number',
+				'fieldType' => 'number',
 			],
 			'total_number_of_orders'    => [
 				'label'     => 'Total Number of Orders',
@@ -57,13 +57,13 @@ class Event_Data extends Base {
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
-			'total_attended_events'  => [
+			'total_attended_events'     => [
 				'label'     => 'Total Attended Events',
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
-			'total_no_shows'  => [
+			'total_no_shows'            => [
 				'label'     => 'Total No Shows',
 				'groupName' => $this->group_name,
 				'type'      => 'number',

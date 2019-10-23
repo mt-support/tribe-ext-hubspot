@@ -33,26 +33,26 @@ class Last_Order extends Base {
 	public function set_properties() {
 
 		$this->properties = [
-			'last_order_date_utc'                   => [
+			'last_order_date_utc'             => [
 				'label'     => 'Last Order Date (UTC)',
 				'groupName' => $this->group_name,
 				'type'      => 'datetime',
 				'fieldType' => 'date',
 			],
-			'last_order_total'                 => [
-				'label'     => 'Last Order Total',
-				'groupName' => $this->group_name,
+			'last_order_total'                => [
+				'label'       => 'Last Order Total',
+				'groupName'   => $this->group_name,
 				'description' => 'Total amount in cents.',
-				'type'      => 'number',
-				'fieldType' => 'number',
+				'type'        => 'number',
+				'fieldType'   => 'number',
 			],
-			'last_order_ticket_quantity'                => [
+			'last_order_ticket_quantity'      => [
 				'label'     => 'Last Order Ticket Quantity',
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
-			'last_order_ticket_type_quantity'        => [
+			'last_order_ticket_type_quantity' => [
 				'label'     => 'Last Order Ticket Type Quantity',
 				'groupName' => $this->group_name,
 				'type'      => 'number',
