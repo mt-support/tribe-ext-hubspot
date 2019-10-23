@@ -34,37 +34,37 @@ class Event_Data extends Base {
 
 		$this->properties = [
 			'total_registered_events'   => [
-				'label'     => 'Total Registered Events',
+				'label'     => __( 'Total Registered Events', 'tribe-ext-hubspot' ),
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
 			'total_number_of_orders'    => [
-				'label'     => 'Total Number of Orders',
+				'label'     => __( 'Total Number of Orders', 'tribe-ext-hubspot' ),
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
 			'average_tickets_per_order' => [
-				'label'     => 'Average Tickets Per Order',
+				'label'     => __( 'Average Tickets Per Order', 'tribe-ext-hubspot' ),
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
 			'average_events_per_order'  => [
-				'label'     => 'Average Events Per Order',
+				'label'     => __( 'Average Events Per Order', 'tribe-ext-hubspot' ),
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
 			'total_attended_events'     => [
-				'label'     => 'Total Attended Events',
+				'label'     => __( 'Total Attended Events', 'tribe-ext-hubspot' ),
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
 			'total_no_shows'            => [
-				'label'     => 'Total No Shows',
+				'label'     => __( 'Total No Shows', 'tribe-ext-hubspot' ),
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
