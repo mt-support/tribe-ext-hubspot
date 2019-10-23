@@ -7,68 +7,151 @@ namespace Tribe\HubSpot\Properties;
  *
  * @package Tribe\HubSpot\Properties
  */
-class Event_Data extends Base {
-
-	/**
-	 * @var string
-	 */
-	protected $properties_grouping_name = 'event_data';
-
-	/**
-	 * @var array
-	 */
-	protected $properties = [];
+class Event_Data {
 
 	public function __construct() {
 
-		$this->set_properties();
+
+		add_action( 'admin_footer', [ $this, 'get_event_values' ] );
 	}
 
-	/**
-	 * Set the Individual Properties for this Grouping
-	 *
-	 * @since 1.0
-	 *
-	 */
-	public function set_properties() {
 
-		$this->properties = [
-			'total_registered_events'   => [
-				'label'     => 'Total Registered Events',
-				'groupName' => $this->group_name,
-				'type'      => 'number',
-				'fieldType' => 'number',
+	public function get_event_values( $post_id ) {
+
+		$post_id = 16108;
+
+		$event = tribe_get_event( $post_id );
+		$event_data = [
+			'event_id'                 => [
+				'names' => [ 'last_registered_event_id', 'last_attended_event_id' ],
+				'value' => $event->ID,
 			],
-			'total_number_of_orders'    => [
-				'label'     => 'Total Number of Orders',
-				'groupName' => $this->group_name,
-				'type'      => 'number',
-				'fieldType' => 'number',
+			'event_name'               => [
+				'names' => [ 'last_registered_event_name', 'last_attended_event_name' ],
+				'value' => $event->post_title,
 			],
-			'average_tickets_per_order' => [
-				'label'     => 'Average Tickets Per Order',
-				'groupName' => $this->group_name,
-				'type'      => 'number',
-				'fieldType' => 'number',
+			'event_organizer'          => [
+				'names' => [ 'last_registered_event_organizer', 'last_attended_event_organizer' ],
+				'value' => implode( ', ', $event->organizers->all() ),
 			],
-			'average_events_per_order'  => [
-				'label'     => 'Average Events Per Order',
-				'groupName' => $this->group_name,
-				'type'      => 'number',
-				'fieldType' => 'number',
+			'event_is_featured'        => [
+				'names' => [ 'last_registered_event_is_featured', 'last_attended_event_is_featured' ],
+				'value' => $event->featured,
 			],
-			'total_attended_events'     => [
-				'label'     => 'Total Attended Events',
-				'groupName' => $this->group_name,
-				'type'      => 'number',
-				'fieldType' => 'number',
+			'event_cost'               => [
+				'names' => [ 'last_registered_event_cost', 'last_attended_event_cost' ],
+				'value' => $event->cost,
 			],
-			'total_no_shows'            => [
-				'label'     => 'Total No Shows',
-				'groupName' => $this->group_name,
-				'type'      => 'number',
-				'fieldType' => 'number',
+			'event_start_datetime_utc' => [
+				'names' => [ 'last_registered_event_start_datetime_utc', 'last_attended_event_start_datetime_utc' ],
+				'value' => $event->start_date,
+			],
+			'event_start_time_utc'     => [
+				'names' => [ 'last_registered_event_start_time_utc', 'last_attended_event_start_time_utc' ],
+				'value' => $event->start_date_utc,
+			],
+			'event_timezone'           => [
+				'names' => [ 'last_registered_event_timezone', 'last_attended_event_timezone' ],
+				'value' => $event->timezone,
+			],
+			'event_duration'           => [
+				'names' => [ 'last_registered_event_duration', 'last_attended_event_duration' ],
+				'value' => $event->duration,
 			],
 		];
+
+		$venue_fields = $this->get_venue_values( $event->venues->all() );
+
+		$event_data = array_merge( $event_data, $venue_fields );
+
+		return $event_data;
+	}
+
+	public function get_venue_values( $venue ) {
+
+		// We only support one venue, but we get an array so get the first value
+		$venue      = reset( $venue );
+		$venue_data = [
+			'event_venue'                => [
+				'names' => [ 'last_registered_event_venue', 'last_attended_event_venue' ],
+				'value' => $venue->post_title,
+			],
+			'event_venue_address'        => [
+				'names' => [ 'last_registered_event_venue_address', 'last_attended_event_venue_address' ],
+				'value' => $venue->address,
+			],
+			'event_venue_cit'            => [
+				'names' => [ 'last_registered_event_venue_city', 'last_attended_event_venue_city' ],
+				'value' => $venue->city,
+			],
+			'event_venue_state_province' => [
+				'names' => [ 'last_registered_event_venue_state_province', 'last_attended_event_venue_state_province' ],
+				'value' => $venue->state_province,
+			],
+			'event_venue_postal_code'    => [
+				'names' => [ 'last_registered_event_venue_postal_code', 'last_attended_event_venue_postal_code' ],
+				'value' => $venue->zip,
+			],
+		];
+
+		return $venue_data;
+	}
+
+	public function get_order_values( $order ) {
+
+		$order_data = [
+			'order_date_utc' => [
+				'names' => [ 'first_order_date_utc', 'last_order_date_utc' ],
+				'value' => '',
+			],
+			'order_total' => [
+				'names' => [ 'first_order_total', 'last_order_total' ],
+				'value' => '',
+			],
+			'order_ticket_quantity' => [
+				'names' => [ 'first_order_ticket_quantity', 'last_order_ticket_quantity' ],
+				'value' => '',
+			],
+			'order_ticket_type_quantity' => [
+				'names' => [ 'first_order_ticket_type_quantity', 'last_order_ticket_type_quantity' ],
+				'value' => '',
+			],
+		];
+
+		return $order_data;
+
+	}
+
+	public function get_ticket_values( $ticket ) {
+
+		$ticket_data = [
+			'ticket_type_id' => [
+				'names' => [ 'last_registered_ticket_type_id' ],
+				'value' => '',
+			],
+			'ticket_type_name' => [
+				'names' => [ 'last_registered_ticket_type_name' ],
+				'value' => '',
+			],
+			'ticket_commerce' => [
+				'names' => [ 'last_registered_ticket_commerce' ],
+				'value' => '',
+			],
+			'ticket_attendee_id' => [
+				'names' => [ 'last_registered_ticket_attendee_id' ],
+				'value' => '',
+			],
+			'ticket_attendee_name' => [
+				'names' => [ 'last_registered_ticket_attendee_name' ],
+				'value' => '',
+			],
+			'rsvp_is_going' => [
+				'names' => [ 'last_registered_ticket_rsvp_is_going' ],
+				'value' => '',
+			],
+		];
+
+		return $ticket_data;
+
 	}
 }
