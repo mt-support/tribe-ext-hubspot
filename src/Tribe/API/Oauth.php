@@ -60,7 +60,6 @@ class Oauth {
 		 * Hook to Save Data During Authorization of Site
 		 *
 		 * @since 1.0
-		 *
 		 */
 		do_action( 'tribe_hubspot_authorize_site' );
 
