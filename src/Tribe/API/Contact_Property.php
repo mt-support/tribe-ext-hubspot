@@ -172,7 +172,7 @@ class Contact_Property {
 		}
 
 		// Additional Safety Check to Verify Status Code.
-		if ( $response->getStatusCode() !== 200 ) {
+		if ( 200 !== $response->getStatusCode() ) {
 			$message = sprintf( 'Could not create custom contact property ' . esc_html( $name ) . ', error code: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Property' );
 
