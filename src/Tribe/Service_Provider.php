@@ -39,6 +39,7 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 		$this->container->singleton( 'tickets.hubspot.properties.last_order', new Properties\Last_Order() );
 		$this->container->singleton( 'tickets.hubspot.properties.last_registered_ticket', new Properties\Last_Registered_Ticket() );
 		$this->container->singleton( 'tickets.hubspot.properties.event_data', new Properties\Event_Data() );
+		$this->container->singleton( 'tickets.hubspot.properties.aggregate_data', Properties\Aggregate_Data::class );
 
 		$this->container->singleton( 'tickets.hubspot.contact.property', API\Contact_Property::class, array( 'hook' ) );
 		$this->container->singleton( 'tickets.hubspot.contact.property.group', API\Contact_Property_Group::class, array( 'hook' ) );

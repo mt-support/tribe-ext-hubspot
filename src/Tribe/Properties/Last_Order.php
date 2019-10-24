@@ -53,7 +53,7 @@ class Last_Order extends Base {
 				'fieldType' => 'number',
 			],
 			'last_order_ticket_type_quantity' => [
-				'label'     => 'Last Order Ticket Type Quantity',
+				'label'     => 'Last Order Ticket Type Quantity', // Number of Different Ticket Types in Order
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',

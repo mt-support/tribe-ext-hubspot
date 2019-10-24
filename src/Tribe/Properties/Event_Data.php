@@ -12,15 +12,13 @@ class Event_Data {
 	public function __construct() {
 
 
-		add_action( 'admin_footer', [ $this, 'get_event_values' ] );
+		//add_action( 'admin_footer', [ $this, 'get_event_values' ] );
 	}
 
 
 	public function get_event_values( $post_id ) {
 
-		$post_id = 16108;
-
-		$event = tribe_get_event( $post_id );
+		$event      = tribe_get_event( $post_id );
 		$event_data = [
 			'event_id'                 => [
 				'names' => [ 'last_registered_event_id', 'last_attended_event_id' ],
@@ -100,15 +98,15 @@ class Event_Data {
 	public function get_order_values( $order ) {
 
 		$order_data = [
-			'order_date_utc' => [
+			'order_date_utc'             => [
 				'names' => [ 'first_order_date_utc', 'last_order_date_utc' ],
 				'value' => '',
 			],
-			'order_total' => [
+			'order_total'                => [
 				'names' => [ 'first_order_total', 'last_order_total' ],
 				'value' => '',
 			],
-			'order_ticket_quantity' => [
+			'order_ticket_quantity'      => [
 				'names' => [ 'first_order_ticket_quantity', 'last_order_ticket_quantity' ],
 				'value' => '',
 			],
@@ -122,36 +120,68 @@ class Event_Data {
 
 	}
 
-	public function get_ticket_values( $ticket ) {
+	public function get_ticket_values( $ticket_id, $attendee_id, $commerce, $name ) {
 
 		$ticket_data = [
-			'ticket_type_id' => [
+			'ticket_type_id'       => [
 				'names' => [ 'last_registered_ticket_type_id' ],
-				'value' => '',
+				'value' => $ticket_id,
 			],
-			'ticket_type_name' => [
-				'names' => [ 'last_registered_ticket_type_name' ],
-				'value' => '',
+			'ticket_type'          => [
+				'names' => [ 'last_registered_ticket_type' ],
+				'value' => get_the_title( $ticket_id ),
 			],
-			'ticket_commerce' => [
+			'ticket_commerce'      => [
 				'names' => [ 'last_registered_ticket_commerce' ],
-				'value' => '',
+				'value' => $commerce,
 			],
-			'ticket_attendee_id' => [
+			'ticket_attendee_id'   => [
 				'names' => [ 'last_registered_ticket_attendee_id' ],
-				'value' => '',
+				'value' => $attendee_id,
 			],
 			'ticket_attendee_name' => [
 				'names' => [ 'last_registered_ticket_attendee_name' ],
-				'value' => '',
+				'value' => $name,
 			],
-			'rsvp_is_going' => [
+			'rsvp_is_going'        => [
 				'names' => [ 'last_registered_ticket_rsvp_is_going' ],
-				'value' => '',
+				'value' => '', //todo when connecting in the rsvp add the value here
 			],
 		];
 
 		return $ticket_data;
 
 	}
+
+	public function get_woo_order_quantities( $order ) {
+
+		$valid_order_items = [
+			'total'   => 0,
+			'tickets' => []
+		];
+
+		$order_items = $order->get_items();
+
+		foreach ( (array) $order_items as $item_id => $item ) {
+			$ticket_id = $item['product_id'];
+
+			$ticket_event_id = absint(
+				get_post_meta( $ticket_id, \Tribe__Tickets_Plus__Commerce__WooCommerce__Main::get_instance()->event_key, true )
+			);
+
+			// If not a ticket product then do not count
+			if ( empty( $ticket_event_id ) ) {
+				continue;
+			}
+
+			$quantities = empty( $item['qty'] ) ? 0 : intval( $item['qty'] );
+
+			$valid_order_items['total']                 += $quantities;
+			$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+		}
+
+		return $valid_order_items;
+
+	}
+
 }

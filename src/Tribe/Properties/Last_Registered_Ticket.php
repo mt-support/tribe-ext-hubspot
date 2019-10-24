@@ -39,7 +39,7 @@ class Last_Registered_Ticket extends Base {
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
-			'last_registered_ticket_type_name'          => [
+			'last_registered_ticket_type'          => [
 				'label'     => 'Last Registered Ticket Name',
 				'groupName' => $this->group_name,
 				'type'      => 'string',

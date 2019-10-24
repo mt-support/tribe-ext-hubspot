@@ -21,6 +21,18 @@ class Purchase {
 		add_action( 'event_ticket_woo_attendee_created', [ $this, 'connect' ], 10, 4 );
 	}
 
+	//todo event_ticket_edd_attendee_created
+	// $attendee_id, $post_id, $order_id, $product_id
+
+	//todo event_tickets_tpp_attendee_created
+	// $attendee_id, $order_id, $product_id, $order_attendee_id, $attendee_order_status
+
+	//todo event_tickets_rsvp_attendee_created
+	// $attendee_id, $post_id, $order_id
+
+	//$this->get_order_values( 16110, 16112 );
+	//$this->get_ticket_values( 16110, 16112, 'woo', 'Brian Jessee' );
+
 	/**
 	 * Connect to Creation of an Attendee.
 	 *
@@ -36,12 +48,24 @@ class Purchase {
 		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
 		$hubspot_api = tribe( 'tickets.hubspot.api' );
 
+		/** @var \Tribe\HubSpot\Properties\Event_Data $data */
+		$data = tribe( 'tickets.hubspot.properties.event_data' );
+
 		if ( ! $access_token = $hubspot_api->is_ready() ) {
 			return;
 		}
 
 		$client = $hubspot_api->client;
-		$contact = $order->get_billing_email();
+		$email  = $order->get_billing_email();
+		$total = $order->get_total();
+		$date = $order->get_date_created()->getTimestamp();
+		$qty = $data->get_woo_order_quantities( $order );
+
+		//todo get all data to send to hubspot in correct format
+		//verify sending to hubspot works
+		//add filter to either immediately send or to add to queue
+		//add coding to use queue
+		//setup queue to process
 
 		$properties = [
 			[
@@ -59,8 +83,8 @@ class Purchase {
 		];
 
 		try {
-			$hubspot = Factory::createWithToken( $access_token, $client );
-			$response = $hubspot->contacts()->createOrUpdate( $contact, $properties );
+			$hubspot  = Factory::createWithToken( $access_token, $client );
+			$response = $hubspot->contacts()->createOrUpdate( $email, $properties );
 		} catch ( Exception $e ) {
 			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact' );
@@ -70,7 +94,7 @@ class Purchase {
 
 		// Additional Safety Check to Verify Status Code.
 		if ( $response->getStatusCode() !== 200 ) {
-			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $response->getStatusCode());
+			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact' );
 
 			return;

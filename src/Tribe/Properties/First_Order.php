@@ -53,7 +53,7 @@ class First_Order extends Base {
 				'fieldType' => 'number',
 			],
 			'first_order_ticket_type_quantity' => [
-				'label'     => 'First Order Ticket Type Quantity',
+				'label'     => 'First Order Ticket Type Quantity', // Number of Different Ticket Types
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
