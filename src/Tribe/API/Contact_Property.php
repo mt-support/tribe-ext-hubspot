@@ -123,11 +123,9 @@ class Contact_Property {
 				$this->create_property( $name, $property, true );
 
 				continue;
-			} else {
-
-				$this->create_property( $name, $property );
-
 			}
+
+			$this->create_property( $name, $property );
 
 		}
 	}
