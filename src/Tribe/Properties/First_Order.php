@@ -34,26 +34,26 @@ class First_Order extends Base {
 
 		$this->properties = [
 			'first_order_date_utc'             => [
-				'label'     => 'First Order Date (UTC)',
+				'label'     => __( 'First Order Date (UTC)', 'tribe-ext-hubspot' ),
 				'groupName' => $this->group_name,
 				'type'      => 'datetime',
 				'fieldType' => 'date',
 			],
 			'first_order_total'                => [
-				'label'       => 'First Order Total',
+				'label'       => __( 'First Order Total', 'tribe-ext-hubspot' ),
 				'groupName'   => $this->group_name,
 				'description' => 'Total amount in cents.',
 				'type'        => 'number',
 				'fieldType'   => 'number',
 			],
 			'first_order_ticket_quantity'      => [
-				'label'     => 'First Order Ticket Quantity',
+				'label'     => __( 'First Order Ticket Quantity', 'tribe-ext-hubspot' ),
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
 			'first_order_ticket_type_quantity' => [
-				'label'     => 'First Order Ticket Type Quantity', // Number of Different Ticket Types
+				'label'     => __( 'First Order Ticket Type Quantity', 'tribe-ext-hubspot' ),// Number of Different Ticket Types
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',

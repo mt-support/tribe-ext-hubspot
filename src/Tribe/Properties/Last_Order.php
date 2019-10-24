@@ -34,27 +34,27 @@ class Last_Order extends Base {
 
 		$this->properties = [
 			'last_order_date_utc'             => [
-				'label'     => 'Last Order Date (UTC)',
+				'label'     => __( 'Last Order Date (UTC)', 'tribe-ext-hubspot' ),
 				'groupName' => $this->group_name,
 				'type'      => 'datetime',
 				'fieldType' => 'date',
 			],
 			'last_order_total'                => [
-				'label'       => 'Last Order Total',
+				'label'       => __( 'Last Order Total', 'tribe-ext-hubspot' ),
 				'groupName'   => $this->group_name,
-				'description' => 'Total amount in cents.',
+				'description' => __( 'Total amount in cents.', 'tribe-ext-hubspot' ),
 				'type'        => 'number',
 				'fieldType'   => 'number',
 			],
 			'last_order_ticket_quantity'      => [
-				'label'     => 'Last Order Ticket Quantity',
+				'label'     => __( 'Last Order Ticket Quantity', 'tribe-ext-hubspot' ),
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
 			'last_order_ticket_type_quantity' => [
-				'label'     => 'Last Order Ticket Type Quantity', // Number of Different Ticket Types in Order
-				'groupName' => $this->group_name,
+				'label'     => __( 'Last Order Ticket Type Quantity', 'tribe-ext-hubspot' ),
+ 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
