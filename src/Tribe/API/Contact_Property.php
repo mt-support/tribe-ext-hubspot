@@ -119,7 +119,6 @@ class Contact_Property {
 		foreach ( $properties as $name => $property ) {
 
 			if ( isset( $created_fields[ $name ] ) ) {
-
 				$this->create_property( $name, $property, true );
 
 				continue;
