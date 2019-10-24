@@ -40,7 +40,9 @@ class Contact_Property {
 	public function setup_properties() {
 
 		/** @var \Tribe\HubSpot\API\Contact_Property_Group $hubspot_api_group */
-		if ( ! $hubspot_api_group = tribe( 'tickets.hubspot.contact.property.group' )->has_group() ) {
+		$hubspot_api_group = tribe( 'tickets.hubspot.contact.property.group' );
+
+		if ( ! $hubspot_api_group->has_group() ) {
 			return;
 		}
 
