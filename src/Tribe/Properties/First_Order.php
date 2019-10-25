@@ -53,7 +53,7 @@ class First_Order extends Base {
 				'fieldType' => 'number',
 			],
 			'first_order_ticket_type_quantity' => [
-				'label'     => __( 'First Order Ticket Type Quantity', 'tribe-ext-hubspot' ),// Number of Different Ticket Types
+				'label'     => __( 'First Order Ticket Type Quantity', 'tribe-ext-hubspot' ), // Number of Different Ticket Types in Order
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',

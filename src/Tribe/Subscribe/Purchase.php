@@ -20,19 +20,7 @@ class Purchase {
 	public function hook() {
 		add_action( 'event_ticket_woo_attendee_created', [ $this, 'connect' ], 10, 4 );
 	}
-
-	//todo event_ticket_edd_attendee_created
-	// $attendee_id, $post_id, $order_id, $product_id
-
-	//todo event_tickets_tpp_attendee_created
-	// $attendee_id, $order_id, $product_id, $order_attendee_id, $attendee_order_status
-
-	//todo event_tickets_rsvp_attendee_created
-	// $attendee_id, $post_id, $order_id
-
-	//$this->get_order_values( 16110, 16112 );
-	//$this->get_ticket_values( 16110, 16112, 'woo', 'Brian Jessee' );
-
+	
 	/**
 	 * Connect to Creation of an Attendee.
 	 *
@@ -60,6 +48,9 @@ class Purchase {
 		$total = $order->get_total();
 		$date = $order->get_date_created()->getTimestamp();
 		$qty = $data->get_woo_order_quantities( $order );
+
+		//$this->get_order_values( 16110, 16112 );
+		//$this->get_ticket_values( 16110, 16112, 'woo', 'Brian Jessee' );
 
 		//todo get all data to send to hubspot in correct format
 		//verify sending to hubspot works
