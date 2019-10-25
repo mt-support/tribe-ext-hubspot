@@ -47,7 +47,7 @@ class Contact_Property_Group {
 		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
 		$hubspot_api = tribe( 'tickets.hubspot.api' );
 		if ( ! $access_token = $hubspot_api->is_ready() ) {
-			return false;
+			return;
 		}
 
 		$properties = [
