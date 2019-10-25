@@ -47,7 +47,7 @@ class Contact_Property_Group {
 		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
 		$hubspot_api = tribe( 'tickets.hubspot.api' );
 		if ( ! $access_token = $hubspot_api->is_ready() ) {
-			return false;
+			return;
 		}
 
 		$properties = [
@@ -67,7 +67,7 @@ class Contact_Property_Group {
 		}
 
 		// Additional Safety Check to Verify Status Code.
-		if ( $response->getStatusCode() !== 200 ) {
+		if ( 200 !== $response->getStatusCode() ) {
 			$message = sprintf( 'Could not create a contact property group, error code: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Property Group' );
 
@@ -103,7 +103,7 @@ class Contact_Property_Group {
 		}
 
 		// Additional Safety Check to Verify Status Code.
-		if ( $response->getStatusCode() !== 200 ) {
+		if ( 200 !== $response->getStatusCode() ) {
 			$message = sprintf( 'Could not determine if the Event Tickets Contact Property Group is Created in HubSpot, error code: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Property Group' );
 

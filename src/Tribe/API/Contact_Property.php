@@ -40,7 +40,9 @@ class Contact_Property {
 	public function setup_properties() {
 
 		/** @var \Tribe\HubSpot\API\Contact_Property_Group $hubspot_api_group */
-		if ( ! $hubspot_api_group = tribe( 'tickets.hubspot.contact.property.group' )->has_group() ) {
+		$hubspot_api_group = tribe( 'tickets.hubspot.contact.property.group' );
+
+		if ( ! $hubspot_api_group->has_group() ) {
 			return;
 		}
 
@@ -119,15 +121,12 @@ class Contact_Property {
 		foreach ( $properties as $name => $property ) {
 
 			if ( isset( $created_fields[ $name ] ) ) {
-
 				$this->create_property( $name, $property, true );
 
 				continue;
-			} else {
-
-				$this->create_property( $name, $property );
-
 			}
+
+			$this->create_property( $name, $property );
 
 		}
 	}
@@ -172,7 +171,7 @@ class Contact_Property {
 		}
 
 		// Additional Safety Check to Verify Status Code.
-		if ( $response->getStatusCode() !== 200 ) {
+		if ( 200 !== $response->getStatusCode() ) {
 			$message = sprintf( 'Could not create custom contact property ' . esc_html( $name ) . ', error code: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Property' );
 
