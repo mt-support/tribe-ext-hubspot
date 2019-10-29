@@ -2,6 +2,8 @@
 
 namespace Tribe\HubSpot\Properties;
 
+use SevenShores\Hubspot\Factory;
+
 /**
  * Class Event_Data
  *
@@ -9,85 +11,100 @@ namespace Tribe\HubSpot\Properties;
  */
 class Event_Data {
 
-	public function __construct() {
-
-
-		//add_action( 'admin_footer', [ $this, 'get_event_values' ] );
-	}
-
-
-	public function get_event_values( $post_id ) {
+	/**
+	 *  Get all the Event Values for the Custom Properties
+	 *
+	 * @since 1.0
+	 *
+	 * @param int $post_id A post ID.
+	 *
+	 * @return array An array of attributes with values
+	 */
+	public function get_event_values( $prefix, $post_id ) {
 
 		$event      = tribe_get_event( $post_id );
 		$event_data = [
-			'event_id'                 => [
-				'names' => [ 'last_registered_event_id', 'last_attended_event_id' ],
+			//todo number formatting is 16,108 in HubSpot
+			[
+				'property' => $prefix . 'event_id',
 				'value' => $event->ID,
 			],
-			'event_name'               => [
-				'names' => [ 'last_registered_event_name', 'last_attended_event_name' ],
+			[
+				'property' => $prefix . 'event_name',
 				'value' => $event->post_title,
 			],
-			'event_organizer'          => [
-				'names' => [ 'last_registered_event_organizer', 'last_attended_event_organizer' ],
+			[
+				'property' => $prefix . 'event_organizer',
 				'value' => implode( ', ', $event->organizers->all() ),
 			],
-			'event_is_featured'        => [
-				'names' => [ 'last_registered_event_is_featured', 'last_attended_event_is_featured' ],
+			[
+				'property' => $prefix . 'event_is_featured',
 				'value' => $event->featured,
 			],
-			'event_cost'               => [
-				'names' => [ 'last_registered_event_cost', 'last_attended_event_cost' ],
+			//todo includes html
+			[
+				'property' => $prefix . 'event_cost',
 				'value' => $event->cost,
 			],
-			'event_start_datetime_utc' => [
-				'names' => [ 'last_registered_event_start_datetime_utc', 'last_attended_event_start_datetime_utc' ],
-				'value' => $event->start_date,
+			//todo must be midnight utc in milliseconds sending as 1576800000000 by hubspot uses 1576800000
+			[
+				'property' => $prefix . 'event_start_datetime_utc',
+				'value' => date( 'U', strtotime( 'midnight', ( \Tribe__Date_Utils::wp_strtotime( $event->start_date ) ) ) ) * 1000,
 			],
-			'event_start_time_utc'     => [
-				'names' => [ 'last_registered_event_start_time_utc', 'last_attended_event_start_time_utc' ],
-				'value' => $event->start_date_utc,
+			//todo it does not show as a time only date
+			[
+				'property' => $prefix . 'event_start_time_utc',
+				'value' => date( 'U', strtotime( $event->start_date_utc ) ),
 			],
-			'event_timezone'           => [
-				'names' => [ 'last_registered_event_timezone', 'last_attended_event_timezone' ],
+			[
+				'property' => $prefix . 'event_timezone',
 				'value' => $event->timezone,
 			],
-			'event_duration'           => [
-				'names' => [ 'last_registered_event_duration', 'last_attended_event_duration' ],
+			[
+				'property' => $prefix . 'event_duration',
 				'value' => $event->duration,
 			],
 		];
 
-		$venue_fields = $this->get_venue_values( $event->venues->all() );
+		$venue_fields = $this->get_venue_values( $prefix, $event->venues->all() );
 
 		$event_data = array_merge( $event_data, $venue_fields );
 
 		return $event_data;
 	}
 
-	public function get_venue_values( $venue ) {
+	/**
+	 *  Get all the Event Values for the Custom Properties
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $venue An array of WP_Post objects
+	 *
+	 * @return array An array of attributes with values
+	 */
+	public function get_venue_values( $prefix, $venue ) {
 
 		// We only support one venue, but we get an array so get the first value
 		$venue      = reset( $venue );
 		$venue_data = [
-			'event_venue'                => [
-				'names' => [ 'last_registered_event_venue', 'last_attended_event_venue' ],
+			[
+				'property' => $prefix . 'event_venue',
 				'value' => $venue->post_title,
 			],
-			'event_venue_address'        => [
-				'names' => [ 'last_registered_event_venue_address', 'last_attended_event_venue_address' ],
+			[
+				'property' => $prefix . 'event_venue_address',
 				'value' => $venue->address,
 			],
-			'event_venue_cit'            => [
-				'names' => [ 'last_registered_event_venue_city', 'last_attended_event_venue_city' ],
+			[
+				'property' => $prefix . 'event_venue_city',
 				'value' => $venue->city,
 			],
-			'event_venue_state_province' => [
-				'names' => [ 'last_registered_event_venue_state_province', 'last_attended_event_venue_state_province' ],
+			[
+				'property' => $prefix . 'event_venue_state_province',
 				'value' => $venue->state_province,
 			],
-			'event_venue_postal_code'    => [
-				'names' => [ 'last_registered_event_venue_postal_code', 'last_attended_event_venue_postal_code' ],
+			[
+				'property' => $prefix . 'event_venue_postal_code',
 				'value' => $venue->zip,
 			],
 		];
@@ -95,24 +112,36 @@ class Event_Data {
 		return $venue_data;
 	}
 
-	public function get_order_values( $order ) {
+	/**
+	 * Get Order Custom Properties with Values
+	 *
+	 * @since 1.0
+	 *
+	 * @param $date
+	 * @param $total
+	 * @param $quantity
+	 * @param $type_quantity
+	 *
+	 * @return array
+	 */
+	public function get_order_values( $prefix, $date, $total, $quantity, $type_quantity ) {
 
 		$order_data = [
-			'order_date_utc'             => [
-				'names' => [ 'first_order_date_utc', 'last_order_date_utc' ],
-				'value' => '',
+			[
+				'property' => $prefix . 'date_utc',
+				'value' => date( 'U', $date ) * 1000,
 			],
-			'order_total'                => [
-				'names' => [ 'first_order_total', 'last_order_total' ],
-				'value' => '',
+			[
+				'property' => $prefix . 'total',
+				'value' => $total,
 			],
-			'order_ticket_quantity'      => [
-				'names' => [ 'first_order_ticket_quantity', 'last_order_ticket_quantity' ],
-				'value' => '',
+			[
+				'property' => $prefix . 'ticket_quantity',
+				'value' => $quantity,
 			],
-			'order_ticket_type_quantity' => [
-				'names' => [ 'first_order_ticket_type_quantity', 'last_order_ticket_type_quantity' ],
-				'value' => '',
+			[
+				'property' => $prefix . 'ticket_type_quantity',
+				'value' => $type_quantity,
 			],
 		];
 
@@ -120,31 +149,43 @@ class Event_Data {
 
 	}
 
+	/**
+	 * Get Ticket Custom Properties with Values
+	 *
+	 * @since 1.0
+	 *
+	 * @param $ticket_id
+	 * @param $attendee_id
+	 * @param $commerce
+	 * @param $name
+	 *
+	 * @return array
+	 */
 	public function get_ticket_values( $ticket_id, $attendee_id, $commerce, $name ) {
 
 		$ticket_data = [
-			'ticket_type_id'       => [
-				'names' => [ 'last_registered_ticket_type_id' ],
+			[
+				'property' => 'last_registered_ticket_type_id',
 				'value' => $ticket_id,
 			],
-			'ticket_type'          => [
-				'names' => [ 'last_registered_ticket_type' ],
+			[
+				'property' => 'last_registered_ticket_type',
 				'value' => get_the_title( $ticket_id ),
 			],
-			'ticket_commerce'      => [
-				'names' => [ 'last_registered_ticket_commerce' ],
+			[
+				'property' => 'last_registered_ticket_commerce',
 				'value' => $commerce,
 			],
-			'ticket_attendee_id'   => [
-				'names' => [ 'last_registered_ticket_attendee_id' ],
+			[
+				'property' => 'last_registered_ticket_attendee_id',
 				'value' => $attendee_id,
 			],
-			'ticket_attendee_name' => [
-				'names' => [ 'last_registered_ticket_attendee_name' ],
+			[
+				'property' => 'last_registered_ticket_attendee_name',
 				'value' => $name,
 			],
-			'rsvp_is_going'        => [
-				'names' => [ 'last_registered_ticket_rsvp_is_going' ],
+			[
+				'property' => 'last_registered_ticket_rsvp_is_going',
 				'value' => '', //todo when connecting in the rsvp add the value here
 			],
 		];
@@ -153,6 +194,15 @@ class Event_Data {
 
 	}
 
+	/**
+	 * Get Order Quantities for WooCommerce Orders
+	 *
+	 * @since 1.0
+	 *
+	 * @param $order WC_Order
+	 *
+	 * @return array
+	 */
 	public function get_woo_order_quantities( $order ) {
 
 		$valid_order_items = [
