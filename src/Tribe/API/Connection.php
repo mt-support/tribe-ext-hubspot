@@ -151,8 +151,6 @@ class Connection {
 		tribe_update_option( $this->opts_prefix . 'refresh_token', sanitize_text_field( $access_tokens->data->refresh_token ) );
 		tribe_update_option( $this->opts_prefix . 'token_expires', sanitize_text_field( current_time( 'timestamp' ) + $access_tokens->data->expires_in ) );
 
-		//todo add check if authorized before and if not then create properties
-		//todo add additional check just to make sure properties are created
 	}
 
 	/**
@@ -171,7 +169,7 @@ class Connection {
 		try {
 			$access_tokens = $this->oauth2->getTokensByCode( $this->client_id, $this->client_secret, $this->callback, $token_code );
 
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			$message = sprintf( 'Could not complete authorization with HubSpot, error message %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Authorization Tokens' );
 
@@ -211,7 +209,7 @@ class Connection {
 		try {
 			$access_tokens = $this->oauth2->getTokensByRefresh( $this->client_id, $this->client_secret, $this->refresh_token );
 
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			$message = sprintf( 'Could not complete refresh with HubSpot, error message %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Refresh Tokens' );
 

@@ -56,7 +56,12 @@ class Oauth {
 			die();
 		}
 
-		tribe( 'tickets.hubspot.api' )->save_access_token();
+		/**
+		 * Hook to Save Data During Authorization of Site
+		 *
+		 * @since 1.0
+		 */
+		do_action( 'tribe_hubspot_authorize_site' );
 
 		wp_safe_redirect( \Tribe__Settings::instance()->get_url( [ 'tab' => 'addons' ] ) );
 
