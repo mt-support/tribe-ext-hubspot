@@ -2,7 +2,7 @@
 
 namespace Tribe\HubSpot\Subscribe;
 
-use Tribe\HubSpot\Process\Async as Async;
+use Tribe\HubSpot\Process\Async as Process_Async;
 
 /**
  * Class Connection
@@ -43,10 +43,6 @@ class Purchase {
 
 		$groups = [];
 		$groups[]  = $data->get_event_values( 'last_registered_', $post_id );
-
-		//todo add check if first order already exists and if it does then
-		//$groups[]  = $data->get_order_values( 'first_order_', $date, $total, $qty['total'], count( $qty['tickets'] ) );
-
 		$groups[]  = $data->get_order_values( 'last_order_', $date, $total, $qty['total'], count( $qty['tickets'] ) );
 		$groups[]  = $data->get_ticket_values( $product_id, $attendee_id, 'woo', $name );
 
@@ -67,7 +63,7 @@ class Purchase {
 
 		// Send to Async Process.
 		if ( ! empty( $email ) ) {
-			$hubspot_process = new Async();
+			$hubspot_process = new Process_Async();
 			$hubspot_process->set_email( $email );
 			$hubspot_process->set_properties( $properties );
 			$hubspot_process->dispatch();

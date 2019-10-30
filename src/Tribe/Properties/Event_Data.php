@@ -21,6 +21,7 @@ class Event_Data {
 	public function get_event_values( $prefix, $post_id ) {
 
 		$event      = tribe_get_event( $post_id );
+
 		$event_data = [
 			//todo number formatting is 16,108 in HubSpot
 			[
@@ -47,7 +48,7 @@ class Event_Data {
 			//todo must be midnight utc in milliseconds sending as 1576800000000 by hubspot uses 1576800000
 			[
 				'property' => $prefix . 'event_start_datetime_utc',
-				'value'    => date( 'U', strtotime( 'midnight', ( \Tribe__Date_Utils::wp_strtotime( $event->start_date ) ) ) ) * 1000,
+				'value'    => date( 'U', strtotime( 'midnight', ( \Tribe__Date_Utils::wp_strtotime( $event->start_date_utc ) ) ) ) * 1000,
 			],
 			//todo it does not show as a time only date
 			[
