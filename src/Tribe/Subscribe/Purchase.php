@@ -2,6 +2,7 @@
 
 namespace Tribe\HubSpot\Subscribe;
 
+use SevenShores\Hubspot\Factory;
 use Tribe\HubSpot\Process\Async as Async;
 
 /**
@@ -18,9 +19,82 @@ class Purchase {
 	 *
 	 */
 	public function hook() {
-		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_subscribe' ], 10, 4 );
+		//add_action( 'admin_init', [ $this, 'createEventType' ], 10 );
+		//add_action( 'admin_init', [ $this, 'createOrUpdate' ], 10 );
+		//add_action( 'admin_init', [ $this, 'get_event_types' ], 10 );
+		add_action( 'event_ticket_woo_attendee_created', [ $this, 'createOrUpdate' ], 10, 4 );
+		//add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_subscribe' ], 10, 4 );
 	}
-	
+
+	public function createEventType() {
+
+		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
+		$hubspot_api = tribe( 'tickets.hubspot.api' );
+
+		if ( ! $access_token = $hubspot_api->is_ready() ) {
+			return false;
+		}
+
+		$client = $hubspot_api->client;
+
+		$appId          = 203977;
+		$name           = 'eventRegistration';
+		$headerTemplate = 'Purchased ticket for <event title> (#<event ID>)';
+		$detailTemplate = 'Ticket purchase occurred at {{#formatDate timestamp}}{{/formatDate}} from the <app name> app';
+
+		//todo looks like it will create it multiple times so add a check that is already exists like the contact properties
+		//todo save the id so we can use that to check if the field is created without an id check
+		$hubspot  = Factory::createWithToken( $access_token, $client );
+		$response = $hubspot->Timeline()->createEventType( $appId, $name, $headerTemplate, $detailTemplate );
+
+
+		return;
+	}
+
+	public function get_event_types() {
+
+		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
+		$hubspot_api = tribe( 'tickets.hubspot.api' );
+
+		if ( ! $access_token = $hubspot_api->is_ready() ) {
+			return false;
+		}
+
+		$client = $hubspot_api->client;
+
+		$appId          = 203977;
+
+		$hubspot  = Factory::createWithToken( $access_token, $client );
+		$response = $hubspot->Timeline()->getEventTypes( $appId );
+
+
+		return;
+	}
+
+	public function createOrUpdate( $attendee_id, $post_id, $order, $product_id ) {
+
+		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
+		$hubspot_api = tribe( 'tickets.hubspot.api' );
+
+		if ( ! $access_token = $hubspot_api->is_ready() ) {
+			return false;
+		}
+
+		$client = $hubspot_api->client;
+		$appId       = 203977;
+		$eventTypeId = 394718;
+		$id          = "event-register:{$post_id}:{$attendee_id}";
+		$email  = $order->get_billing_email();
+		$extraData   = [];
+
+		$hubspot  = Factory::createWithToken( $access_token, $client );
+		$response = $hubspot->Timeline()->createOrUpdate( $appId, $eventTypeId, $id, null, $email,  null, $extraData );
+
+		log_me( $response );
+
+		return;
+	}
+
 	/**
 	 * Connect to Creation of an Attendee for WooCommerce
 	 *
