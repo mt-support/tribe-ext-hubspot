@@ -57,9 +57,7 @@ class Purchase {
 			],
 		];
 
-		foreach ( $groups as $group ) {
-			$properties = array_merge( $properties, $group );
-		}
+		$properties = array_merge( $properties, ...$groups );
 
 		// Send to Async Process.
 		if ( ! empty( $email ) ) {
