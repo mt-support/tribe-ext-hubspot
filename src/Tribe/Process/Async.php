@@ -18,6 +18,9 @@ class Async extends Tribe__Process__Handler {
 
 	/**
 	 * {@inheritdoc}
+	 *
+	 * @since 1.0
+	 *
 	 */
 	public static function action() {
 		return 'hubspot_subscriptions';
@@ -25,6 +28,9 @@ class Async extends Tribe__Process__Handler {
 
 	/**
 	 * {@inheritdoc}
+	 *
+	 * @since 1.0
+	 *
 	 */
 	public function dispatch() {
 
@@ -87,6 +93,9 @@ class Async extends Tribe__Process__Handler {
 
 	/**
 	 * {@inheritdoc}
+	 *
+	 * @since 1.0
+	 *
 	 */
 	public function sync_handle( array $data_source = null ) {
 
