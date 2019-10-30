@@ -28,7 +28,7 @@ class Contact_Property {
 		$this->properties['first_order']            = tribe( 'tickets.hubspot.properties.first_order' );
 		$this->properties['last_order']             = tribe( 'tickets.hubspot.properties.last_order' );
 		$this->properties['last_registered_ticket'] = tribe( 'tickets.hubspot.properties.last_registered_ticket' );
-		$this->properties['aggregate_data']             = tribe( 'tickets.hubspot.properties.aggregate_data' );
+		$this->properties['aggregate_data']         = tribe( 'tickets.hubspot.properties.aggregate_data' );
 	}
 
 	/**
@@ -183,10 +183,10 @@ class Contact_Property {
 	/**
 	 * Update Contact
 	 *
-     * @since 1.0
-     *
-	 * @param $email
-	 * @param $properties
+	 * @since 1.0
+	 *
+	 * @param string $email      An email used to update a contact in HubSpot.
+	 * @param array  $properties An array of fields and custom fields to update for a contact.
 	 */
 	public function update( $email, $properties ) {
 

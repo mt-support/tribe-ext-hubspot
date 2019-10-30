@@ -65,8 +65,6 @@ class Purchase {
 			$properties = array_merge( $properties, $group );
 		}
 
-		//add filter to either immediately send or to add to queue
-
 		// Send to Async Process.
 		if ( ! empty( $email ) ) {
 			$hubspot_process = new Async();
@@ -74,8 +72,6 @@ class Purchase {
 			$hubspot_process->set_properties( $properties );
 			$hubspot_process->dispatch();
 		}
-
-		//setup queue to process
 
 	}
 

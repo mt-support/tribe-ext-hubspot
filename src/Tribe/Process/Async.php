@@ -39,8 +39,8 @@ class Async extends Tribe__Process__Handler {
 		}
 
 		$data = [
-			'email'        => $this->email,
-			'properties'        => $this->properties,
+			'email'      => $this->email,
+			'properties' => $this->properties,
 		];
 
 		$this->data( $data );
@@ -51,7 +51,7 @@ class Async extends Tribe__Process__Handler {
 	}
 
 	/**
-	 *
+	 * Set Email of Contact in HubSpot
 	 *
 	 * @since 1.0
 	 *
@@ -62,7 +62,7 @@ class Async extends Tribe__Process__Handler {
 	}
 
 	/**
-	 *
+	 * Set Array of Properties to Update for HubSpot
 	 *
 	 * @since 1.0
 	 *
@@ -73,7 +73,7 @@ class Async extends Tribe__Process__Handler {
 	}
 
 	/**
-	 *
+	 * Handle Updating
 	 *
 	 * @since 1.0
 	 *
@@ -93,7 +93,7 @@ class Async extends Tribe__Process__Handler {
 		/** @var \Tribe\HubSpot\API\Contact_Property $hubspot_api */
 		$hubspot_contact = tribe( 'tickets.hubspot.contact.property' );
 
-			/** @var Tribe__Log $logger */
+		/** @var \Tribe__Log $logger */
 		$logger  = tribe( 'logger' );
 		$log_src = 'HubSpot Subscriptions';
 
@@ -107,12 +107,12 @@ class Async extends Tribe__Process__Handler {
 			return 0;
 		}
 
-		$email             = filter_var( $data_source['email'], FILTER_SANITIZE_EMAIL );
-		$properties             = $data_source['properties'];
+		$email      = filter_var( $data_source['email'], FILTER_SANITIZE_EMAIL );
+		$properties = \Tribe__Utils__Array::escape_multidimensional_array( $data_source['properties'] );
 
 		$logger->log_debug( "(ID: {$this->identifier}) - updating contact {$email}", $log_src );
 
-		//todo this is where to connect
+		// Connect to HubSpot and Update.
 		$hubspot_response = $hubspot_contact->update( $email, $properties );
 
 		if ( false === $hubspot_response ) {

@@ -2,8 +2,6 @@
 
 namespace Tribe\HubSpot\Properties;
 
-use SevenShores\Hubspot\Factory;
-
 /**
  * Class Event_Data
  *
@@ -27,42 +25,42 @@ class Event_Data {
 			//todo number formatting is 16,108 in HubSpot
 			[
 				'property' => $prefix . 'event_id',
-				'value' => $event->ID,
+				'value'    => $event->ID,
 			],
 			[
 				'property' => $prefix . 'event_name',
-				'value' => $event->post_title,
+				'value'    => $event->post_title,
 			],
 			[
 				'property' => $prefix . 'event_organizer',
-				'value' => implode( ', ', $event->organizers->all() ),
+				'value'    => implode( ', ', $event->organizers->all() ),
 			],
 			[
 				'property' => $prefix . 'event_is_featured',
-				'value' => $event->featured,
+				'value'    => $event->featured,
 			],
 			//todo includes html
 			[
 				'property' => $prefix . 'event_cost',
-				'value' => $event->cost,
+				'value'    => $event->cost,
 			],
 			//todo must be midnight utc in milliseconds sending as 1576800000000 by hubspot uses 1576800000
 			[
 				'property' => $prefix . 'event_start_datetime_utc',
-				'value' => date( 'U', strtotime( 'midnight', ( \Tribe__Date_Utils::wp_strtotime( $event->start_date ) ) ) ) * 1000,
+				'value'    => date( 'U', strtotime( 'midnight', ( \Tribe__Date_Utils::wp_strtotime( $event->start_date ) ) ) ) * 1000,
 			],
 			//todo it does not show as a time only date
 			[
 				'property' => $prefix . 'event_start_time_utc',
-				'value' => date( 'U', strtotime( $event->start_date_utc ) ),
+				'value'    => date( 'U', strtotime( $event->start_date_utc ) ),
 			],
 			[
 				'property' => $prefix . 'event_timezone',
-				'value' => $event->timezone,
+				'value'    => $event->timezone,
 			],
 			[
 				'property' => $prefix . 'event_duration',
-				'value' => $event->duration,
+				'value'    => $event->duration,
 			],
 		];
 
@@ -89,23 +87,23 @@ class Event_Data {
 		$venue_data = [
 			[
 				'property' => $prefix . 'event_venue',
-				'value' => $venue->post_title,
+				'value'    => $venue->post_title,
 			],
 			[
 				'property' => $prefix . 'event_venue_address',
-				'value' => $venue->address,
+				'value'    => $venue->address,
 			],
 			[
 				'property' => $prefix . 'event_venue_city',
-				'value' => $venue->city,
+				'value'    => $venue->city,
 			],
 			[
 				'property' => $prefix . 'event_venue_state_province',
-				'value' => $venue->state_province,
+				'value'    => $venue->state_province,
 			],
 			[
 				'property' => $prefix . 'event_venue_postal_code',
-				'value' => $venue->zip,
+				'value'    => $venue->zip,
 			],
 		];
 
@@ -117,10 +115,10 @@ class Event_Data {
 	 *
 	 * @since 1.0
 	 *
-	 * @param $date
-	 * @param $total
-	 * @param $quantity
-	 * @param $type_quantity
+	 * @param int $date The date in unix timestamp in seconds
+	 * @param int $total The total for an order of Tickets.
+	 * @param int $quantity The total quantity of tickets purchased.
+	 * @param int $type_quantity The different amount of ticket types in an Order.
 	 *
 	 * @return array
 	 */
@@ -129,19 +127,19 @@ class Event_Data {
 		$order_data = [
 			[
 				'property' => $prefix . 'date_utc',
-				'value' => date( 'U', $date ) * 1000,
+				'value'    => $date * 1000, //convert to milliseconds for HubSpot
 			],
 			[
 				'property' => $prefix . 'total',
-				'value' => $total,
+				'value'    => $total,
 			],
 			[
 				'property' => $prefix . 'ticket_quantity',
-				'value' => $quantity,
+				'value'    => $quantity,
 			],
 			[
 				'property' => $prefix . 'ticket_type_quantity',
-				'value' => $type_quantity,
+				'value'    => $type_quantity,
 			],
 		];
 
@@ -166,27 +164,27 @@ class Event_Data {
 		$ticket_data = [
 			[
 				'property' => 'last_registered_ticket_type_id',
-				'value' => $ticket_id,
+				'value'    => $ticket_id,
 			],
 			[
 				'property' => 'last_registered_ticket_type',
-				'value' => get_the_title( $ticket_id ),
+				'value'    => get_the_title( $ticket_id ),
 			],
 			[
 				'property' => 'last_registered_ticket_commerce',
-				'value' => $commerce,
+				'value'    => $commerce,
 			],
 			[
 				'property' => 'last_registered_ticket_attendee_id',
-				'value' => $attendee_id,
+				'value'    => $attendee_id,
 			],
 			[
 				'property' => 'last_registered_ticket_attendee_name',
-				'value' => $name,
+				'value'    => $name,
 			],
 			[
 				'property' => 'last_registered_ticket_rsvp_is_going',
-				'value' => '', //todo when connecting in the rsvp add the value here
+				'value'    => '', //todo when connecting in the rsvp add the value here
 			],
 		];
 
@@ -215,9 +213,7 @@ class Event_Data {
 		foreach ( (array) $order_items as $item_id => $item ) {
 			$ticket_id = $item['product_id'];
 
-			$ticket_event_id = absint(
-				get_post_meta( $ticket_id, \Tribe__Tickets_Plus__Commerce__WooCommerce__Main::get_instance()->event_key, true )
-			);
+			$ticket_event_id = absint( get_post_meta( $ticket_id, \Tribe__Tickets_Plus__Commerce__WooCommerce__Main::get_instance()->event_key, true ) );
 
 			// If not a ticket product then do not count
 			if ( empty( $ticket_event_id ) ) {
