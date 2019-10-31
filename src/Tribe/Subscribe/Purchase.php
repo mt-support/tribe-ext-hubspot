@@ -19,78 +19,61 @@ class Purchase {
 	 *
 	 */
 	public function hook() {
-		//add_action( 'admin_init', [ $this, 'createEventType' ], 10 );
-		//add_action( 'admin_init', [ $this, 'createOrUpdate' ], 10 );
-		//add_action( 'admin_init', [ $this, 'get_event_types' ], 10 );
+
 		add_action( 'event_ticket_woo_attendee_created', [ $this, 'createOrUpdate' ], 10, 4 );
-		//add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_subscribe' ], 10, 4 );
-	}
-
-	public function createEventType() {
-
-		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
-		$hubspot_api = tribe( 'tickets.hubspot.api' );
-
-		if ( ! $access_token = $hubspot_api->is_ready() ) {
-			return false;
-		}
-
-		$client = $hubspot_api->client;
-
-		$appId          = 203977;
-		$name           = 'eventRegistration';
-		$headerTemplate = 'Purchased ticket for <event title> (#<event ID>)';
-		$detailTemplate = 'Ticket purchase occurred at {{#formatDate timestamp}}{{/formatDate}} from the <app name> app';
-
-		//todo looks like it will create it multiple times so add a check that is already exists like the contact properties
-		//todo save the id so we can use that to check if the field is created without an id check
-		$hubspot  = Factory::createWithToken( $access_token, $client );
-		$response = $hubspot->Timeline()->createEventType( $appId, $name, $headerTemplate, $detailTemplate );
-
-
-		return;
-	}
-
-	public function get_event_types() {
-
-		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
-		$hubspot_api = tribe( 'tickets.hubspot.api' );
-
-		if ( ! $access_token = $hubspot_api->is_ready() ) {
-			return false;
-		}
-
-		$client = $hubspot_api->client;
-
-		$appId          = 203977;
-
-		$hubspot  = Factory::createWithToken( $access_token, $client );
-		$response = $hubspot->Timeline()->getEventTypes( $appId );
-
-
-		return;
+		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_subscribe' ], 10, 4 );
 	}
 
 	public function createOrUpdate( $attendee_id, $post_id, $order, $product_id ) {
 
-		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
-		$hubspot_api = tribe( 'tickets.hubspot.api' );
+		//$post_id = 16108;
+		//$attendee_id = 16232;
+		//$product_id = 16110;
 
-		if ( ! $access_token = $hubspot_api->is_ready() ) {
-			return false;
-		}
-
-		$client = $hubspot_api->client;
-		$appId       = 203977;
-		$eventTypeId = 394718;
-		$id          = "event-register:{$post_id}:{$attendee_id}";
+		/** @var \Tribe\HubSpot\Properties\Event_Data $data */
+		$data = tribe( 'tickets.hubspot.properties.event_data' );
+		$type ='eventRegistration_id';
+		$id = "event-register:{$post_id}:{$attendee_id}";
 		$email  = $order->get_billing_email();
-		$extraData   = [];
+		//$email = 'hubspot@jesseeproductions.com';
+		$event = tribe_get_event( $post_id );
+		//$tickets   = $data->get_ticket_values( $product_id, $attendee_id, 'woo', 'HubSpot McHubSpot' );
+/*		$extra_data = [
+			'event' => [
+				'ID' => $event->ID,
+				'post_title' => $event->post_title,
+			]
+		];*/
+		$extra_data = [
+			'event'     => [
+				'ID'         => $event->ID,
+				'post_title' => $event->post_title,
+			],
+			'pollData'  => [
+				[
+					'question' => 'How excited are you for this webinar?',
+					'answer'   => 'Quite!',
+				],
+				[
+					'question' => 'How frequently do you use our product?',
+					'answer'   => 'Daily',
+				],
+			],
+			'coWorkers' => [
+				[
+					'name'  => 'Joe Coworker',
+					'email' => 'jmcoworker@testco.com',
+				],
+				[
+					'name'  => 'Jane Coworker',
+					'email' => 'jcoworker@testco.com',
+				],
+			],
+		];
 
-		$hubspot  = Factory::createWithToken( $access_token, $client );
-		$response = $hubspot->Timeline()->createOrUpdate( $appId, $eventTypeId, $id, null, $email,  null, $extraData );
 
-		log_me( $response );
+		//todo change this to use a Queue Process in Sprint 4
+		tribe( 'tickets.hubspot.timeline' )->create( $id, $type, $email, $extra_data );
 
 		return;
 	}
