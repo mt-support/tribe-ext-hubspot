@@ -55,8 +55,8 @@ class Timeline {
 
 		//todo setup all 3 types in another class and generate each one here
 		$name           = 'eventRegistration';
-		$headerTemplate = 'Purchased ticket for {{event.post_title}} (# {{event.ID}} )';
-		$detailTemplate = 'Ticket purchase occurred at {{#formatDate timestamp}}{{/formatDate}} from the Event Tickets HubSpot Integration app';
+		$headerTemplate = 'Ticket purchase occurred at {{#formatDate timestamp}}{{/formatDate}} from the Event Tickets HubSpot Integration app';
+		$detailTemplate = 'Purchased ticket for {{extraData.event.post_title}} (# {{extraData.event.ID}} )';
 
 		try {
 			$hubspot  = Factory::createWithToken( $access_token, $client );
