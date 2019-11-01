@@ -25,6 +25,13 @@ class Timeline {
 
 	}
 
+	/**
+	 * Create Timeline Event Type
+	 *
+	 * @since 1.0
+	 *
+	 * @return bool
+	 */
 	public function create_event_type() {
 		//todo if the appid changes then this ids should be deleted
 
@@ -33,14 +40,14 @@ class Timeline {
 		$options         = $hubspot_options->get_all_options();
 
 		if ( ! empty( $options['eventRegistration_id'] ) ) {
-			return;
+			return false;
 		}
 
 		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
 		$hubspot_api = tribe( 'tickets.hubspot.api' );
 
 		if ( ! $access_token = $hubspot_api->is_ready() ) {
-			return;
+			return false;
 		}
 
 		$client = $hubspot_api->client;
@@ -65,19 +72,26 @@ class Timeline {
 			$message = sprintf( 'Could not create timeline event type: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Timeline Event Type' );
 
-			return;
+			return false;
 		}
 
-		$hubspot_options->add_option( 'eventRegistration_id', $response->data->id );
+		$hubspot_options->update_option( 'eventRegistration_id', $response->data->id );
 	}
 
+	/**
+	 * Get Timeline Event Type for the APP ID
+	 *
+	 * @since 1.0
+	 *
+	 * @return array An array of event types for an APP ID.
+	 */
 	public function get_event_types() {
 
 		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
 		$hubspot_api = tribe( 'tickets.hubspot.api' );
 
 		if ( ! $access_token = $hubspot_api->is_ready() ) {
-			return false;
+			return [];
 		}
 
 		$hubspot_options = tribe( 'tickets.hubspot' )->get_all_options();
@@ -91,7 +105,7 @@ class Timeline {
 			$message = sprintf( 'Could not get timeline event types from HubSpot, error code: %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Timeline Event Type' );
 
-			return false;
+			return [];
 		}
 
 
@@ -99,12 +113,22 @@ class Timeline {
 			$message = sprintf( 'Could not get timeline event types: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Timeline Event Type' );
 
-			return;
+			return [];
 		}
 
 		return $response->data;
 	}
 
+	/**
+	 * Create Timeline Event
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $id         The custom id for the event in HubSpot.
+	 * @param string $type       The name of the type of event to create ( Registration, Update, Check-In ).
+	 * @param string $email      The email address of the account to Update.
+	 * @param array  $extra_data An array of event and ticket data to include with the Timeline Event.
+	 */
 	public function create( $id, $type, $email, $extra_data ) {
 
 		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
@@ -112,7 +136,7 @@ class Timeline {
 		$hubspot_options = tribe( 'tickets.hubspot' )->get_all_options();
 
 		if ( ! $access_token = $hubspot_api->is_ready() ) {
-			return false;
+			return;
 		}
 
 		$client = $hubspot_api->client;
@@ -126,7 +150,7 @@ class Timeline {
 			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Timeline Event Type' );
 
-			return false;
+			return;
 		}
 
 		// Additional Safety Check to Verify Status Code.
@@ -134,7 +158,7 @@ class Timeline {
 			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Timeline Event Type' );
 
-			return false;
+			return;
 		}
 
 	}

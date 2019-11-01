@@ -20,59 +20,33 @@ class Purchase {
 	 */
 	public function hook() {
 
-		add_action( 'event_ticket_woo_attendee_created', [ $this, 'createOrUpdate' ], 10, 4 );
+		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_timeline' ], 10, 4 );
 		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_subscribe' ], 10, 4 );
 	}
 
-	public function createOrUpdate( $attendee_id, $post_id, $order, $product_id ) {
+	/**
+	 * Create Timeline Event
+	 *
+	 * @since 1.0
+	 *
+	 * @param int    $attendee_id ID of attendee ticket.
+	 * @param int    $post_id     ID of event.
+	 * @param object $order       WooCommerce order object /WC_Order.
+	 * @param int    $product_id  WooCommerce product ID.
+	 */
+	public function woo_timeline( $attendee_id, $post_id, $order, $product_id ) {
 
-		//$post_id = 16108;
-		//$attendee_id = 16232;
-		//$product_id = 16110;
-
-		/** @var \Tribe\HubSpot\Properties\Event_Data $data */
-		$data = tribe( 'tickets.hubspot.properties.event_data' );
 		$type ='eventRegistration_id';
 		$id = "event-register:{$post_id}:{$attendee_id}";
 		$email  = $order->get_billing_email();
-		//$email = 'hubspot@jesseeproductions.com';
 		$event = tribe_get_event( $post_id );
-		//$tickets   = $data->get_ticket_values( $product_id, $attendee_id, 'woo', 'HubSpot McHubSpot' );
-/*		$extra_data = [
+		$extra_data = [
 			'event' => [
 				'ID' => $event->ID,
 				'post_title' => $event->post_title,
 			]
-		];*/
-		$extra_data = [
-			'event'     => [
-				'ID'         => $event->ID,
-				'post_title' => $event->post_title,
-			],
-			'pollData'  => [
-				[
-					'question' => 'How excited are you for this webinar?',
-					'answer'   => 'Quite!',
-				],
-				[
-					'question' => 'How frequently do you use our product?',
-					'answer'   => 'Daily',
-				],
-			],
-			'coWorkers' => [
-				[
-					'name'  => 'Joe Coworker',
-					'email' => 'jmcoworker@testco.com',
-				],
-				[
-					'name'  => 'Jane Coworker',
-					'email' => 'jcoworker@testco.com',
-				],
-			],
 		];
 
-
-		//todo change this to use a Queue Process in Sprint 4
 		tribe( 'tickets.hubspot.timeline' )->create( $id, $type, $email, $extra_data );
 
 		return;

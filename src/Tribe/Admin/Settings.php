@@ -171,17 +171,18 @@ class Settings {
 	}
 
 	/**
-	 * Given an option key, delete this extension's option value.
+	 * Update an Option given a Key and Value
 	 *
 	 * This automatically prepends this extension's option prefix so you can just do `$this->add_option( 'a_setting' )`.
 	 *
 	 * @since 1.0
 	 *
-	 * @param string $key
+	 * @param string $key   The option name without the prefix.
+	 * @param mixed  $value The value to save for this option.
 	 *
 	 * @return mixed
 	 */
-	public function add_option( $key, $value ) {
+	public function update_option( $key, $value ) {
 		$key = $this->sanitize_option_key( $key );
 
 		$options = Tribe__Settings_Manager::get_options();
@@ -212,13 +213,12 @@ class Settings {
 				'html' => $this->get_authorize_fields(),
 			],
 
-			$this->opts_prefix . 'app_id'      => [
+			$this->opts_prefix . 'app_id' => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'APP ID', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'Enter the app id from the application created in HubSpot', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			],
-
 			$this->opts_prefix . 'client_id'      => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Client ID of the OAuth app', 'tribe-ext-hubspot' ),
