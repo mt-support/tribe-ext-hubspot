@@ -154,7 +154,7 @@ class Timeline {
 		}
 
 		// Additional Safety Check to Verify Status Code.
-		if ( $response->getStatusCode() !== 200 ) {
+		if ( $response->getStatusCode() !== 204 && $response->getStatusCode() !== 200 ) {
 			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Timeline Event Type' );
 
