@@ -35,6 +35,8 @@ class Setup extends Tribe__Extension {
 
 		// Connect into Process Filter, if done later it does not add the handler.
 		add_action( 'tribe_process_handlers', [ $this, 'process_handlers' ] );
+		add_action( 'tribe_process_queues', [ $this, 'queue_handlers' ] );
+
 	}
 
 	/**
@@ -101,6 +103,23 @@ class Setup extends Tribe__Extension {
 	public function process_handlers( $handlers = [] ) {
 
 		$handlers[] = Process\Async::class;
+
+		return $handlers;
+	}
+
+
+	/**
+	 * Add async process handler class to the process handlers
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $handlers The process handler classes.
+	 *
+	 * @return array The process handler classes.
+	 */
+	public function queue_handlers( $handlers = [] ) {
+
+		$handlers[] = Process\Connection_Queue::class;
 
 		return $handlers;
 	}

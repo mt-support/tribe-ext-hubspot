@@ -4,6 +4,7 @@ namespace Tribe\HubSpot\Subscribe;
 
 use SevenShores\Hubspot\Factory;
 use Tribe\HubSpot\Process\Async as Process_Async;
+use Tribe\HubSpot\Process\Connection_Queue;
 
 /**
  * Class Connection
@@ -36,8 +37,7 @@ class Purchase {
 	 */
 	public function woo_timeline( $attendee_id, $post_id, $order, $product_id ) {
 
-		$type ='event_registration_id';
-		$id = "event-register:{$post_id}:{$attendee_id}";
+
 		$email  = $order->get_billing_email();
 		$event = tribe_get_event( $post_id );
 		$extra_data = [
@@ -47,7 +47,24 @@ class Purchase {
 			]
 		];
 
-		tribe( 'tickets.hubspot.timeline' )->create( $id, $type, $email, $extra_data );
+
+		// Send to Queue Process.
+		if ( ! empty( $email ) ) {
+
+			$hubspot_data = [
+				'type'       => 'timeline',
+				'event_type' => 'event_registration_id',
+				'event_id'   => "event-register:{$post_id}:{$attendee_id}",
+				'email'      => $email,
+				'properties' => [],
+				'extra_data' => $extra_data,
+			];
+
+			$queue = new Connection_Queue();
+			$queue->push_to_queue( $hubspot_data );
+			$queue->save();
+			$queue->dispatch();
+		}
 
 		return;
 	}
@@ -90,12 +107,20 @@ class Purchase {
 
 		$properties = array_merge( $properties, ...$groups );
 
-		// Send to Async Process.
+		// Send to Queue Process.
 		if ( ! empty( $email ) ) {
-			$hubspot_process = new Process_Async();
-			$hubspot_process->set_email( $email );
-			$hubspot_process->set_properties( $properties );
-			$hubspot_process->dispatch();
+
+			$hubspot_data = [
+				'type' => 'contact',
+				'email' => $email,
+				'properties' => $properties,
+				'extra_data' => [],
+			];
+
+			$queue = new Connection_Queue();
+			$queue->push_to_queue( $hubspot_data );
+			$queue->save();
+			$queue->dispatch();
 		}
 
 	}
