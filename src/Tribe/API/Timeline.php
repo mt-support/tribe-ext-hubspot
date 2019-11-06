@@ -39,7 +39,7 @@ class Timeline {
 		$hubspot_options = tribe( 'tickets.hubspot.admin.settings' );
 		$options         = $hubspot_options->get_all_options();
 
-		if ( ! empty( $options['eventRegistration_id'] ) ) {
+		if ( ! empty( $options['event_registration_id'] ) ) {
 			return false;
 		}
 
@@ -75,7 +75,7 @@ class Timeline {
 			return false;
 		}
 
-		$hubspot_options->update_option( 'eventRegistration_id', $response->data->id );
+		$hubspot_options->update_option( 'event_registration_id', $response->data->id );
 	}
 
 	/**

@@ -36,7 +36,7 @@ class Purchase {
 	 */
 	public function woo_timeline( $attendee_id, $post_id, $order, $product_id ) {
 
-		$type ='eventRegistration_id';
+		$type ='event_registration_id';
 		$id = "event-register:{$post_id}:{$attendee_id}";
 		$email  = $order->get_billing_email();
 		$event = tribe_get_event( $post_id );
