@@ -128,6 +128,8 @@ class Timeline {
 	 * @param string $type       The name of the type of event to create ( Registration, Update, Check-In ).
 	 * @param string $email      The email address of the account to Update.
 	 * @param array  $extra_data An array of event and ticket data to include with the Timeline Event.
+	 *
+	 * @return bool
 	 */
 	public function create( $id, $type, $email, $extra_data ) {
 
@@ -136,7 +138,7 @@ class Timeline {
 		$hubspot_options = tribe( 'tickets.hubspot' )->get_all_options();
 
 		if ( ! $access_token = $hubspot_api->is_ready() ) {
-			return;
+			return false;
 		}
 
 		$client = $hubspot_api->client;
@@ -150,7 +152,7 @@ class Timeline {
 			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Timeline Event Type' );
 
-			return;
+			return false;
 		}
 
 		// Additional Safety Check to Verify Status Code.
@@ -158,8 +160,9 @@ class Timeline {
 			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Timeline Event Type' );
 
-			return;
+			return false;
 		}
 
+		return true;
 	}
 }

@@ -21,7 +21,7 @@ class Purchase {
 	 */
 	public function hook() {
 
-		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_timeline' ], 10, 4 );
+		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_timeline' ], 100, 4 );
 		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_subscribe' ], 10, 4 );
 	}
 

@@ -28,7 +28,15 @@ class Connection_Queue extends Tribe__Process__Queue {
 		return 'hubspot_connection_queue';
 	}
 
-
+	/**
+	 * Task to send the Data to HubSpot based on the Type Sent
+	 *
+	 * @since 1.0
+	 *
+	 * @param mixed $hubspot_data An array of data to send to HubSpot
+	 *
+	 * @return bool
+	 */
 	protected function task( $hubspot_data ) {
 
 		if ( empty( $hubspot_data['type'] ) ) {
@@ -38,21 +46,27 @@ class Connection_Queue extends Tribe__Process__Queue {
 		$this->type = $hubspot_data['type'];
 		$this->data = $hubspot_data;
 
-		$response = '';
-
+		$response = false;
 		if ( 'contact' === $hubspot_data['type'] ) {
 			$response = $this->contact_update( $hubspot_data );
 		} elseif ( 'timeline' === $hubspot_data['type'] ) {
-			$response = $this->timeline_update( $hubspot_data );
+			$response = $this->timeline_create( $hubspot_data );
 		} elseif ( 'update_properties' === $hubspot_data['type'] ) {
 			$response = $this->properties_update( $hubspot_data );
 		}
 
-
-
 		return $response;
 	}
 
+	/**
+	 * Update Contact with HubSpot
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $hubspot_data An array of data to send to HubSpot
+	 *
+	 * @return bool
+	 */
 	protected function contact_update( $hubspot_data ) {
 
 		/** @var \Tribe\HubSpot\API\Contact_Property $hubspot_api */
@@ -67,7 +81,7 @@ class Connection_Queue extends Tribe__Process__Queue {
 		if ( ! isset( $hubspot_data['email'], $hubspot_data['properties'] ) ) {
 			do_action( 'tribe_log', 'error', $this->identifier, [ 'data' => $hubspot_data, ] );
 
-			return 0;
+			return false;
 		}
 
 		$email      = filter_var( $hubspot_data['email'], FILTER_SANITIZE_EMAIL );
@@ -84,14 +98,14 @@ class Connection_Queue extends Tribe__Process__Queue {
 				'error',
 				$this->identifier,
 				[
-					'action'     => 'fetch',
+					'action'     => 'update-contact',
 					'email'      => $email,
 					'properties' => $properties,
 				]
 			);
 			$logger->log_debug( "(ID: {$this->identifier}) - could not update contact {$email}", $log_src );
 
-			return 0;
+			return false;
 		}
 
 
@@ -100,7 +114,7 @@ class Connection_Queue extends Tribe__Process__Queue {
 			'debug',
 			$this->identifier,
 			[
-				'action'     => 'set',
+				'action'     => 'update-contact',
 				'email'      => $email,
 				'properties' => $properties,
 			]
@@ -109,10 +123,18 @@ class Connection_Queue extends Tribe__Process__Queue {
 		$logger->log_debug( "(ID: {$this->identifier}) - updated {$email}.", $log_src );
 
 		return $hubspot_response;
-
 	}
 
-	protected function timeline_update( $hubspot_data ) {
+	/**
+	 * Create Timeline Event with HubSpot
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $hubspot_data An array of data to send to HubSpot
+	 *
+	 * @return bool
+	 */
+	protected function timeline_create( $hubspot_data ) {
 
 		/** @var \Tribe\HubSpot\API\Timeline $hubspot_api */
 		$hubspot_timeline = tribe( 'tickets.hubspot.timeline' );
@@ -126,7 +148,7 @@ class Connection_Queue extends Tribe__Process__Queue {
 		if ( ! isset( $hubspot_data['email'], $hubspot_data['properties'] ) ) {
 			do_action( 'tribe_log', 'error', $this->identifier, [ 'data' => $hubspot_data, ] );
 
-			return 0;
+			return false;
 		}
 
 		$email      = filter_var( $hubspot_data['email'], FILTER_SANITIZE_EMAIL );
@@ -145,13 +167,13 @@ class Connection_Queue extends Tribe__Process__Queue {
 				'error',
 				$this->identifier,
 				[
-					'action'     => 'fetch',
+					'action'     => 'create-timeline',
 					'email'      => $email,
 				]
 			);
 			$logger->log_debug( "(ID: {$this->identifier}) - could not update timeline {$email}", $log_src );
 
-			return 0;
+			return false;
 		}
 
 
@@ -160,7 +182,7 @@ class Connection_Queue extends Tribe__Process__Queue {
 			'debug',
 			$this->identifier,
 			[
-				'action'     => 'set',
+				'action'     => 'create-timeline',
 				'email'      => $email,
 			]
 		);
@@ -171,6 +193,15 @@ class Connection_Queue extends Tribe__Process__Queue {
 
 	}
 
+	/**
+	 * Update Custom Properties with HubSpot
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $hubspot_data An array of data to send to HubSpot
+	 *
+	 * @return bool
+	 */
 	protected function properties_update( $hubspot_data ) {
 
 		/** @var \Tribe\HubSpot\API\Properties $hubspot_api */
@@ -191,30 +222,34 @@ class Connection_Queue extends Tribe__Process__Queue {
 				'error',
 				$this->identifier,
 				[
-					'action'     => 'update',
+					'action'     => 'update-properties',
 				]
 			);
 			$logger->log_debug( "(ID: {$this->identifier}) - could not update custom properties", $log_src );
 
-			return 0;
+			return false;
 		}
-
 
 		do_action(
 			'tribe_log',
 			'debug',
 			$this->identifier,
 			[
-				'action'     => 'set',
+				'action'     => 'update-properties',
 			]
 		);
 
 		$logger->log_debug( "(ID: {$this->identifier}) - updated custom properties with HubSpot.", $log_src );
 
 		return $hubspot_response;
-
 	}
 
+	/**
+	 * HubSpot Connection Complete
+	 *
+	 * @since 1.0
+	 *
+	 */
 	protected function complete() {
 
 		/** @var \Tribe__Log $logger */
@@ -226,14 +261,13 @@ class Connection_Queue extends Tribe__Process__Queue {
 			'debug',
 			$this->identifier,
 			[
-				'action'     => 'set',
+				'action'     => 'hubspot',
 				'type' => $this->type,
 				'data' => $this->data,
 			]
 		);
 
 		$logger->log_debug( "(ID: {$this->identifier}) - updated {$this->type}.", $log_src );
-
 
 		parent::complete();
 	}

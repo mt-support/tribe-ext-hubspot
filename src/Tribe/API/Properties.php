@@ -207,6 +207,8 @@ class Properties {
 	 *
 	 * @param string $email      An email used to update a contact in HubSpot.
 	 * @param array  $properties An array of fields and custom fields to update for a contact.
+	 *
+	 * @return bool
 	 */
 	public function update( $email, $properties ) {
 
