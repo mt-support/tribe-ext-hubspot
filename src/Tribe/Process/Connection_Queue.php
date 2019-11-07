@@ -16,7 +16,6 @@ class Connection_Queue extends Tribe__Process__Queue {
 	 */
 	protected $data;
 
-
 	/**
 	 * Returns the queue process action name.
 	 *
@@ -70,7 +69,7 @@ class Connection_Queue extends Tribe__Process__Queue {
 	protected function contact_update( $hubspot_data ) {
 
 		/** @var \Tribe\HubSpot\API\Contact_Property $hubspot_api */
-		$hubspot_contact = tribe( 'tickets.hubspot.contact.property' );
+		$hubspot_contact = tribe( 'tickets.hubspot.contact.properties' );
 
 		/** @var \Tribe__Log $logger */
 		$logger  = tribe( 'logger' );
@@ -205,7 +204,7 @@ class Connection_Queue extends Tribe__Process__Queue {
 	protected function properties_update( $hubspot_data ) {
 
 		/** @var \Tribe\HubSpot\API\Properties $hubspot_api */
-		$hubspot_contact = tribe( 'tickets.hubspot.contact.property' );
+		$hubspot_contact = tribe( 'tickets.hubspot.contact.properties' );
 
 		/** @var \Tribe__Log $logger */
 		$logger  = tribe( 'logger' );

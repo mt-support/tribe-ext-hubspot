@@ -6,11 +6,11 @@ use SevenShores\Hubspot\Factory;
 use Tribe\HubSpot\Process\Connection_Queue;
 
 /**
- * Class Properties
+ * Class Contact_Properties
  *
  * @package Tribe\HubSpot\API
  */
-class Properties {
+class Contact_Properties {
 
 	protected $properties = [];
 
