@@ -28,7 +28,7 @@ class Contact_Property {
 		$this->properties['first_order']            = tribe( 'tickets.hubspot.properties.first_order' );
 		$this->properties['last_order']             = tribe( 'tickets.hubspot.properties.last_order' );
 		$this->properties['last_registered_ticket'] = tribe( 'tickets.hubspot.properties.last_registered_ticket' );
-		$this->properties['event_data']             = tribe( 'tickets.hubspot.properties.event_data' );
+		$this->properties['aggregate_data']         = tribe( 'tickets.hubspot.properties.aggregate_data' );
 	}
 
 	/**
@@ -177,6 +177,50 @@ class Contact_Property {
 
 			return;
 		}
+
+	}
+
+	/**
+	 * Update Contact
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $email      An email used to update a contact in HubSpot.
+	 * @param array  $properties An array of fields and custom fields to update for a contact.
+	 */
+	public function update( $email, $properties ) {
+
+		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
+		$hubspot_api = tribe( 'tickets.hubspot.api' );
+
+		if ( ! $access_token = $hubspot_api->is_ready() ) {
+			return false;
+		}
+
+		$client = $hubspot_api->client;
+
+		//todo aggregate data will be calculated right here
+
+		try {
+			$hubspot  = Factory::createWithToken( $access_token, $client );
+			$response = $hubspot->contacts()->createOrUpdate( $email, $properties );
+		} catch ( Exception $e ) {
+			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );
+			tribe( 'logger' )->log_error( $message, 'HubSpot Contact' );
+
+			return false;
+		}
+
+		// Additional Safety Check to Verify Status Code.
+		if ( $response->getStatusCode() !== 200 ) {
+			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $response->getStatusCode() );
+			tribe( 'logger' )->log_error( $message, 'HubSpot Contact' );
+
+			return false;
+		}
+
+
+		return true;
 
 	}
 }

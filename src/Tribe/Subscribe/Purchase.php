@@ -3,6 +3,7 @@
 namespace Tribe\HubSpot\Subscribe;
 
 use SevenShores\Hubspot\Factory;
+use Tribe\HubSpot\Process\Async as Process_Async;
 
 /**
  * Class Connection
@@ -18,30 +19,63 @@ class Purchase {
 	 *
 	 */
 	public function hook() {
-		add_action( 'event_ticket_woo_attendee_created', [ $this, 'connect' ], 10, 4 );
+
+		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_timeline' ], 10, 4 );
+		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_subscribe' ], 10, 4 );
 	}
 
 	/**
-	 * Connect to Creation of an Attendee.
+	 * Create Timeline Event
 	 *
-	 * @since TBD
+	 * @since 1.0
 	 *
 	 * @param int    $attendee_id ID of attendee ticket.
 	 * @param int    $post_id     ID of event.
-	 * @param object $order       WooCommerce order.
+	 * @param object $order       WooCommerce order object /WC_Order.
 	 * @param int    $product_id  WooCommerce product ID.
 	 */
-	public function connect( $attendee_id, $post_id, $order, $product_id ) {
+	public function woo_timeline( $attendee_id, $post_id, $order, $product_id ) {
 
-		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
-		$hubspot_api = tribe( 'tickets.hubspot.api' );
+		$type ='event_registration_id';
+		$id = "event-register:{$post_id}:{$attendee_id}";
+		$email  = $order->get_billing_email();
+		$event = tribe_get_event( $post_id );
+		$extra_data = [
+			'event' => [
+				'ID' => $event->ID,
+				'post_title' => $event->post_title,
+			]
+		];
 
-		if ( ! $access_token = $hubspot_api->is_ready() ) {
-			return;
-		}
+		tribe( 'tickets.hubspot.timeline' )->create( $id, $type, $email, $extra_data );
 
-		$client = $hubspot_api->client;
-		$contact = $order->get_billing_email();
+		return;
+	}
+
+	/**
+	 * Connect to Creation of an Attendee for WooCommerce
+	 *
+	 * @since 1.0
+	 *
+	 * @param int    $attendee_id ID of attendee ticket.
+	 * @param int    $post_id     ID of event.
+	 * @param object $order       WooCommerce order object /WC_Order.
+	 * @param int    $product_id  WooCommerce product ID.
+	 */
+	public function woo_subscribe( $attendee_id, $post_id, $order, $product_id ) {
+
+		/** @var \Tribe\HubSpot\Properties\Event_Data $data */
+		$data = tribe( 'tickets.hubspot.properties.event_data' );
+		$email  = $order->get_billing_email();
+		$name  = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
+		$total = $order->get_total();
+		$date = $order->get_date_created()->getTimestamp();
+		$qty = $data->get_woo_order_quantities( $order );
+
+		$groups = [];
+		$groups[]  = $data->get_event_values( 'last_registered_', $post_id );
+		$groups[]  = $data->get_order_values( 'last_order_', $date, $total, $qty['total'], count( $qty['tickets'] ) );
+		$groups[]  = $data->get_ticket_values( $product_id, $attendee_id, 'woo', $name );
 
 		$properties = [
 			[
@@ -54,23 +88,16 @@ class Purchase {
 			],
 		];
 
-		try {
-			$hubspot = Factory::createWithToken( $access_token, $client );
-			$response = $hubspot->contacts()->createOrUpdate( $contact, $properties );
-		} catch ( Exception $e ) {
-			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );
-			tribe( 'logger' )->log_error( $message, 'HubSpot Contact' );
+		$properties = array_merge( $properties, ...$groups );
 
-			return;
-		}
-
-		// Additional Safety Check to Verify Status Code.
-		if ( $response->getStatusCode() !== 200 ) {
-			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $response->getStatusCode());
-			tribe( 'logger' )->log_error( $message, 'HubSpot Contact' );
-
-			return;
+		// Send to Async Process.
+		if ( ! empty( $email ) ) {
+			$hubspot_process = new Process_Async();
+			$hubspot_process->set_email( $email );
+			$hubspot_process->set_properties( $properties );
+			$hubspot_process->dispatch();
 		}
 
 	}
+
 }

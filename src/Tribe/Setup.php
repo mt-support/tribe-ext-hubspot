@@ -3,6 +3,7 @@
 namespace Tribe\HubSpot;
 
 use Tribe\HubSpot\Main;
+use Tribe\HubSpot\Process\Async;
 use Tribe__Autoloader;
 use Tribe__Extension;
 
@@ -30,8 +31,10 @@ class Setup extends Tribe__Extension {
 	public function construct() {
 
 		$this->add_required_plugin( 'Tribe__Tickets__Main', '4.10' );
-		// $this->add_required_plugin( 'Tribe__Tickets_Plus__Main', '4.3.3' );
+		$this->add_required_plugin( 'Tribe__Tickets_Plus__Main', '4.10' );
 
+		// Connect into Process Filter, if done later it does not add the handler.
+		add_action( 'tribe_process_handlers', [ $this, 'process_handlers' ] );
 	}
 
 	/**
@@ -84,6 +87,22 @@ class Setup extends Tribe__Extension {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Add async process handler class to the process handlers
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $handlers The process handler classes.
+	 *
+	 * @return array The process handler classes.
+	 */
+	public function process_handlers( $handlers = [] ) {
+
+		$handlers[] = Process\Async::class;
+
+		return $handlers;
 	}
 
 } // end class

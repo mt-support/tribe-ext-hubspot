@@ -38,10 +38,12 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 		$this->container->singleton( 'tickets.hubspot.properties.first_order', Properties\First_Order::class );
 		$this->container->singleton( 'tickets.hubspot.properties.last_order', Properties\Last_Order::class );
 		$this->container->singleton( 'tickets.hubspot.properties.last_registered_ticket', Properties\Last_Registered_Ticket::class );
+		$this->container->singleton( 'tickets.hubspot.properties.aggregate_data', Properties\Aggregate_Data::class );
 		$this->container->singleton( 'tickets.hubspot.properties.event_data', Properties\Event_Data::class );
 
 		$this->container->singleton( 'tickets.hubspot.contact.property', API\Contact_Property::class, array( 'hook' ) );
 		$this->container->singleton( 'tickets.hubspot.contact.property.group', API\Contact_Property_Group::class, array( 'hook' ) );
+		$this->container->singleton( 'tickets.hubspot.timeline', API\Timeline::class, array( 'hook' ) );
 
 		$this->container->singleton( 'tickets.hubspot.subscribe.purchase', Subscribe\Purchase::class, array( 'hook' ) );
 
@@ -61,6 +63,7 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 		//todo change these to only load when required during Sprint 4
 		tribe( 'tickets.hubspot.api' );
 		tribe( 'tickets.hubspot.oauth' );
+		tribe( 'tickets.hubspot.timeline' );
 		add_action( 'tribe_hubspot_authorize_site', tribe_callback( 'tickets.hubspot.api', 'save_access_token' ) );
 
 		tribe( 'tickets.hubspot.contact.property.group' );
