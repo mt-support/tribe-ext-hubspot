@@ -30,6 +30,57 @@ class Contact_Properties {
 		$this->properties['last_order']             = tribe( 'tickets.hubspot.properties.last_order' );
 		$this->properties['last_registered_ticket'] = tribe( 'tickets.hubspot.properties.last_registered_ticket' );
 		$this->properties['aggregate_data']         = tribe( 'tickets.hubspot.properties.aggregate_data' );
+
+	}
+
+	public function get_aggregate_data( $email, $tickets,$events ) {
+		$contact = $this->get_contact_by_email( $email );
+
+		$aggregate_data = tribe( 'tickets.hubspot.properties.aggregate_data' );
+		$agg_data       = $aggregate_data->get_values( 'register', $contact->properties, $tickets, $events );
+
+		return $agg_data;
+	}
+
+	public function get_contact_by_email( $email ) {
+
+		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
+		$hubspot_api = tribe( 'tickets.hubspot.api' );
+
+		if ( ! $access_token = $hubspot_api->is_ready() ) {
+			return false;
+		}
+
+		$client = $hubspot_api->client;
+
+		$properties['property'] = [
+			'total_registered_events',
+			'total_number_of_orders',
+			'average_tickets_per_order',
+			'average_events_per_order',
+			'total_attended_events',
+		];
+
+		try {
+			$hubspot  = Factory::createWithToken( $access_token, $client );
+			$response = $hubspot->contacts()->getByEmail( $email, $properties );
+		} catch ( Exception $e ) {
+			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );
+			tribe( 'logger' )->log_error( $message, 'HubSpot Contact' );
+
+			return false;
+		}
+
+		// Additional Safety Check to Verify Status Code.
+		if ( $response->getStatusCode() !== 200 ) {
+			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $response->getStatusCode() );
+			tribe( 'logger' )->log_error( $message, 'HubSpot Contact' );
+
+			return false;
+		}
+
+		return $response->data;
+
 	}
 
 	/**
@@ -220,8 +271,27 @@ class Contact_Properties {
 		}
 
 		$client = $hubspot_api->client;
+		$tickets = reset( wp_filter_object_list( $properties, [ 'property' => 'last_order_ticket_quantity' ], 'and', 'value' ) );
+		$events = reset( wp_filter_object_list( $properties, [ 'property' => 'last_order_ticket_quantity' ], 'and', 'value' ) );
 
-		//todo aggregate data will be calculated right here
+		// Calculate Aggregate Data
+		$agg_data = $this->get_aggregate_data( $email, $tickets,$events );
+		$properties = array_merge( $properties, $agg_data );
+		//if ( 1 === $agg_data['total_registered_events'] ) {
+			/** @var \Tribe\HubSpot\Properties\Event_Data $data */
+			$data = tribe( 'tickets.hubspot.properties.event_data' );
+			$order_date_utc = reset( wp_filter_object_list( $properties, [ 'property' => 'last_order_date_utc' ], 'and', 'value' ) );
+			$order_total = reset( wp_filter_object_list( $properties, [ 'property' => 'last_order_total' ], 'and', 'value' ) );
+			$order_ticket_quantity = reset( wp_filter_object_list( $properties, [ 'property' => 'last_order_ticket_quantity' ], 'and', 'value' ) );
+			$order_ticket_type_quantity = reset( wp_filter_object_list( $properties, [ 'property' => 'last_order_ticket_type_quantity' ], 'and', 'value' ) );
+			
+			$first_order = $data->get_order_values( 'first_order_', $order_date_utc, $order_total, $order_ticket_quantity, $order_ticket_type_quantity );
+			$properties  = array_merge( $properties, $first_order );
+		//}
+
+		log_me('$agg_data');
+		log_me($agg_data);
+		log_me($properties);
 
 		try {
 			$hubspot  = Factory::createWithToken( $access_token, $client );
