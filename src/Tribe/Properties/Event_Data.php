@@ -211,10 +211,14 @@ class Event_Data {
 
 		$order_items = $order->get_items();
 
+		/** @var $commerce_woo \Tribe__Tickets_Plus__Commerce__WooCommerce__Main */
+		$commerce_woo = tribe( 'tickets-plus.commerce.woo' );
+
+		$event_key = $commerce_woo->event_key;
 		foreach ( (array) $order_items as $item_id => $item ) {
 			$ticket_id = $item['product_id'];
 
-			$ticket_event_id = absint( get_post_meta( $ticket_id, \Tribe__Tickets_Plus__Commerce__WooCommerce__Main::get_instance()->event_key, true ) );
+			$ticket_event_id = absint( get_post_meta( $ticket_id, $event_key, true ) );
 
 			// If not a ticket product then do not count
 			if ( empty( $ticket_event_id ) ) {
