@@ -41,8 +41,8 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 		$this->container->singleton( 'tickets.hubspot.properties.aggregate_data', Properties\Aggregate_Data::class );
 		$this->container->singleton( 'tickets.hubspot.properties.event_data', Properties\Event_Data::class );
 
-		$this->container->singleton( 'tickets.hubspot.contact.property', API\Contact_Property::class, array( 'hook' ) );
 		$this->container->singleton( 'tickets.hubspot.contact.property.group', API\Contact_Property_Group::class, array( 'hook' ) );
+		$this->container->singleton( 'tickets.hubspot.contact.properties', API\Contact_Properties::class, array( 'hook' ) );
 		$this->container->singleton( 'tickets.hubspot.timeline', API\Timeline::class, array( 'hook' ) );
 
 		$this->container->singleton( 'tickets.hubspot.subscribe.purchase', Subscribe\Purchase::class, array( 'hook' ) );
@@ -67,7 +67,7 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 		add_action( 'tribe_hubspot_authorize_site', tribe_callback( 'tickets.hubspot.api', 'save_access_token' ) );
 
 		tribe( 'tickets.hubspot.contact.property.group' );
-		tribe( 'tickets.hubspot.contact.property' );
+		tribe( 'tickets.hubspot.contact.properties' );
 
 		tribe( 'tickets.hubspot.process.setup' );
 		tribe( 'tickets.hubspot.subscribe.purchase' );

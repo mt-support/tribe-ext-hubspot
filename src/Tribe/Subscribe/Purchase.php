@@ -2,8 +2,7 @@
 
 namespace Tribe\HubSpot\Subscribe;
 
-use SevenShores\Hubspot\Factory;
-use Tribe\HubSpot\Process\Async as Process_Async;
+use Tribe\HubSpot\Process\Delivery_Queue;
 
 /**
  * Class Connection
@@ -20,36 +19,9 @@ class Purchase {
 	 */
 	public function hook() {
 
-		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_timeline' ], 10, 4 );
 		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_subscribe' ], 10, 4 );
-	}
-
-	/**
-	 * Create Timeline Event
-	 *
-	 * @since 1.0
-	 *
-	 * @param int    $attendee_id ID of attendee ticket.
-	 * @param int    $post_id     ID of event.
-	 * @param object $order       WooCommerce order object /WC_Order.
-	 * @param int    $product_id  WooCommerce product ID.
-	 */
-	public function woo_timeline( $attendee_id, $post_id, $order, $product_id ) {
-
-		$type ='event_registration_id';
-		$id = "event-register:{$post_id}:{$attendee_id}";
-		$email  = $order->get_billing_email();
-		$event = tribe_get_event( $post_id );
-		$extra_data = [
-			'event' => [
-				'ID' => $event->ID,
-				'post_title' => $event->post_title,
-			]
-		];
-
-		tribe( 'tickets.hubspot.timeline' )->create( $id, $type, $email, $extra_data );
-
-		return;
+		// Timeline Events Should be Added Second to the Queue so the Contact Can Be Created.
+		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_timeline' ], 100, 4 );
 	}
 
 	/**
@@ -90,14 +62,60 @@ class Purchase {
 
 		$properties = array_merge( $properties, ...$groups );
 
-		// Send to Async Process.
+		// Send to Queue Process.
 		if ( ! empty( $email ) ) {
-			$hubspot_process = new Process_Async();
-			$hubspot_process->set_email( $email );
-			$hubspot_process->set_properties( $properties );
-			$hubspot_process->dispatch();
+
+			$hubspot_data = [
+				'type' => 'contact',
+				'email' => $email,
+				'properties' => $properties,
+			];
+
+			$queue = new Delivery_Queue();
+			$queue->push_to_queue( $hubspot_data );
+			$queue->save();
+			$queue->dispatch();
 		}
 
 	}
 
+	/**
+	 * Create Timeline Event
+	 *
+	 * @since 1.0
+	 *
+	 * @param int    $attendee_id ID of attendee ticket.
+	 * @param int    $post_id     ID of event.
+	 * @param object $order       WooCommerce order object /WC_Order.
+	 * @param int    $product_id  WooCommerce product ID.
+	 */
+	public function woo_timeline( $attendee_id, $post_id, $order, $product_id ) {
+
+		$email  = $order->get_billing_email();
+		$event = tribe_get_event( $post_id );
+		$extra_data = [
+			'event' => [
+				'ID' => $event->ID,
+				'post_title' => $event->post_title,
+			]
+		];
+
+		// Send to Queue Process.
+		if ( ! empty( $email ) ) {
+
+			$hubspot_data = [
+				'type'              => 'timeline',
+				'event_type'        => 'timeline_event_registration_id',
+				'timeline_event_id' => "event-register:{$post_id}:{$attendee_id}",
+				'email'             => $email,
+				'extra_data'        => $extra_data,
+			];
+
+			$queue = new Delivery_Queue();
+			$queue->push_to_queue( $hubspot_data );
+			$queue->save();
+			$queue->dispatch();
+		}
+
+	}
 }

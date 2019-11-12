@@ -3,13 +3,14 @@
 namespace Tribe\HubSpot\API;
 
 use SevenShores\Hubspot\Factory;
+use Tribe\HubSpot\Process\Delivery_Queue;
 
 /**
- * Class Contact_Property
+ * Class Contact_Properties
  *
  * @package Tribe\HubSpot\API
  */
-class Contact_Property {
+class Contact_Properties {
 
 	protected $properties = [];
 
@@ -21,7 +22,7 @@ class Contact_Property {
 	 */
 	public function hook() {
 
-		add_action( 'tribe_hubspot_authorize_site', [ $this, 'setup_properties' ], 30 );
+		add_action( 'tribe_hubspot_authorize_site', [ $this, 'queue_properties' ], 30 );
 
 		$this->properties['last_registered_event']  = tribe( 'tickets.hubspot.properties.last_registered_event' );
 		$this->properties['last_attended_event']    = tribe( 'tickets.hubspot.properties.last_attended_event' );
@@ -29,6 +30,25 @@ class Contact_Property {
 		$this->properties['last_order']             = tribe( 'tickets.hubspot.properties.last_order' );
 		$this->properties['last_registered_ticket'] = tribe( 'tickets.hubspot.properties.last_registered_ticket' );
 		$this->properties['aggregate_data']         = tribe( 'tickets.hubspot.properties.aggregate_data' );
+	}
+
+	/**
+	 * Queue the Creation of the Custom Properties
+	 *
+	 * @since 1.0
+	 *
+	 */
+	public function queue_properties() {
+
+		$hubspot_data = [
+			'type' => 'update_properties',
+		];
+
+		$queue = new Delivery_Queue();
+		$queue->push_to_queue( $hubspot_data );
+		$queue->save();
+		$queue->dispatch();
+
 	}
 
 	/**
@@ -187,6 +207,8 @@ class Contact_Property {
 	 *
 	 * @param string $email      An email used to update a contact in HubSpot.
 	 * @param array  $properties An array of fields and custom fields to update for a contact.
+	 *
+	 * @return bool
 	 */
 	public function update( $email, $properties ) {
 
