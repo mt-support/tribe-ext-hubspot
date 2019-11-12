@@ -2,8 +2,6 @@
 
 namespace Tribe\HubSpot\Subscribe;
 
-use SevenShores\Hubspot\Factory;
-use Tribe\HubSpot\Process\Async as Process_Async;
 use Tribe\HubSpot\Process\Delivery_Queue;
 
 /**
