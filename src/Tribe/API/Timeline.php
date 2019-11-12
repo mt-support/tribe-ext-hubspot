@@ -69,7 +69,7 @@ class Timeline {
 	}
 
 	/**
-	 * Create all Timeline Event Types
+	 * Create all Timeline Event Types.
 	 *
 	 * @since 1.0
 	 *
@@ -89,7 +89,7 @@ class Timeline {
 		}
 
 		$client          = $hubspot_api->client;
-		$appId           = isset( $options['app_id'] ) ? (int) $options['app_id'] : '';
+		$app_id          = isset( $options['app_id'] ) ? (int) $options['app_id'] : '';
 		$timeline_events = $this->get_event_types();
 
 		foreach ( $this->timeline_event_types as $name => $event_type ) {
@@ -99,13 +99,13 @@ class Timeline {
 
 			// If the match is empty then there is no event type and create it.
 			if ( empty( $matching_event_type->applicationId ) ) {
-				$this->create_event_type( $hubspot_options, $access_token, $client, $appId, $name, $event_type );
+				$this->create_event_type( $hubspot_options, $access_token, $client, $app_id, $name, $event_type );
 				continue;
 			}
 
 			// If the match and the app id does not match then create it.
-			if ( $appId !== (int) $matching_event_type->applicationId ) {
-				$this->create_event_type( $hubspot_options, $access_token, $client, $appId, $name, $event_type );
+			if ( $app_id !== (int) $matching_event_type->applicationId ) {
+				$this->create_event_type( $hubspot_options, $access_token, $client, $app_id, $name, $event_type );
 				continue;
 			}
 
@@ -125,11 +125,11 @@ class Timeline {
 	 *
 	 * @return bool
 	 */
-	public function create_event_type( $hubspot_options, $access_token, $client, $appId, $name, $event_type ) {
+	public function create_event_type( $hubspot_options, $access_token, $client, $app_id, $name, $event_type ) {
 
 		try {
 			$hubspot  = Factory::createWithToken( $access_token, $client );
-			$response = $hubspot->Timeline()->createEventType( $appId, $name, $event_type['headerTemplate'], $event_type['detailTemplate'] );
+			$response = $hubspot->Timeline()->createEventType( $app_id, $name, $event_type['headerTemplate'], $event_type['detailTemplate'] );
 		} catch ( Exception $e ) {
 			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Timeline Event Type' );
