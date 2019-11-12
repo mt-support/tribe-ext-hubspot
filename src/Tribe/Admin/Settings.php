@@ -27,10 +27,10 @@ class Settings {
 	 */
 	public function __construct() {
 
-		//todo change to singleton so this only runs once?
 		$this->set_options_prefix( $this->opts_prefix );
 
 		add_filter( 'tribe_addons_tab_fields', array( $this, 'add_settings' ) );
+		add_action( 'current_screen', [ $this, 'maybe_clear_hubspot_credentials' ] );
 	}
 
 	/**
@@ -280,10 +280,33 @@ class Settings {
 		return ob_get_clean();
 	}
 
+	/**
+	 * Authorization
+	 *
+	 * @since 1.0
+	 *
+	 * @return false|string|void
+	 */
 	private function get_authorize_fields() {
 
 		if (  ! tribe( 'tickets.hubspot.api' )->has_required_fields() ) {
 			return;
+		}
+
+		// HubSpot Requires a SSL, check and display an error message if SSL not detected
+		if ( ! is_ssl() ) {
+			ob_start();
+			?>
+			<fieldset id="tribe-field-hubspot_token" class="tribe-field tribe-field-text tribe-size-medium">
+				<legend class="tribe-field-label"><?php esc_html_e( 'HubSpot Token', 'tribe-ext-hubspot' ) ?></legend>
+				<div class="tribe-field-wrap tribe-error">
+					<?php esc_html_e( 'An SSL is required to connect to HubSpot, please enable it on your site.', 'tribe-ext-hubspot' ) ?>
+				</div>
+			</fieldset>
+			<div class="clear"></div>
+			<?php
+
+			return ob_get_clean();
 		}
 
 		$missing_hubspot_credentials = ! tribe( 'tickets.hubspot.api' )->is_authorized();
@@ -301,24 +324,111 @@ class Settings {
 					$hubspot_button_label = __( 'Connect to HubSpot', 'tribe-ext-hubspot' );
 				} else {
 					$hubspot_button_label     = __( 'Refresh your connection to HubSpot', 'tribe-ext-hubspot' );
-
-					//todo add in code to disconnect - ie clear  the current connection with hubspot and remove access token, refresh token, and expiration timestamp
 					$hubspot_disconnect_label = __( 'Disconnect', 'tribe-ext-hubspot' );
-					$hubspot_disconnect_url   = \Tribe__Settings::instance()->get_url( [ 'tab' => 'addons' ] );
+					$current_url              = \Tribe__Settings::instance()->get_url( [ 'tab' => 'addons' ] );
+					$hubspot_disconnect_url   = $this->build_disconnect_hubspot_url( $current_url );
 				}
 				?>
-				<a target="_blank" class="tribe-button" href="<?php echo esc_url( $authorize_link ); ?>"><?php esc_html_e( $hubspot_button_label ); ?></a>
-
-				<!--<?php /*if ( ! $missing_hubspot_credentials ) : */ ?>
-				<a href="<?php /*echo esc_url( $hubspot_disconnect_url ); */ ?>" class="tribe-hubspot-disconnect"><?php /*echo esc_html( $hubspot_disconnect_label ); */ ?></a>
-			--><?php /*endif; */ ?>
-
+				<a target="_blank" class="tribe-button tribe-hubspot-button" href="<?php echo esc_url( $authorize_link ); ?>"><?php esc_html_e( $hubspot_button_label ); ?></a>
+				<?php if ( ! $missing_hubspot_credentials ) : ?>
+					<a href="<?php echo esc_url( $hubspot_disconnect_url ); ?>" class="tribe-hubspot-disconnect"><?php echo esc_html( $hubspot_disconnect_label ); ?></a>
+				<?php endif; ?>
 			</div>
 		</fieldset>
+
+		<!-- Uses style guide colors https://www.hubspot.com/style-guide -->
+		<style>
+			.tribe-hubspot-button {
+				background: #00A4BD;
+				border-radius: 3px;
+				color: #fff;
+				display: inline-block;
+				padding: .5rem 1.5rem;
+				text-decoration: none;
+				-webkit-transition: all 0.5s ease;
+				transition: all 0.5s ease;
+			}
+
+			.tribe-hubspot-button:active,
+			.tribe-hubspot-button:hover,
+			.tribe-hubspot-button:focus {
+				background: #FF7A59;
+				color: #253342;
+			}
+		</style>
 		<div class="clear"></div>
 		<?php
 
 		return ob_get_clean();
 	}
 
+	/**
+	 * Hooked to current_screen, this method identifies whether or not HubSpot credentials should be cleared
+	 *
+	 * @since 1.0
+	 *
+	 * @param WP_Screen $screen
+	 */
+	public function maybe_clear_hubspot_credentials( $screen ) {
+		if ( 'tribe_events_page_tribe-common' !== $screen->base ) {
+			return;
+		}
+
+		if ( ! isset( $_GET['tab'] ) || 'addons' !== $_GET['tab'] ) {
+			return;
+		}
+
+		if (
+			! (
+				isset( $_GET['action'] )
+				&& isset( $_GET['_wpnonce'] )
+				&& 'disconnect-hubspot' === $_GET['action']
+				&& wp_verify_nonce( $_GET['_wpnonce'], 'disconnect-hubspot' )
+			)
+		) {
+			return;
+		}
+
+		$this->clear_hubspot_credentials();
+
+		wp_redirect(
+			\Tribe__Settings::instance()->get_url( [ 'tab' => 'addons' ] )
+		);
+		die;
+	}
+
+	/**
+	 * Given a URL, tack on the parts of the URL that gets used to disconnect from HubSpot
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $url The base url to add the disconnect query variables.
+	 *
+	 * @return string The url with disconnect query variables.
+	 */
+	public function build_disconnect_hubspot_url( $url ) {
+		return wp_nonce_url(
+			add_query_arg(
+				'action',
+				'disconnect-hubspot',
+				$url
+			),
+			'disconnect-hubspot'
+		);
+	}
+
+	/**
+	 * Disconnect from Hubspot by deleting all HubSpot options.
+	 *
+	 * @since 1.0
+	 *
+	 */
+	public function clear_hubspot_credentials() {
+
+		$hb_options = $this->get_all_options();
+
+		foreach ( $hb_options as $key => $option ) {
+			$this->delete_option( $key );
+		}
+	}
 }

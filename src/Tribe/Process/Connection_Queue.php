@@ -52,7 +52,10 @@ class Connection_Queue extends Tribe__Process__Queue {
 			$response = $this->timeline_create( $hubspot_data );
 		} elseif ( 'update_properties' === $hubspot_data['type'] ) {
 			$response = $this->properties_update( $hubspot_data );
+		}   elseif ( 'update_timeline_event_types' === $hubspot_data['type'] ) {
+			$response = $this->timeline_event_types_update( $hubspot_data );
 		}
+
 
 		return $response;
 	}
@@ -144,21 +147,21 @@ class Connection_Queue extends Tribe__Process__Queue {
 
 		$logger->log_debug( "(ID: {$this->identifier}) - handling request.", $log_src );
 
-		if ( ! isset( $hubspot_data['email'], $hubspot_data['properties'] ) ) {
+		if ( ! isset( $hubspot_data['email'], $hubspot_data['timeline_event_id'], $hubspot_data['event_type'] ) ) {
 			do_action( 'tribe_log', 'error', $this->identifier, [ 'data' => $hubspot_data, ] );
 
 			return false;
 		}
 
-		$email      = filter_var( $hubspot_data['email'], FILTER_SANITIZE_EMAIL );
-		$id         = filter_var( $hubspot_data['event_id'], FILTER_SANITIZE_STRING );
-		$type       = filter_var( $hubspot_data['event_type'], FILTER_SANITIZE_STRING );
-		$extra_data = \Tribe__Utils__Array::escape_multidimensional_array( $hubspot_data['properties'] );
+		$email             = filter_var( $hubspot_data['email'], FILTER_SANITIZE_EMAIL );
+		$timeline_event_id = filter_var( $hubspot_data['timeline_event_id'], FILTER_SANITIZE_STRING );
+		$event_type        = filter_var( $hubspot_data['event_type'], FILTER_SANITIZE_STRING );
+		$extra_data        = \Tribe__Utils__Array::escape_multidimensional_array( $hubspot_data['extra_data'] );
 
 		$logger->log_debug( "(ID: {$this->identifier}) - updating timeline {$email}", $log_src );
 
 		// Connect to HubSpot and Update.
-		$hubspot_response = $hubspot_timeline->create( $id, $type, $email, $extra_data );
+		$hubspot_response = $hubspot_timeline->create( $timeline_event_id, $event_type, $email, $extra_data );
 
 		if ( false === $hubspot_response ) {
 			do_action(
@@ -239,6 +242,57 @@ class Connection_Queue extends Tribe__Process__Queue {
 		);
 
 		$logger->log_debug( "(ID: {$this->identifier}) - updated custom properties with HubSpot.", $log_src );
+
+		return $hubspot_response;
+	}
+
+	/**
+	 * Update Timeline Event Types with HubSpot
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $hubspot_data An array of data to send to HubSpot
+	 *
+	 * @return bool
+	 */
+	protected function timeline_event_types_update( $hubspot_data ) {
+
+		/** @var \Tribe\HubSpot\API\Timeline $hubspot_api */
+		$hubspot_timeline = tribe( 'tickets.hubspot.timeline' );
+
+		/** @var \Tribe__Log $logger */
+		$logger  = tribe( 'logger' );
+		$log_src = 'HubSpot Timeline';
+
+		$logger->log_debug( "(ID: {$this->identifier}) - updating timeline event types with HubSpot", $log_src );
+
+		// Connect to HubSpot and Update.
+		$hubspot_response = $hubspot_timeline->create_event_types();
+
+		if ( false === $hubspot_response ) {
+			do_action(
+				'tribe_log',
+				'error',
+				$this->identifier,
+				[
+					'action'     => 'update-timeline-event-types',
+				]
+			);
+			$logger->log_debug( "(ID: {$this->identifier}) - could not update timeline event types", $log_src );
+
+			return false;
+		}
+
+		do_action(
+			'tribe_log',
+			'debug',
+			$this->identifier,
+			[
+				'action'     => 'update-timeline-event-types',
+			]
+		);
+
+		$logger->log_debug( "(ID: {$this->identifier}) - updated timeline event types with HubSpot.", $log_src );
 
 		return $hubspot_response;
 	}

@@ -3,6 +3,7 @@
 namespace Tribe\HubSpot\API;
 
 use SevenShores\Hubspot\Factory;
+use Tribe\HubSpot\Process\Connection_Queue;
 
 /**
  * Class Timeline
@@ -11,7 +12,31 @@ use SevenShores\Hubspot\Factory;
  */
 class Timeline {
 
-	protected $properties = [];
+	/**
+	 * @var array
+	 */
+	protected $timeline_event_types = [
+		'eventRegistration'     => [
+			'site_option'    => 'timeline_event_registration_id',
+			'headerTemplate' => 'Ticket purchase occurred at {{#formatDate timestamp}}{{/formatDate}} from the Event Tickets HubSpot Integration app',
+			'detailTemplate' => 'Purchased ticket for {{extraData.event.post_title}} (# {{extraData.event.ID}} )',
+		],
+		'eventRegistrationRSVP' => [
+			'site_option'    => 'timeline_event_registration_rsvp_id',
+			'headerTemplate' => 'RSVP occurred at {{#formatDate timestamp}}{{/formatDate}} from the Event Tickets HubSpot Integration app',
+			'detailTemplate' => 'RSVP\'d for {{extraData.event.post_title}} (# {{extraData.event.ID}} )',
+		],
+		'eventAttendeeUpdate'   => [
+			'site_option'    => 'timeline_event_attendee_update_id',
+			'headerTemplate' => 'Attendee Information update occurred at {{#formatDate timestamp}}{{/formatDate}} from the Event Tickets HubSpot Integration app',
+			'detailTemplate' => 'Updated Attendee Information for {{extraData.event.post_title}} (# {{extraData.event.ID}} )',
+		],
+		'eventCheckin'          => [
+			'site_option'    => 'timeline_event_checkin_id',
+			'headerTemplate' => 'Contact was successfully checked in at {{#formatDate timestamp}}{{/formatDate}}',
+			'detailTemplate' => 'Attendee was checked into {{extraData.event.post_title}} (# {{extraData.event.ID}} )',
+		],
+	];
 
 	/**
 	 * Setup Hooks for Contact_Property
@@ -21,8 +46,76 @@ class Timeline {
 	 */
 	public function hook() {
 
-		add_action( 'tribe_hubspot_authorize_site', [ $this, 'create_event_type' ], 30 );
+		add_action( 'tribe_hubspot_authorize_site', [ $this, 'queue_timeline_event_types' ], 30 );
+	}
 
+	/**
+	 * Queue the Creation of Timeline Event Types
+	 *
+	 * @since 1.0
+	 *
+	 */
+	public function queue_timeline_event_types() {
+
+		$hubspot_data = [
+			'type' => 'update_timeline_event_types',
+		];
+
+		$queue = new Connection_Queue();
+		$queue->push_to_queue( $hubspot_data );
+		$queue->save();
+		$queue->dispatch();
+
+	}
+
+	/**
+	 * Create all Timeline Event Types
+	 *
+	 * @since 1.0
+	 *
+	 * @return bool
+	 */
+	public function create_event_types() {
+
+		/** @var \Tribe\HubSpot\Admin\Settings $hubspot_options */
+		$hubspot_options = tribe( 'tickets.hubspot.admin.settings' );
+		$options         = $hubspot_options->get_all_options();
+
+		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
+		$hubspot_api = tribe( 'tickets.hubspot.api' );
+
+		if ( ! $access_token = $hubspot_api->is_ready() ) {
+			return false;
+		}
+
+		$client          = $hubspot_api->client;
+		$appId           = isset( $options['app_id'] ) ? (int) $options['app_id'] : '';
+		$timeline_events = $this->get_event_types();
+
+		foreach ( $this->timeline_event_types as $name => $event_type ) {
+
+			$matching_event_types = wp_filter_object_list( $timeline_events, [ 'name' => $name ], 'and' );
+			$matching_event_type  = reset( $matching_event_types );
+
+			// If the match is empty then there is no event type and create it.
+			if ( empty( $matching_event_type->applicationId ) ) {
+				$this->create_event_type( $hubspot_options, $access_token, $client, $appId, $name, $event_type );
+				continue;
+			}
+
+			// If the match and the app id does not match then create it.
+			if ( $appId !== (int) $matching_event_type->applicationId ) {
+				$this->create_event_type( $hubspot_options, $access_token, $client, $appId, $name, $event_type );
+				continue;
+			}
+
+			// If there is an id then update the site option with it
+			if ( ! empty( $matching_event_type->id ) ) {
+				$hubspot_options->update_option( $event_type['site_option'], $matching_event_type->id );
+				continue;
+			}
+
+		}
 	}
 
 	/**
@@ -32,35 +125,11 @@ class Timeline {
 	 *
 	 * @return bool
 	 */
-	public function create_event_type() {
-		//todo if the appid changes then this ids should be deleted
-
-		/** @var \Tribe\HubSpot\Admin\Settings $hubspot_options */
-		$hubspot_options = tribe( 'tickets.hubspot.admin.settings' );
-		$options         = $hubspot_options->get_all_options();
-
-		if ( ! empty( $options['event_registration_id'] ) ) {
-			return false;
-		}
-
-		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
-		$hubspot_api = tribe( 'tickets.hubspot.api' );
-
-		if ( ! $access_token = $hubspot_api->is_ready() ) {
-			return false;
-		}
-
-		$client = $hubspot_api->client;
-		$appId  = isset( $options['app_id'] ) ? $options['app_id'] : '';
-
-		//todo setup all 3 types in another class and generate each one here
-		$name           = 'eventRegistration';
-		$headerTemplate = 'Ticket purchase occurred at {{#formatDate timestamp}}{{/formatDate}} from the Event Tickets HubSpot Integration app';
-		$detailTemplate = 'Purchased ticket for {{extraData.event.post_title}} (# {{extraData.event.ID}} )';
+	public function create_event_type( $hubspot_options, $access_token, $client, $appId, $name, $event_type ) {
 
 		try {
 			$hubspot  = Factory::createWithToken( $access_token, $client );
-			$response = $hubspot->Timeline()->createEventType( $appId, $name, $headerTemplate, $detailTemplate );
+			$response = $hubspot->Timeline()->createEventType( $appId, $name, $event_type['headerTemplate'], $event_type['detailTemplate'] );
 		} catch ( Exception $e ) {
 			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Timeline Event Type' );
@@ -75,7 +144,9 @@ class Timeline {
 			return false;
 		}
 
-		$hubspot_options->update_option( 'event_registration_id', $response->data->id );
+		$hubspot_options->update_option( $event_type['site_option'], $response->data->id );
+
+		return true;
 	}
 
 	/**

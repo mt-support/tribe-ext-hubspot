@@ -71,7 +71,6 @@ class Purchase {
 				'type' => 'contact',
 				'email' => $email,
 				'properties' => $properties,
-				'extra_data' => [],
 			];
 
 			$queue = new Connection_Queue();
@@ -107,12 +106,11 @@ class Purchase {
 		if ( ! empty( $email ) ) {
 
 			$hubspot_data = [
-				'type'       => 'timeline',
-				'event_type' => 'event_registration_id',
-				'event_id'   => "event-register:{$post_id}:{$attendee_id}",
-				'email'      => $email,
-				'properties' => [],
-				'extra_data' => $extra_data,
+				'type'              => 'timeline',
+				'event_type'        => 'timeline_event_registration_id',
+				'timeline_event_id' => "event-register:{$post_id}:{$attendee_id}",
+				'email'             => $email,
+				'extra_data'        => $extra_data,
 			];
 
 			$queue = new Connection_Queue();

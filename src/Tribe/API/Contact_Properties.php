@@ -41,7 +41,7 @@ class Contact_Properties {
 	public function queue_properties() {
 
 		$hubspot_data = [
-			'type'       => 'update_properties',
+			'type' => 'update_properties',
 		];
 
 		$queue = new Connection_Queue();
