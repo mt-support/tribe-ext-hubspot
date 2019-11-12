@@ -37,17 +37,17 @@ class Purchase {
 	public function woo_subscribe( $attendee_id, $post_id, $order, $product_id ) {
 
 		/** @var \Tribe\HubSpot\Properties\Event_Data $data */
-		$data = tribe( 'tickets.hubspot.properties.event_data' );
-		$email  = $order->get_billing_email();
+		$data  = tribe( 'tickets.hubspot.properties.event_data' );
+		$email = $order->get_billing_email();
 		$name  = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
 		$total = $order->get_total();
-		$date = $order->get_date_created()->getTimestamp();
-		$qty = $data->get_woo_order_quantities( $order );
+		$date  = $order->get_date_created()->getTimestamp();
+		$qty   = $data->get_woo_order_quantities( $order );
 
-		$groups = [];
-		$groups[]  = $data->get_event_values( 'last_registered_', $post_id );
-		$groups[]  = $data->get_order_values( 'last_order_', $date, $total, $qty['total'], count( $qty['tickets'] ) );
-		$groups[]  = $data->get_ticket_values( $product_id, $attendee_id, 'woo', $name );
+		$groups   = [];
+		$groups[] = $data->get_event_values( 'last_registered_', $post_id );
+		$groups[] = $data->get_order_values( 'last_order_', $date, $total, $qty['total'], count( $qty['tickets'] ) );
+		$groups[] = $data->get_ticket_values( $product_id, $attendee_id, 'woo', $name );
 
 		$properties = [
 			[
@@ -62,13 +62,22 @@ class Purchase {
 
 		$properties = array_merge( $properties, ...$groups );
 
+		$order_data = [
+			'order_date'                 => $date,
+			'order_total'                => $total,
+			'order_ticket_quantity'      => $qty['total'],
+			'order_ticket_type_quantity' => count( $qty['tickets'] ),
+			'events_per_order'           => $qty['events_per_order'],
+		];
+
 		// Send to Queue Process.
 		if ( ! empty( $email ) ) {
 
 			$hubspot_data = [
-				'type' => 'contact',
-				'email' => $email,
+				'type'       => 'contact',
+				'email'      => $email,
 				'properties' => $properties,
+				'order_data' => $order_data,
 			];
 
 			$queue = new Delivery_Queue();

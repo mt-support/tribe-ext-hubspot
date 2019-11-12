@@ -228,8 +228,11 @@ class Event_Data {
 			$quantities = empty( $item['qty'] ) ? 0 : intval( $item['qty'] );
 
 			$valid_order_items['total']                 += $quantities;
+			$valid_order_items['events_per_order'][]    = $ticket_event_id;
 			$valid_order_items['tickets'][ $ticket_id ] = $quantities;
 		}
+
+		$valid_order_items['events_per_order'] = count( wp_parse_id_list( $valid_order_items['events_per_order'] ) );
 
 		return $valid_order_items;
 
