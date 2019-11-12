@@ -3,7 +3,6 @@
 namespace Tribe\HubSpot;
 
 use Tribe\HubSpot\Main;
-use Tribe\HubSpot\Process\Async;
 use Tribe__Autoloader;
 use Tribe__Extension;
 
@@ -101,7 +100,7 @@ class Setup extends Tribe__Extension {
 	 */
 	public function queue_handlers( $handlers = [] ) {
 
-		$handlers[] = Process\Connection_Queue::class;
+		$handlers[] = Process\Delivery_Queue::class;
 
 		return $handlers;
 	}

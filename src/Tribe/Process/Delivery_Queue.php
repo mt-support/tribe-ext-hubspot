@@ -4,7 +4,7 @@ namespace Tribe\HubSpot\Process;
 
 use Tribe__Process__Queue;
 
-class Connection_Queue extends Tribe__Process__Queue {
+class Delivery_Queue extends Tribe__Process__Queue {
 
 	/**
 	 * @var string The type of action to take to update HubSpot
@@ -24,7 +24,7 @@ class Connection_Queue extends Tribe__Process__Queue {
 	 * @return string
 	 */
 	public static function action() {
-		return 'hubspot_connection_queue';
+		return 'hubspot_delivery_Queue';
 	}
 
 	/**

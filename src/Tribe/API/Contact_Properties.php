@@ -3,7 +3,7 @@
 namespace Tribe\HubSpot\API;
 
 use SevenShores\Hubspot\Factory;
-use Tribe\HubSpot\Process\Connection_Queue;
+use Tribe\HubSpot\Process\Delivery_Queue;
 
 /**
  * Class Contact_Properties
@@ -44,7 +44,7 @@ class Contact_Properties {
 			'type' => 'update_properties',
 		];
 
-		$queue = new Connection_Queue();
+		$queue = new Delivery_Queue();
 		$queue->push_to_queue( $hubspot_data );
 		$queue->save();
 		$queue->dispatch();

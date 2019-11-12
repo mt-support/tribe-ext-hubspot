@@ -4,7 +4,7 @@ namespace Tribe\HubSpot\Subscribe;
 
 use SevenShores\Hubspot\Factory;
 use Tribe\HubSpot\Process\Async as Process_Async;
-use Tribe\HubSpot\Process\Connection_Queue;
+use Tribe\HubSpot\Process\Delivery_Queue;
 
 /**
  * Class Connection
@@ -73,7 +73,7 @@ class Purchase {
 				'properties' => $properties,
 			];
 
-			$queue = new Connection_Queue();
+			$queue = new Delivery_Queue();
 			$queue->push_to_queue( $hubspot_data );
 			$queue->save();
 			$queue->dispatch();
@@ -113,7 +113,7 @@ class Purchase {
 				'extra_data'        => $extra_data,
 			];
 
-			$queue = new Connection_Queue();
+			$queue = new Delivery_Queue();
 			$queue->push_to_queue( $hubspot_data );
 			$queue->save();
 			$queue->dispatch();
