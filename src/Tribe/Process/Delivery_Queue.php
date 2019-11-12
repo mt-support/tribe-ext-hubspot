@@ -24,7 +24,7 @@ class Delivery_Queue extends Tribe__Process__Queue {
 	 * @return string
 	 */
 	public static function action() {
-		return 'hubspot_delivery_Queue';
+		return 'hubspot_delivery_queue';
 	}
 
 	/**

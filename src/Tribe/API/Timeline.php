@@ -123,6 +123,13 @@ class Timeline {
 	 *
 	 * @since 1.0
 	 *
+	 * @param array  $hubspot_options An array of save site options for HubSpot.
+	 * @param string $access_token    A string of the access token.
+	 * @param object $client          GuzzleClient Object.
+	 * @param int    $app_id          The application ID in HubSpot
+	 * @param string $name            The name of the Timeline Event Type
+	 * @param array  $event_type      An array for the header and detail template for the Event Type
+	 *
 	 * @return bool
 	 */
 	public function create_event_type( $hubspot_options, $access_token, $client, $app_id, $name, $event_type ) {
@@ -167,18 +174,17 @@ class Timeline {
 
 		$hubspot_options = tribe( 'tickets.hubspot' )->get_all_options();
 		$client          = $hubspot_api->client;
-		$appId           = isset( $hubspot_options['app_id'] ) ? $hubspot_options['app_id'] : '';;
+		$app_id           = isset( $hubspot_options['app_id'] ) ? $hubspot_options['app_id'] : '';;
 
 		try {
 			$hubspot  = Factory::createWithToken( $access_token, $client );
-			$response = $hubspot->Timeline()->getEventTypes( $appId );
+			$response = $hubspot->Timeline()->getEventTypes( $app_id );
 		} catch ( Exception $e ) {
 			$message = sprintf( 'Could not get timeline event types from HubSpot, error code: %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Timeline Event Type' );
 
 			return [];
 		}
-
 
 		if ( $response->getStatusCode() !== 200 ) {
 			$message = sprintf( 'Could not get timeline event types: %s', $response->getStatusCode() );
