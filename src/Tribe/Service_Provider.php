@@ -45,6 +45,7 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 		$this->container->singleton( 'tickets.hubspot.contact.properties', API\Contact_Properties::class, array( 'hook' ) );
 		$this->container->singleton( 'tickets.hubspot.timeline', API\Timeline::class, array( 'hook' ) );
 
+		$this->container->singleton( 'tickets.hubspot.subscribe.checkin', Subscribe\Checkin::class, array( 'hook' ) );
 		$this->container->singleton( 'tickets.hubspot.subscribe.purchase', Subscribe\Purchase::class, array( 'hook' ) );
 
 		$this->hook();
@@ -70,6 +71,7 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 		tribe( 'tickets.hubspot.contact.properties' );
 
 		tribe( 'tickets.hubspot.process.setup' );
+		tribe( 'tickets.hubspot.subscribe.checkin' );
 		tribe( 'tickets.hubspot.subscribe.purchase' );
 
 		if ( is_admin() ) {

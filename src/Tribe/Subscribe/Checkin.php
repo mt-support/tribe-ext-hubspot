@@ -5,49 +5,49 @@ namespace Tribe\HubSpot\Subscribe;
 use Tribe\HubSpot\Process\Delivery_Queue;
 
 /**
- * Class Purchase
+ * Class Checkin
  *
  * @package Tribe\HubSpot\API
  */
-class Purchase {
+class Checkin {
 
 	/**
-	 * Setup Hooks to SubScribe to Purchases
+	 * Setup Hooks to SubScribe to Check
 	 *
 	 * @since 1.0
 	 *
 	 */
 	public function hook() {
 
-		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_subscribe' ], 10, 4 );
-		// Timeline Events Should be Added Second to the Queue so the Contact Can Be Created.
-		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_timeline' ], 100, 4 );
+		add_action( 'wootickets_checkin', [ $this, 'woo_subscribe' ] );
+		add_action( 'wootickets_checkin', [ $this, 'woo_timeline' ] );
 	}
 
 	/**
-	 * Connect to Creation of an Attendee for WooCommerce
+	 * Connect to Checkin of an Attendee for WooCommerce
 	 *
 	 * @since 1.0
 	 *
-	 * @param int    $attendee_id ID of attendee ticket.
-	 * @param int    $post_id     ID of event.
-	 * @param object $order       WooCommerce order object /WC_Order.
-	 * @param int    $product_id  WooCommerce product ID.
+	 * @param int $attendee_id The id of the attendee who was checked in.
 	 */
-	public function woo_subscribe( $attendee_id, $post_id, $order, $product_id ) {
+	public function woo_subscribe( $attendee_id ) {
+
+		/** @var $commerce_woo \Tribe__Tickets_Plus__Commerce__WooCommerce__Main */
+		$commerce_woo = tribe( 'tickets-plus.commerce.woo' );
 
 		/** @var \Tribe\HubSpot\Properties\Event_Data $data */
 		$data  = tribe( 'tickets.hubspot.properties.event_data' );
+
+		$order_id = get_post_meta( $attendee_id, $commerce_woo->attendee_order_key, true );
+		$post_id = get_post_meta( $attendee_id, $commerce_woo->attendee_event_key, true );
+		$order = new \WC_Order( $order_id );
 		$email = $order->get_billing_email();
-		$name  = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
 		$total = $order->get_total();
 		$date  = $order->get_date_created()->getTimestamp();
 		$qty   = $data->get_woo_order_quantities( $order );
 
 		$groups   = [];
-		$groups[] = $data->get_event_values( 'last_registered_', $post_id );
-		$groups[] = $data->get_order_values( 'last_order_', $date, $total, $qty['total'], count( $qty['tickets'] ) );
-		$groups[] = $data->get_ticket_values( $product_id, $attendee_id, 'woo', $name );
+		$groups[] = $data->get_event_values( 'last_attended_', $post_id );
 
 		$properties = [
 			[
@@ -68,8 +68,9 @@ class Purchase {
 			'order_ticket_quantity'      => $qty['total'],
 			'order_ticket_type_quantity' => count( $qty['tickets'] ),
 			'events_per_order'           => $qty['events_per_order'],
-			'aggregate_type'             => 'register',
+			'aggregate_type'             => 'checkin',
 		];
+
 
 		// Send to Queue Process.
 		if ( ! empty( $email ) ) {
@@ -90,17 +91,20 @@ class Purchase {
 	}
 
 	/**
-	 * Create Timeline Event
+	 * Connect to Checkin of an Attendee for WooCommerce
 	 *
 	 * @since 1.0
 	 *
-	 * @param int    $attendee_id ID of attendee ticket.
-	 * @param int    $post_id     ID of event.
-	 * @param object $order       WooCommerce order object /WC_Order.
-	 * @param int    $product_id  WooCommerce product ID.
+	 * @param int $attendee_id The id of the attendee who was checked in.
 	 */
-	public function woo_timeline( $attendee_id, $post_id, $order, $product_id ) {
+	public function woo_timeline( $attendee_id ) {
 
+		/** @var $commerce_woo \Tribe__Tickets_Plus__Commerce__WooCommerce__Main */
+		$commerce_woo = tribe( 'tickets-plus.commerce.woo' );
+
+		$order_id = get_post_meta( $attendee_id, $commerce_woo->attendee_order_key, true );
+		$post_id = get_post_meta( $attendee_id, $commerce_woo->attendee_event_key, true );
+		$order = new \WC_Order( $order_id );
 		$email  = $order->get_billing_email();
 		$event = tribe_get_event( $post_id );
 		$extra_data = [
@@ -115,8 +119,8 @@ class Purchase {
 
 			$hubspot_data = [
 				'type'              => 'timeline',
-				'event_type'        => 'timeline_event_registration_id',
-				'timeline_event_id' => "event-register:{$post_id}:{$attendee_id}",
+				'event_type'        => 'timeline_event_checkin_id',
+				'timeline_event_id' => "event-checkin:{$post_id}:{$attendee_id}",
 				'email'             => $email,
 				'extra_data'        => $extra_data,
 			];

@@ -96,6 +96,11 @@ class Aggregate_Data extends Base {
 	 * @return array An array of properties with values to update the contact in HubSpot.
 	 */
 	public function get_values( $subscribe_type, $current_properties, $tickets_qty, $events_per_order ) {
+
+		if ( empty( $subscribe_type ) ) {
+			return [];
+		}
+
 		$agg_data            = [];
 		$matching_properties = wp_filter_object_list( $this->properties, [ 'subscribe_type' => $subscribe_type ], 'and' );
 
