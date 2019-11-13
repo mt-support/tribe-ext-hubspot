@@ -34,47 +34,47 @@ class Aggregate_Data extends Base {
 
 		$this->properties = [
 			'total_registered_events'   => [
-				'label'          => __( 'Total Registered Events', 'tribe-ext-hubspot' ),
+				'label'          => 'Total Registered Events',
 				'groupName'      => $this->group_name,
 				'type'           => 'number',
 				'fieldType'      => 'number',
 				'subscribe_type' => 'register',
 			],
 			'total_number_of_orders'    => [
-				'label'          => __( 'Total Number of Orders', 'tribe-ext-hubspot' ),
+				'label'          => 'Total Number of Orders',
 				'groupName'      => $this->group_name,
 				'type'           => 'number',
 				'fieldType'      => 'number',
 				'subscribe_type' => 'register',
 			],
 			'average_tickets_per_order' => [
-				'label'          => __( 'Average Tickets Per Order', 'tribe-ext-hubspot' ),
+				'label'          => 'Average Tickets Per Order',
 				'groupName'      => $this->group_name,
 				'type'           => 'number',
 				'fieldType'      => 'number',
 				'subscribe_type' => 'register',
 			],
 			'average_tickets_per_order_list' => [
-				'label'          => __( 'Average Tickets Per Order List', 'tribe-ext-hubspot' ),
+				'label'          => 'Average Tickets Per Order List',
 				'groupName'      => $this->group_name,
 				'type'           => 'string',
 				'fieldType'      => 'text',
 			],
 			'average_events_per_order'  => [
-				'label'          => __( 'Average Events Per Order', 'tribe-ext-hubspot' ),
+				'label'          => 'Average Events Per Order',
 				'groupName'      => $this->group_name,
 				'type'           => 'number',
 				'fieldType'      => 'number',
 				'subscribe_type' => 'register',
 			],
 			'average_events_per_order_list'  => [
-				'label'          => __( 'Average Events Per Order List', 'tribe-ext-hubspot' ),
+				'label'          => 'Average Events Per Order List',
 				'groupName'      => $this->group_name,
 				'type'           => 'string',
 				'fieldType'      => 'text',
 			],
 			'total_attended_events'     => [
-				'label'          => __( 'Total Attended Events', 'tribe-ext-hubspot' ),
+				'label'          => 'Total Attended Events',
 				'groupName'      => $this->group_name,
 				'type'           => 'number',
 				'fieldType'      => 'number',
@@ -84,12 +84,16 @@ class Aggregate_Data extends Base {
 	}
 
 	/**
-	 * @param $subscribe_type
-	 * @param $current_properties
-	 * @param $tickets_qty
-	 * @param $events_qty
+	 * Get Aggregate Values and Format for HubSpot
 	 *
-	 * @return array
+	 * @since 1.0
+	 *
+	 * @param string $subscribe_type     The name of the properties to setup values for.
+	 * @param object $current_properties An object of custom properties with values from HubSpot.
+	 * @param int    $tickets_qty        The total number of tickets in this order.
+	 * @param int    $events             The amount of different events in this order.
+	 *
+	 * @return array An array of properties with values to update the contact in HubSpot.
 	 */
 	public function get_values( $subscribe_type, $current_properties, $tickets_qty, $events_per_order ) {
 		$agg_data            = [];
@@ -138,11 +142,15 @@ class Aggregate_Data extends Base {
 	}
 
 	/**
-	 * @param $current_properties
-	 * @param $list_key
-	 * @param $qty
+	 * Get the average values from a comma separated list of values in HubSpot with the provided key.
 	 *
-	 * @return array
+	 * @since 1.0
+	 *
+	 * @param object $current_properties An object of custom properties with values from HubSpot.
+	 * @param string $list_key           The key to get values from the current properties.
+	 * @param int    $qty                The new value to use to calculate the average.
+	 *
+	 * @return array An array of the values with the current and average value.
 	 */
 	public function get_average_from_list( $current_properties, $list_key, $qty ) {
 

@@ -30,7 +30,6 @@ class Contact_Properties {
 		$this->properties['last_order']             = tribe( 'tickets.hubspot.properties.last_order' );
 		$this->properties['last_registered_ticket'] = tribe( 'tickets.hubspot.properties.last_registered_ticket' );
 		$this->properties['aggregate_data']         = tribe( 'tickets.hubspot.properties.aggregate_data' );
-
 	}
 
 	/**
@@ -208,6 +207,7 @@ class Contact_Properties {
 	 *
 	 * @param string $email      An email used to update a contact in HubSpot.
 	 * @param array  $properties An array of fields and custom fields to update for a contact.
+	 * @param array  $order_data An array of order data for the aggregate data and first order
 	 *
 	 * @return bool
 	 */
@@ -259,11 +259,15 @@ class Contact_Properties {
 	}
 
 	/**
-	 * @param $email
-	 * @param $tickets
-	 * @param $events
+	 * Get Aggregate Data for a Contact
 	 *
-	 * @return mixed
+	 * @since 1.0
+	 *
+	 * @param string $email       An email used to get data from HubSpot.
+	 * @param int    $tickets_qty The total number of tickets in this order.
+	 * @param int    $events      The amount of different events in this order.
+	 *
+	 * @return array An array of values for the aggregate data.
 	 */
 	public function get_aggregate_data( $email, $tickets_qty, $events_per_order ) {
 		$contact    = $this->get_contact_by_email( $email );
@@ -279,9 +283,13 @@ class Contact_Properties {
 	}
 
 	/**
-	 * @param $email
+	 * Get a Contact by Email
 	 *
-	 * @return bool|mixed
+	 * @since 1.0
+	 *
+	 * @param string $email An email to get HubSpot fields from.
+	 *
+	 * @return bool|mixed false or response data from HubSpot
 	 */
 	public function get_contact_by_email( $email ) {
 
@@ -306,7 +314,6 @@ class Contact_Properties {
 
 		try {
 			$hubspot = Factory::createWithToken( $access_token, $client );
-			//$response = $hubspot->contacts()->getByEmail( $email, $properties );
 			// Use get by batch emails to prevent fatal errors in Guzzle when get by email returns 404
 			$response = $hubspot->contacts()->getBatchByEmails( [ $email ], $properties );
 
@@ -325,8 +332,8 @@ class Contact_Properties {
 			return false;
 		}
 
+		// Contact results are returned as an array, but we only want the first result
 		return reset( $response->data );
-
 	}
 
 }
