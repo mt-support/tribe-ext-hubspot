@@ -7,9 +7,9 @@ use Tribe\HubSpot\Process\Delivery_Queue;
 /**
  * Class Purchase
  *
- * @package Tribe\HubSpot\API
+ * @package Tribe\HubSpot\Subscribe
  */
-class Purchase {
+class Purchase extends Base {
 
 	/**
 	 * Setup Hooks to SubScribe to Purchases
@@ -31,62 +31,28 @@ class Purchase {
 	 *
 	 * @param int    $attendee_id ID of attendee ticket.
 	 * @param int    $post_id     ID of event.
-	 * @param object $order       WooCommerce order object /WC_Order.
+	 * @param object $order       WooCommerce order object \WC_Order.
 	 * @param int    $product_id  WooCommerce product ID.
 	 */
 	public function woo_subscribe( $attendee_id, $post_id, $order, $product_id ) {
 
 		/** @var \Tribe\HubSpot\Properties\Event_Data $data */
-		$data  = tribe( 'tickets.hubspot.properties.event_data' );
-		$email = $order->get_billing_email();
-		$name  = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
-		$total = $order->get_total();
-		$date  = $order->get_date_created()->getTimestamp();
-		$qty   = $data->get_woo_order_quantities( $order );
+		$data = tribe( 'tickets.hubspot.properties.event_data' );
+
+		$attendee_data = $this->get_woo_contact_data_from_order( $order );
+		$qty           = $data->get_woo_order_quantities( $order );
 
 		$groups   = [];
 		$groups[] = $data->get_event_values( 'last_registered_', $post_id );
-		$groups[] = $data->get_order_values( 'last_order_', $date, $total, $qty['total'], count( $qty['tickets'] ) );
-		$groups[] = $data->get_ticket_values( $product_id, $attendee_id, 'woo', $name );
+		$groups[] = $data->get_order_values( 'last_order_', $attendee_data['date'], $attendee_data['total'], $qty['total'], count( $qty['tickets'] ) );
+		$groups[] = $data->get_ticket_values( $product_id, $attendee_id, 'woo', $attendee_data['name'] );
 
-		$properties = [
-			[
-				'property' => 'firstname',
-				'value'    => $order->get_billing_first_name(),
-			],
-			[
-				'property' => 'lastname',
-				'value'    => $order->get_billing_last_name(),
-			],
-		];
-
+		$properties = $this->get_initial_properties_array( $attendee_data );
 		$properties = array_merge( $properties, ...$groups );
 
-		$order_data = [
-			'order_date'                 => $date,
-			'order_total'                => $total,
-			'order_ticket_quantity'      => $qty['total'],
-			'order_ticket_type_quantity' => count( $qty['tickets'] ),
-			'events_per_order'           => $qty['events_per_order'],
-			'aggregate_type'             => 'register',
-		];
+		$order_data = $this->get_order_data_array( $attendee_data, $qty, 'register' );
 
-		// Send to Queue Process.
-		if ( ! empty( $email ) ) {
-
-			$hubspot_data = [
-				'type'       => 'contact',
-				'email'      => $email,
-				'properties' => $properties,
-				'order_data' => $order_data,
-			];
-
-			$queue = new Delivery_Queue();
-			$queue->push_to_queue( $hubspot_data );
-			$queue->save();
-			$queue->dispatch();
-		}
-
+		$this->maybe_push_to_contact_queue( $attendee_data, $properties, $order_data );
 	}
 
 	/**
@@ -101,31 +67,9 @@ class Purchase {
 	 */
 	public function woo_timeline( $attendee_id, $post_id, $order, $product_id ) {
 
-		$email  = $order->get_billing_email();
-		$event = tribe_get_event( $post_id );
-		$extra_data = [
-			'event' => [
-				'ID' => $event->ID,
-				'post_title' => $event->post_title,
-			]
-		];
+		$attendee_data = $this->get_woo_contact_data_from_order( $order );
+		$extra_data    = $this->get_extra_data( $post_id, $product_id, $attendee_id, 'woo', $attendee_data['name'] );
 
-		// Send to Queue Process.
-		if ( ! empty( $email ) ) {
-
-			$hubspot_data = [
-				'type'              => 'timeline',
-				'event_type'        => 'timeline_event_registration_id',
-				'timeline_event_id' => "event-register:{$post_id}:{$attendee_id}",
-				'email'             => $email,
-				'extra_data'        => $extra_data,
-			];
-
-			$queue = new Delivery_Queue();
-			$queue->push_to_queue( $hubspot_data );
-			$queue->save();
-			$queue->dispatch();
-		}
-
+		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_registration_id', $post_id, $attendee_id, $extra_data );
 	}
 }
