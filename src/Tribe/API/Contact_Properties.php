@@ -207,7 +207,7 @@ class Contact_Properties {
 	 *
 	 * @param string $email      An email used to update a contact in HubSpot.
 	 * @param array  $properties An array of fields and custom fields to update for a contact.
-	 * @param array  $order_data An array of order data for the aggregate data and first order
+	 * @param array  $order_data An array of order data for the aggregate data and first order.
 	 *
 	 * @return bool
 	 */
@@ -227,7 +227,7 @@ class Contact_Properties {
 		$agg_data    = $this->get_aggregate_data( $email, $tickets_qty, $order_data['events_per_order'] );
 		$properties  = array_merge( $properties, $agg_data['values'] );
 
-		// If this is the first order for a contact, add First Order Values
+		// If this is the first order for a contact, add first order values.
 		if ( 1 === $agg_data['total_registered_events'] ) {
 			/** @var \Tribe\HubSpot\Properties\Event_Data $data */
 			$data = tribe( 'tickets.hubspot.properties.event_data' );
@@ -259,7 +259,7 @@ class Contact_Properties {
 	}
 
 	/**
-	 * Get Aggregate Data for a Contact
+	 * Get Aggregate Data for a Contact.
 	 *
 	 * @since 1.0
 	 *
@@ -289,7 +289,7 @@ class Contact_Properties {
 	 *
 	 * @param string $email An email to get HubSpot fields from.
 	 *
-	 * @return bool|mixed false or response data from HubSpot
+	 * @return false|mixed Response data from HubSpot or false if not successful.
 	 */
 	public function get_contact_by_email( $email ) {
 
@@ -314,7 +314,8 @@ class Contact_Properties {
 
 		try {
 			$hubspot = Factory::createWithToken( $access_token, $client );
-			// Use get by batch emails to prevent fatal errors in Guzzle when get by email returns 404
+
+			// Use get by batch emails to prevent fatal errors in Guzzle when get by email returns 404.
 			$response = $hubspot->contacts()->getBatchByEmails( [ $email ], $properties );
 
 		} catch ( Exception $e ) {
@@ -332,7 +333,7 @@ class Contact_Properties {
 			return false;
 		}
 
-		// Contact results are returned as an array, but we only want the first result
+		// Contact results are returned as an array, but we only want the first result.
 		return reset( $response->data );
 	}
 
