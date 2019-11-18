@@ -84,7 +84,7 @@ class Aggregate_Data extends Base {
 	}
 
 	/**
-	 * Get Aggregate Values and Format for HubSpot
+	 * Get Aggregate Values and Format for HubSpot.
 	 *
 	 * @since 1.0
 	 *
