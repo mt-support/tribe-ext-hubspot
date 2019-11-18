@@ -19,27 +19,29 @@ class Purchase extends Base {
 	 */
 	public function hook() {
 
-		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_subscribe' ], 10, 4 );
+		add_action( 'event_tickets_woocommerce_tickets_generated_for_product', [ $this, 'woo_subscribe' ], 10, 4 );
 		// Timeline Events Should be Added Second to the Queue so the Contact Can Be Created.
-		add_action( 'event_ticket_woo_attendee_created', [ $this, 'woo_timeline' ], 100, 4 );
+		add_action( 'event_tickets_woocommerce_tickets_generated_for_product', [ $this, 'woo_timeline' ], 100, 4 );
 	}
 
 	/**
-	 * Connect to Creation of an Attendee for WooCommerce
+	 * Update HubSpot on Creation of a WooCommerce Attendee
 	 *
 	 * @since 1.0
 	 *
-	 * @param int    $attendee_id ID of attendee ticket.
-	 * @param int    $post_id     ID of event.
-	 * @param object $order       WooCommerce order object \WC_Order.
-	 * @param int    $product_id  WooCommerce product ID.
+	 * @param int $product_id WooCommerce product ID.
+	 * @param int $order_id   ID of the WooCommerce Order.
+	 * @param int $quantity   The total Quantity of items in Order.
+	 * @param int $post_id    ID of event.
 	 */
-	public function woo_subscribe( $attendee_id, $post_id, $order, $product_id ) {
+	public function woo_subscribe( $product_id, $order_id, $quantity, $post_id ) {
 
 		/** @var \Tribe\HubSpot\Properties\Event_Data $data */
 		$data = tribe( 'tickets.hubspot.properties.event_data' );
 
+		$order         = new \WC_Order( $order_id );
 		$attendee_data = $this->get_woo_contact_data_from_order( $order );
+		$attendee_id   = $this->get_woo_first_attendee_id_from_order( $order_id );
 		$qty           = $data->get_woo_order_quantities( $order );
 
 		$groups   = [];
@@ -56,18 +58,20 @@ class Purchase extends Base {
 	}
 
 	/**
-	 * Create Timeline Event
+	 * Create Timeline Event for WooCommerce Attendee
 	 *
 	 * @since 1.0
 	 *
-	 * @param int    $attendee_id ID of attendee ticket.
-	 * @param int    $post_id     ID of event.
-	 * @param object $order       WooCommerce order object /WC_Order.
-	 * @param int    $product_id  WooCommerce product ID.
+	 * @param int $product_id WooCommerce product ID.
+	 * @param int $order_id   ID of the WooCommerce Order.
+	 * @param int $quantity   The total Quantity of items in Order.
+	 * @param int $post_id    ID of event.
 	 */
-	public function woo_timeline( $attendee_id, $post_id, $order, $product_id ) {
+	public function woo_timeline( $product_id, $order_id, $quantity, $post_id ) {
 
+		$order         = new \WC_Order( $order_id );
 		$attendee_data = $this->get_woo_contact_data_from_order( $order );
+		$attendee_id   = $this->get_woo_first_attendee_id_from_order( $order_id );
 		$extra_data    = $this->get_extra_data( $post_id, $product_id, $attendee_id, 'woo', $attendee_data['name'] );
 
 		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_registration_id', $post_id, $attendee_id, $extra_data );

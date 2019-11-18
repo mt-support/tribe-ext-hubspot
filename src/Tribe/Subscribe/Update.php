@@ -19,9 +19,9 @@ class Update extends Base {
 	 */
 	public function hook() {
 
-		add_action( 'event_tickets_plus_woo_attendee_meta_update', [ $this, 'woo_subscribe' ], 10, 3 );
+		add_action( 'event_tickets_plus_attendee_meta_update', [ $this, 'woo_subscribe' ], 10, 3 );
 		// Timeline Events Should be Added Second to the Queue so the Contact Can Be Created.
-		add_action( 'event_tickets_plus_woo_attendee_meta_update', [ $this, 'woo_timeline' ], 100, 3 );
+		add_action( 'event_tickets_plus_attendee_meta_update', [ $this, 'woo_timeline' ], 100, 3 );
 	}
 
 	/**

@@ -197,6 +197,27 @@ abstract class Base {
 	}
 
 	/**
+	 * Get the First Attendee in an Order.
+	 *
+	 * @since 1.0
+	 *
+	 * @param int $order_id ID of the WooCommerce Order.
+	 *
+	 * @return int An attendee Id
+	 */
+	public function get_woo_first_attendee_id_from_order( $order_id ) {
+
+		/** @var $commerce_woo \Tribe__Tickets_Plus__Commerce__WooCommerce__Main */
+		$commerce_woo = tribe( 'tickets-plus.commerce.woo' );
+
+		$attendees = $commerce_woo->get_attendees_by_id( $order_id );
+
+		$attendee = reset( $attendees );
+
+		return $attendee[ 'attendee_id' ];
+	}
+
+	/**
 	 * Connect to Creation of an Attendee for WooCommerce.
 	 *
 	 * @since 1.0
