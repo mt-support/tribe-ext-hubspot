@@ -38,7 +38,7 @@ class Event_Data {
 			],
 			[
 				'property' => $prefix . 'event_is_featured',
-				'value'    => $event->√,
+				'value'    => $event->featured,
 			],
 			//todo includes html
 			[

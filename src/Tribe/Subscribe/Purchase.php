@@ -10,7 +10,7 @@ namespace Tribe\HubSpot\Subscribe;
 class Purchase extends Base {
 
 	/**
-	 * Setup Hooks to SubScribe to Purchases
+	 * Setup Hooks to Subscribe to Purchases.
 	 *
 	 * @since 1.0
 	 *
@@ -23,7 +23,7 @@ class Purchase extends Base {
 	}
 
 	/**
-	 * Update HubSpot on Creation of a WooCommerce Attendee
+	 * Update HubSpot on Creation of a WooCommerce Attendee.
 	 *
 	 * @since 1.0
 	 *
@@ -56,7 +56,7 @@ class Purchase extends Base {
 	}
 
 	/**
-	 * Create Timeline Event for WooCommerce Attendee
+	 * Create Timeline Event for WooCommerce Attendee.
 	 *
 	 * @since 1.0
 	 *
