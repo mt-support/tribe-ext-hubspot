@@ -101,6 +101,7 @@ class Setup extends Tribe__Extension {
 	public function queue_handlers( $handlers = [] ) {
 
 		$handlers[] = Process\Delivery_Queue::class;
+		$handlers[] = Process\Setup_Queue::class;
 
 		return $handlers;
 	}
