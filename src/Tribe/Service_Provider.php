@@ -28,9 +28,8 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 		$this->container->singleton( 'tickets.hubspot.admin.settings', Admin\Settings::class );
 		$this->container->singleton( 'tickets.hubspot.admin.notices', Admin\Notices::class, array( 'hook' ) );
 
-		$this->container->singleton( 'tickets.hubspot.process.setup', Process\Setup::class, array( 'hook' ) );
-
 		$this->container->singleton( 'tickets.hubspot.api', API\Connection::class );
+		$this->container->singleton( 'tickets.hubspot.setup', API\Setup::instance() );
 		$this->container->singleton( 'tickets.hubspot.oauth', API\Oauth::class, array( 'hook' ) );
 
 		$this->container->singleton( 'tickets.hubspot.properties.last_registered_event', Properties\Last_Registered_Event::class );
@@ -43,7 +42,7 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 
 		$this->container->singleton( 'tickets.hubspot.contact.property.group', API\Contact_Property_Group::class, array( 'hook' ) );
 		$this->container->singleton( 'tickets.hubspot.contact.properties', API\Contact_Properties::class, array( 'hook' ) );
-		$this->container->singleton( 'tickets.hubspot.timeline', API\Timeline::class, array( 'hook' ) );
+		$this->container->singleton( 'tickets.hubspot.timeline', API\Timeline::class );
 
 		$this->container->singleton( 'tickets.hubspot.subscribe.checkin', Subscribe\Checkin::class, array( 'hook' ) );
 		$this->container->singleton( 'tickets.hubspot.subscribe.purchase', Subscribe\Purchase::class, array( 'hook' ) );
@@ -63,15 +62,12 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 	protected function hook() {
 
 		//todo change these to only load when required during Sprint 4
-		tribe( 'tickets.hubspot.api' );
 		tribe( 'tickets.hubspot.oauth' );
-		tribe( 'tickets.hubspot.timeline' );
 		add_action( 'tribe_hubspot_authorize_site', tribe_callback( 'tickets.hubspot.api', 'save_access_token' ) );
 
 		tribe( 'tickets.hubspot.contact.property.group' );
 		tribe( 'tickets.hubspot.contact.properties' );
 
-		tribe( 'tickets.hubspot.process.setup' );
 		tribe( 'tickets.hubspot.subscribe.checkin' );
 		tribe( 'tickets.hubspot.subscribe.purchase' );
 		tribe( 'tickets.hubspot.subscribe.update' );

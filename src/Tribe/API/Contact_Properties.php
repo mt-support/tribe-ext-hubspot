@@ -3,7 +3,6 @@
 namespace Tribe\HubSpot\API;
 
 use SevenShores\Hubspot\Factory;
-use Tribe\HubSpot\Process\Setup_Queue;
 
 /**
  * Class Contact_Properties
@@ -12,7 +11,15 @@ use Tribe\HubSpot\Process\Setup_Queue;
  */
 class Contact_Properties {
 
+	/**
+	 * @var array
+	 */
 	protected $properties = [];
+
+	/**
+	 * @var string
+	 */
+	public $setup_name = 'custom_properties_setup';
 
 	/**
 	 * Setup Hooks for Contact_Property
@@ -21,8 +28,6 @@ class Contact_Properties {
 	 *
 	 */
 	public function hook() {
-
-		add_action( 'tribe_hubspot_authorize_site', [ $this, 'queue_properties' ], 30 );
 
 		$this->properties['last_registered_event']  = tribe( 'tickets.hubspot.properties.last_registered_event' );
 		$this->properties['last_attended_event']    = tribe( 'tickets.hubspot.properties.last_attended_event' );
@@ -33,31 +38,26 @@ class Contact_Properties {
 	}
 
 	/**
-	 * Queue the Creation of the Custom Properties
-	 *
-	 * @since 1.0
-	 *
-	 */
-	public function queue_properties() {
-
-		$hubspot_data = [
-			'type' => 'update_properties',
-		];
-
-		$queue = new Setup_Queue();
-		$queue->push_to_queue( $hubspot_data );
-		$queue->save();
-		$queue->dispatch();
-
-	}
-
-	/**
 	 * Setup Custom Properties with HubSpot
 	 *
 	 * @since 1.0
 	 *
 	 */
 	public function setup_properties() {
+
+		/** @var \Tribe\HubSpot\API\Setup $setup */
+		$setup = tribe( 'tickets.hubspot.setup' );
+		$setup_try = $setup->get_status_by_name( $this->setup_name );
+
+		if ( 'failed' === $setup_try ) {
+			return false;
+		}
+
+		if ( 'complete' === $setup_try ) {
+			return true;
+		}
+
+		$setup->set_status_by_name( $this->setup_name, $setup_try );
 
 		/** @var \Tribe\HubSpot\API\Contact_Property_Group $hubspot_api_group */
 		$hubspot_api_group = tribe( 'tickets.hubspot.contact.property.group' );
@@ -72,6 +72,8 @@ class Contact_Properties {
 		// Create or Update Properties
 		$this->create_all_properties( $created_fields );
 
+		// The custom properties are setup in HubSpot, set status as complete.
+		$setup->set_status_by_name( $this->setup_name, 'complete' );
 	}
 
 	/**
@@ -147,7 +149,6 @@ class Contact_Properties {
 			}
 
 			$this->create_property( $name, $property );
-
 		}
 	}
 

@@ -46,13 +46,66 @@ class Setup_Queue extends Tribe__Process__Queue {
 		$this->data = $hubspot_data;
 
 		$response = false;
-		if ( 'update_properties' === $hubspot_data['type'] ) {
+		if ( 'group_name_setup' === $hubspot_data['type'] ) {
+			$response = $this->group_name_update( $hubspot_data );
+		} elseif ( 'custom_properties_setup' === $hubspot_data['type'] ) {
 			$response = $this->properties_update( $hubspot_data );
-		}   elseif ( 'update_timeline_event_types' === $hubspot_data['type'] ) {
+		}   elseif ( 'timeline_event_types_setup' === $hubspot_data['type'] ) {
 			$response = $this->timeline_event_types_update( $hubspot_data );
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Update Group Name for Custom Properties with HubSpot
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $hubspot_data An array of data to send to HubSpot
+	 *
+	 * @return bool
+	 */
+	protected function group_name_update( $hubspot_data ) {
+
+		/** @var \Tribe\HubSpot\API\Contact_Property_Group $hubspot_api */
+		$hubspot_contact = tribe( 'tickets.hubspot.contact.property.group' );
+
+		/** @var \Tribe__Log $logger */
+		$logger  = tribe( 'logger' );
+		$log_src = 'HubSpot Group Name';
+
+		$logger->log_debug( "(ID: {$this->identifier}) - start setup group name with HubSpot", $log_src );
+
+		// Connect to HubSpot and Update.
+		$hubspot_response = $hubspot_contact->create();
+
+		if ( false === $hubspot_response ) {
+			do_action(
+				'tribe_log',
+				'error',
+				$this->identifier,
+				[
+					'action'     => 'setup-group-name',
+				]
+			);
+			$logger->log_debug( "(ID: {$this->identifier}) - could not setup group name with HubSpot", $log_src );
+
+			return false;
+		}
+
+		do_action(
+			'tribe_log',
+			'debug',
+			$this->identifier,
+			[
+				'action'     => 'setup-group-name',
+			]
+		);
+
+		$logger->log_debug( "(ID: {$this->identifier}) - complete setup group name with HubSpot.", $log_src );
+
+		return $hubspot_response;
 	}
 
 	/**
@@ -66,14 +119,14 @@ class Setup_Queue extends Tribe__Process__Queue {
 	 */
 	protected function properties_update( $hubspot_data ) {
 
-		/** @var \Tribe\HubSpot\API\Properties $hubspot_api */
+		/** @var \Tribe\HubSpot\API\Contact_Properties $hubspot_api */
 		$hubspot_contact = tribe( 'tickets.hubspot.contact.properties' );
 
 		/** @var \Tribe__Log $logger */
 		$logger  = tribe( 'logger' );
 		$log_src = 'HubSpot Custom Properties';
 
-		$logger->log_debug( "(ID: {$this->identifier}) - updating custom properties with HubSpot", $log_src );
+		$logger->log_debug( "(ID: {$this->identifier}) - start setup custom properties with HubSpot", $log_src );
 
 		// Connect to HubSpot and Update.
 		$hubspot_response = $hubspot_contact->setup_properties();
@@ -84,10 +137,10 @@ class Setup_Queue extends Tribe__Process__Queue {
 				'error',
 				$this->identifier,
 				[
-					'action'     => 'update-properties',
+					'action'     => 'setup-custom-properties',
 				]
 			);
-			$logger->log_debug( "(ID: {$this->identifier}) - could not update custom properties", $log_src );
+			$logger->log_debug( "(ID: {$this->identifier}) - could not setup custom properties with HubSpot", $log_src );
 
 			return false;
 		}
@@ -97,11 +150,11 @@ class Setup_Queue extends Tribe__Process__Queue {
 			'debug',
 			$this->identifier,
 			[
-				'action'     => 'update-properties',
+				'action'     => 'setup-custom-properties',
 			]
 		);
 
-		$logger->log_debug( "(ID: {$this->identifier}) - updated custom properties with HubSpot.", $log_src );
+		$logger->log_debug( "(ID: {$this->identifier}) - complete setup custom properties with HubSpot.", $log_src );
 
 		return $hubspot_response;
 	}
@@ -124,7 +177,7 @@ class Setup_Queue extends Tribe__Process__Queue {
 		$logger  = tribe( 'logger' );
 		$log_src = 'HubSpot Timeline';
 
-		$logger->log_debug( "(ID: {$this->identifier}) - updating timeline event types with HubSpot", $log_src );
+		$logger->log_debug( "(ID: {$this->identifier}) - start setup timeline event types with HubSpot", $log_src );
 
 		// Connect to HubSpot and Update.
 		$hubspot_response = $hubspot_timeline->create_event_types();
@@ -135,10 +188,10 @@ class Setup_Queue extends Tribe__Process__Queue {
 				'error',
 				$this->identifier,
 				[
-					'action'     => 'update-timeline-event-types',
+					'action'     => 'timeline-event-types-setup',
 				]
 			);
-			$logger->log_debug( "(ID: {$this->identifier}) - could not update timeline event types", $log_src );
+			$logger->log_debug( "(ID: {$this->identifier}) - could not update timeline event types with HubSpot", $log_src );
 
 			return false;
 		}
@@ -152,7 +205,7 @@ class Setup_Queue extends Tribe__Process__Queue {
 			]
 		);
 
-		$logger->log_debug( "(ID: {$this->identifier}) - updated timeline event types with HubSpot.", $log_src );
+		$logger->log_debug( "(ID: {$this->identifier}) - complete setup timeline event types with HubSpot.", $log_src );
 
 		return $hubspot_response;
 	}
@@ -167,20 +220,20 @@ class Setup_Queue extends Tribe__Process__Queue {
 
 		/** @var \Tribe__Log $logger */
 		$logger  = tribe( 'logger' );
-		$log_src = 'HubSpot Updates';
+		$log_src = 'HubSpot Setup';
 
 		do_action(
 			'tribe_log',
 			'debug',
 			$this->identifier,
 			[
-				'action'     => 'hubspot',
+				'action'     => 'hubspot-setup',
 				'type' => $this->type,
 				'data' => $this->data,
 			]
 		);
 
-		$logger->log_debug( "(ID: {$this->identifier}) - updated {$this->type}.", $log_src );
+		$logger->log_debug( "(ID: {$this->identifier}) - setup {$this->type}.", $log_src );
 
 		parent::complete();
 	}

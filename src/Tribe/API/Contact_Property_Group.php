@@ -3,6 +3,7 @@
 namespace Tribe\HubSpot\API;
 
 use SevenShores\Hubspot\Factory;
+use Tribe\HubSpot\Process\Setup_Queue;
 
 /**
  * Class Contact_Property_Group
@@ -22,6 +23,11 @@ class Contact_Property_Group {
 	public $group_name = 'event_tickets';
 
 	/**
+	 * @var string
+	 */
+	public $setup_name = 'group_name_setup';
+
+	/**
 	 * Setup Hooks for Contact_Property_Group
 	 *
 	 * @since 1.0
@@ -29,7 +35,31 @@ class Contact_Property_Group {
 	 */
 	public function hook() {
 
-		add_action( 'tribe_hubspot_authorize_site', [ $this, 'create' ], 20 );
+		add_action( 'tribe_hubspot_authorize_site', [ $this, 'queue_group_name' ], 20 );
+	}
+
+	/**
+	 * Queue the Creation of the Custom Properties
+	 *
+	 * @since 1.0
+	 *
+	 * @param mixed $setup_try The current setup try number or status message.
+	 */
+	public function queue_group_name( $setup_try = 1 ) {
+
+		/** @var \Tribe\HubSpot\API\Setup $setup */
+		$setup = tribe( 'tickets.hubspot.setup' );
+		// Clear the setup try for custom properties and timeline event types.
+		$setup->clear_setup();
+
+		$hubspot_data = [
+			'type' => $this->setup_name,
+		];
+
+		$queue = new Setup_Queue();
+		$queue->push_to_queue( $hubspot_data );
+		$queue->save();
+		$queue->dispatch();
 	}
 
 	/**
@@ -40,7 +70,24 @@ class Contact_Property_Group {
 	 */
 	public function create() {
 
+		/** @var \Tribe\HubSpot\API\Setup $setup */
+		$setup = tribe( 'tickets.hubspot.setup' );
+		$setup_try = $setup->get_status_by_name( $this->setup_name );
+
+		if ( 'failed' === $setup_try ) {
+			return false;
+		}
+
+		if ( 'complete' === $setup_try ) {
+			return true;
+		}
+
+		$setup->set_status_by_name( $this->setup_name, $setup_try );
+
 		if ( $hubspot_api_group = $this->has_group() ) {
+			// The group is setup in HubSpot, set status as complete.
+			$setup->set_status_by_name( $this->setup_name, 'complete', true );
+
 			return;
 		}
 
@@ -73,6 +120,9 @@ class Contact_Property_Group {
 
 			return;
 		}
+
+		// The group is setup in HubSpot, set status as complete.
+		$setup->set_status_by_name( $this->setup_name, 'complete', true );
 
 	}
 

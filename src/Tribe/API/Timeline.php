@@ -3,7 +3,6 @@
 namespace Tribe\HubSpot\API;
 
 use SevenShores\Hubspot\Factory;
-use Tribe\HubSpot\Process\Setup_Queue;
 
 /**
  * Class Timeline
@@ -39,34 +38,9 @@ class Timeline {
 	];
 
 	/**
-	 * Setup Hooks for Contact_Property
-	 *
-	 * @since 1.0
-	 *
+	 * @var string
 	 */
-	public function hook() {
-
-		add_action( 'tribe_hubspot_authorize_site', [ $this, 'queue_timeline_event_types' ], 30 );
-	}
-
-	/**
-	 * Queue the Creation of Timeline Event Types
-	 *
-	 * @since 1.0
-	 *
-	 */
-	public function queue_timeline_event_types() {
-
-		$hubspot_data = [
-			'type' => 'update_timeline_event_types',
-		];
-
-		$queue = new Setup_Queue();
-		$queue->push_to_queue( $hubspot_data );
-		$queue->save();
-		$queue->dispatch();
-
-	}
+	public $setup_name = 'timeline_event_types_setup';
 
 	/**
 	 * Create all Timeline Event Types.
@@ -76,6 +50,20 @@ class Timeline {
 	 * @return bool
 	 */
 	public function create_event_types() {
+
+		/** @var \Tribe\HubSpot\API\Setup $setup */
+		$setup = tribe( 'tickets.hubspot.setup' );
+		$setup_try = $setup->get_status_by_name( $this->setup_name );
+
+		if ( 'failed' === $setup_try ) {
+			return false;
+		}
+
+		if ( 'complete' === $setup_try ) {
+			return true;
+		}
+
+		$setup->set_status_by_name( $this->setup_name, $setup_try );
 
 		/** @var \Tribe\HubSpot\Admin\Settings $hubspot_options */
 		$hubspot_options = tribe( 'tickets.hubspot.admin.settings' );
@@ -116,6 +104,9 @@ class Timeline {
 			}
 
 		}
+
+		// The timeline event types are setup in HubSpot, set status as complete.
+		$setup->set_status_by_name( $this->setup_name, 'complete' );
 	}
 
 	/**
@@ -174,7 +165,7 @@ class Timeline {
 
 		$hubspot_options = tribe( 'tickets.hubspot' )->get_all_options();
 		$client          = $hubspot_api->client;
-		$app_id           = isset( $hubspot_options['app_id'] ) ? $hubspot_options['app_id'] : '';;
+		$app_id          = isset( $hubspot_options['app_id'] ) ? $hubspot_options['app_id'] : '';
 
 		try {
 			$hubspot  = Factory::createWithToken( $access_token, $client );
