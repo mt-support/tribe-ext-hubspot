@@ -41,10 +41,8 @@ class Update extends Base {
 		$related_data  = $this->get_woo_related_data_by_attendee_id( $attendee_id );
 		$attendee_data = $this->get_woo_contact_data_from_order( $related_data['order'] );
 		$qty           = $data->get_woo_order_quantities( $related_data['order'] );
-
-		$properties = $this->get_initial_properties_array( $attendee_data );
-
-		$order_data = $this->get_order_data_array( $attendee_data, $qty, '' );
+		$properties    = $this->get_initial_properties_array( $attendee_data );
+		$order_data    = $this->get_order_data_array( $attendee_data, $qty, '' );
 
 		$this->maybe_push_to_contact_queue( $attendee_data, $properties, $order_data );
 	}

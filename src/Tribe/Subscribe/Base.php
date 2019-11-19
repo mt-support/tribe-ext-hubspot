@@ -7,13 +7,6 @@ use Tribe\HubSpot\Process\Delivery_Queue;
 /**
  * Class Base
  *
- * @package Tribe\HubSpot\API
- */
-
-
-/**
- * Class Base
- *
  * @package Tribe\HubSpot\Subscribe
  */
 abstract class Base {
@@ -49,7 +42,7 @@ abstract class Base {
 	 * @since 1.0
 	 *
 	 * @param array  $attendee_data  An array of contact information for the attendee.
-	 * @param array  $qty            An array of data for total tickets, total number of events, and total types of tickets
+	 * @param array  $qty            An array of data for total tickets, total number of events, and total types of tickets.
 	 * @param string $aggregate_type The type of fields to calculate aggregate data for.
 	 *
 	 * @return array An array of order date to use to calculate aggregate data and first order custom properties.
@@ -72,7 +65,7 @@ abstract class Base {
 	 * Get the Extra Data for HubSpot Timeline Events.
 	 *
 	 * @param int    $post_id     the ID of an event.
-	 * @param int    $ticket_id   The ticket product id
+	 * @param int    $ticket_id   The ticket product id.
 	 * @param int    $attendee_id the ID of an attendee.
 	 * @param string $commerce    The commerce key for ET and ET+ (woo,edd,tpp,rsvp).
 	 * @param string $name        The name of the Attendee.
