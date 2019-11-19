@@ -207,10 +207,11 @@ class Contact_Properties {
 	 *
 	 * @param string $email      An email used to update a contact in HubSpot.
 	 * @param array  $properties An array of fields and custom fields to update for a contact.
+	 * @param array  $order_data An array of order data for the aggregate data and first order.
 	 *
 	 * @return bool
 	 */
-	public function update( $email, $properties ) {
+	public function update( $email, $properties, $order_data ) {
 
 		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
 		$hubspot_api = tribe( 'tickets.hubspot.api' );
@@ -221,7 +222,19 @@ class Contact_Properties {
 
 		$client = $hubspot_api->client;
 
-		//todo aggregate data will be calculated right here
+		// Calculate Aggregate Data
+		$tickets_qty = $order_data['order_ticket_quantity'];
+		$agg_data    = $this->get_aggregate_data( $email, $tickets_qty, $order_data['events_per_order'] );
+		$properties  = array_merge( $properties, $agg_data['values'] );
+
+		// If this is the first order for a contact, add first order values.
+		if ( 1 === $agg_data['total_registered_events'] ) {
+			/** @var \Tribe\HubSpot\Properties\Event_Data $data */
+			$data = tribe( 'tickets.hubspot.properties.event_data' );
+
+			$first_order = $data->get_order_values( 'first_order_', $order_data['order_date'], $order_data['order_total'], $tickets_qty, $order_data['order_ticket_type_quantity'] );
+			$properties  = array_merge( $properties, $first_order );
+		}
 
 		try {
 			$hubspot  = Factory::createWithToken( $access_token, $client );
@@ -243,6 +256,85 @@ class Contact_Properties {
 
 
 		return true;
-
 	}
+
+	/**
+	 * Get Aggregate Data for a Contact.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $email       An email used to get data from HubSpot.
+	 * @param int    $tickets_qty The total number of tickets in this order.
+	 * @param int    $events      The amount of different events in this order.
+	 *
+	 * @return array An array of values for the aggregate data.
+	 */
+	public function get_aggregate_data( $email, $tickets_qty, $events_per_order ) {
+		$contact    = $this->get_contact_by_email( $email );
+		$properties = '';
+		if ( ! empty( $contact->properties ) ) {
+			$properties = $contact->properties;
+		}
+
+		$aggregate_data = tribe( 'tickets.hubspot.properties.aggregate_data' );
+		$agg_data       = $aggregate_data->get_values( 'register', $properties, $tickets_qty, $events_per_order );
+
+		return $agg_data;
+	}
+
+	/**
+	 * Get a Contact by Email
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $email An email to get HubSpot fields from.
+	 *
+	 * @return false|mixed Response data from HubSpot or false if not successful.
+	 */
+	public function get_contact_by_email( $email ) {
+
+		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
+		$hubspot_api = tribe( 'tickets.hubspot.api' );
+
+		if ( ! $access_token = $hubspot_api->is_ready() ) {
+			return false;
+		}
+
+		$client = $hubspot_api->client;
+
+		$properties['property'] = [
+			'total_registered_events',
+			'total_number_of_orders',
+			'average_tickets_per_order',
+			'average_tickets_per_order_list',
+			'average_events_per_order',
+			'average_events_per_order_list',
+			'total_attended_events',
+		];
+
+		try {
+			$hubspot = Factory::createWithToken( $access_token, $client );
+
+			// Use get by batch emails to prevent fatal errors in Guzzle when get by email returns 404.
+			$response = $hubspot->contacts()->getBatchByEmails( [ $email ], $properties );
+
+		} catch ( Exception $e ) {
+			$message = sprintf( 'Could not get the contact by email with HubSpot, error code: %s', $e->getMessage() );
+			tribe( 'logger' )->log_error( $message, 'HubSpot Contact' );
+
+			return false;
+		}
+
+		// Additional Safety Check to Verify Status Code.
+		if ( $response->getStatusCode() !== 200 ) {
+			$message = sprintf( 'Could not get the contact by email with HubSpot, error code: %s', $response->getStatusCode() );
+			tribe( 'logger' )->log_error( $message, 'HubSpot Contact' );
+
+			return false;
+		}
+
+		// Contact results are returned as an array, but we only want the first result.
+		return reset( $response->data );
+	}
+
 }

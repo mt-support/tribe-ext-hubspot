@@ -88,11 +88,12 @@ class Delivery_Queue extends Tribe__Process__Queue {
 
 		$email      = filter_var( $hubspot_data['email'], FILTER_SANITIZE_EMAIL );
 		$properties = \Tribe__Utils__Array::escape_multidimensional_array( $hubspot_data['properties'] );
+		$order_data = \Tribe__Utils__Array::escape_multidimensional_array( $hubspot_data['order_data'] );
 
 		$logger->log_debug( "(ID: {$this->identifier}) - updating contact {$email}", $log_src );
 
 		// Connect to HubSpot and Update.
-		$hubspot_response = $hubspot_contact->update( $email, $properties );
+		$hubspot_response = $hubspot_contact->update( $email, $properties, $order_data );
 
 		if ( false === $hubspot_response ) {
 			do_action(
