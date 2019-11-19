@@ -42,28 +42,29 @@ class Contact_Properties {
 	 *
 	 * @since 1.0
 	 *
+	 * @return bool
 	 */
 	public function setup_properties() {
 
 		/** @var \Tribe\HubSpot\API\Setup $setup */
 		$setup = tribe( 'tickets.hubspot.setup' );
-		$setup_try = $setup->get_status_by_name( $this->setup_name );
+		$setup_status = $setup->get_status_value_by_name( $this->setup_name );
 
-		if ( 'failed' === $setup_try ) {
+		if ( 'failed' === $setup_status ) {
 			return false;
 		}
 
-		if ( 'complete' === $setup_try ) {
+		if ( 'complete' === $setup_status ) {
 			return true;
 		}
 
-		$setup->set_status_by_name( $this->setup_name, $setup_try );
+		$setup->set_status_value_by_name( $this->setup_name, $setup_status );
 
 		/** @var \Tribe\HubSpot\API\Contact_Property_Group $hubspot_api_group */
 		$hubspot_api_group = tribe( 'tickets.hubspot.contact.property.group' );
 
 		if ( ! $hubspot_api_group->has_group() ) {
-			return;
+			return false;
 		}
 
 		// Get all properties created for our group name.
@@ -73,7 +74,9 @@ class Contact_Properties {
 		$this->create_all_properties( $created_fields );
 
 		// The custom properties are setup in HubSpot, set status as complete.
-		$setup->set_status_by_name( $this->setup_name, 'complete' );
+		$setup->set_status_value_by_name( $this->setup_name, 'complete' );
+
+		return true;
 	}
 
 	/**

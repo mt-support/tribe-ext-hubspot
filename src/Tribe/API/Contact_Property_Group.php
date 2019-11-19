@@ -43,9 +43,9 @@ class Contact_Property_Group {
 	 *
 	 * @since 1.0
 	 *
-	 * @param mixed $setup_try The current setup try number or status message.
+	 * @param mixed $setup_status The current setup try number or status message.
 	 */
-	public function queue_group_name( $setup_try = 1 ) {
+	public function queue_group_name( $setup_status = 1 ) {
 
 		/** @var \Tribe\HubSpot\API\Setup $setup */
 		$setup = tribe( 'tickets.hubspot.setup' );
@@ -67,34 +67,35 @@ class Contact_Property_Group {
 	 *
 	 * @since 1.0
 	 *
+	 * @return bool
 	 */
 	public function create() {
 
 		/** @var \Tribe\HubSpot\API\Setup $setup */
 		$setup = tribe( 'tickets.hubspot.setup' );
-		$setup_try = $setup->get_status_by_name( $this->setup_name );
+		$setup_status = $setup->get_status_value_by_name( $this->setup_name );
 
-		if ( 'failed' === $setup_try ) {
+		if ( 'failed' === $setup_status ) {
 			return false;
 		}
 
-		if ( 'complete' === $setup_try ) {
+		if ( 'complete' === $setup_status ) {
 			return true;
 		}
 
-		$setup->set_status_by_name( $this->setup_name, $setup_try );
+		$setup->set_status_value_by_name( $this->setup_name, $setup_status );
 
 		if ( $hubspot_api_group = $this->has_group() ) {
 			// The group is setup in HubSpot, set status as complete.
-			$setup->set_status_by_name( $this->setup_name, 'complete', true );
+			$setup->set_status_value_by_name( $this->setup_name, 'complete', true );
 
-			return;
+			return true;
 		}
 
 		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
 		$hubspot_api = tribe( 'tickets.hubspot.api' );
 		if ( ! $access_token = $hubspot_api->is_ready() ) {
-			return;
+			return false;
 		}
 
 		$properties = [
@@ -110,7 +111,7 @@ class Contact_Property_Group {
 			$message = sprintf( 'Could not create a contact property group, error code: %s', $e->getMessage() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Property Group' );
 
-			return;
+			return false;
 		}
 
 		// Additional Safety Check to Verify Status Code.
@@ -118,12 +119,13 @@ class Contact_Property_Group {
 			$message = sprintf( 'Could not create a contact property group, error code: %s', $response->getStatusCode() );
 			tribe( 'logger' )->log_error( $message, 'HubSpot Contact Property Group' );
 
-			return;
+			return false;
 		}
 
 		// The group is setup in HubSpot, set status as complete.
-		$setup->set_status_by_name( $this->setup_name, 'complete', true );
+		$setup->set_status_value_by_name( $this->setup_name, 'complete', true );
 
+		return true;
 	}
 
 	/**

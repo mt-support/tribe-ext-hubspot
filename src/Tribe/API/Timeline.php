@@ -53,17 +53,17 @@ class Timeline {
 
 		/** @var \Tribe\HubSpot\API\Setup $setup */
 		$setup = tribe( 'tickets.hubspot.setup' );
-		$setup_try = $setup->get_status_by_name( $this->setup_name );
+		$setup_status = $setup->get_status_value_by_name( $this->setup_name );
 
-		if ( 'failed' === $setup_try ) {
+		if ( 'failed' === $setup_status ) {
 			return false;
 		}
 
-		if ( 'complete' === $setup_try ) {
+		if ( 'complete' === $setup_status ) {
 			return true;
 		}
 
-		$setup->set_status_by_name( $this->setup_name, $setup_try );
+		$setup->set_status_value_by_name( $this->setup_name, $setup_status );
 
 		/** @var \Tribe\HubSpot\Admin\Settings $hubspot_options */
 		$hubspot_options = tribe( 'tickets.hubspot.admin.settings' );
@@ -106,7 +106,7 @@ class Timeline {
 		}
 
 		// The timeline event types are setup in HubSpot, set status as complete.
-		$setup->set_status_by_name( $this->setup_name, 'complete' );
+		$setup->set_status_value_by_name( $this->setup_name, 'complete' );
 	}
 
 	/**

@@ -136,7 +136,7 @@ class Setup {
 
 			// If greater then the max tries then mark as failed.
 			if ( $options[ $type ] >= $this->max_setup_tries ) {
-				$this->set_status_by_name( $type, 'failed' );
+				$this->set_status_value_by_name( $type, 'failed' );
 				continue;
 			}
 
@@ -158,7 +158,7 @@ class Setup {
 	 * @param mixed   $value             The value to update the status type to.
 	 * @param boolean $trigger_secondary Whether to trigger setup of secondary values.
 	 */
-	public function set_status_by_name( $type, $value, $trigger_secondary = false ) {
+	public function set_status_value_by_name( $type, $value, $trigger_secondary = false ) {
 
 		$this->settings->update_option( $type, $value );
 
@@ -184,7 +184,7 @@ class Setup {
 	 *
 	 * @return int|mixed|string The value of the Status Type.
 	 */
-	public function get_status_by_name( $type ) {
+	public function get_status_value_by_name( $type ) {
 
 		$value = $this->settings->get_option( $type );
 
@@ -252,7 +252,7 @@ class Setup {
 	public function clear_setup() {
 
 		foreach ( $this->setup_types as $type ) {
-			$this->set_status_by_name( $type, false );
+			$this->set_status_value_by_name( $type, false );
 		}
 	}
 
