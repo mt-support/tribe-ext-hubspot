@@ -64,9 +64,9 @@ abstract class Base {
 	/**
 	 * Get the Extra Data for HubSpot Timeline Events.
 	 *
-	 * @param int    $post_id     the ID of an event.
+	 * @param int    $post_id     The ID of an event.
 	 * @param int    $ticket_id   The ticket product id.
-	 * @param int    $attendee_id the ID of an attendee.
+	 * @param int    $attendee_id The ID of an attendee.
 	 * @param string $commerce    The commerce key for ET and ET+ (woo,edd,tpp,rsvp).
 	 * @param string $name        The name of the Attendee.
 	 * @param null   $rsvp        The optional RSVP status of going (1) and not going (0).
@@ -107,6 +107,78 @@ abstract class Base {
 		];
 
 		return $extra_data;
+	}
+
+	/**
+	 * Maybe Update HubSpot Contact.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string                               $provider_key  The key for the provider.
+	 * @param int                                  $post_id       The ID of the event.
+	 * @param int                                  $product_id    The ID of the product(ticket).
+	 * @param int                                  $attendee_id   The ID of an attendee.
+	 * @param array                                $attendee_data An array of attendee data.
+	 * @param array                                $qty           An array of data for total tickets, total number of events, and total types of tickets.
+	 * @param \Tribe\HubSpot\Properties\Event_Data $data          An event data object used to get and organize values for HubSpot.
+	 */
+	public function maybe_register_contact( $provider_key, $post_id, $product_id, $attendee_id, $attendee_data, $qty, $data ) {
+
+		$rsvp_status = null;
+		if ( 'rsvp' === $provider_key ) {
+			$rsvp_status = $attendee_data['status'];
+		}
+
+		$groups   = [];
+		$groups[] = $data->get_event_values( 'last_registered_', $post_id );
+		$groups[] = $data->get_order_values( 'last_order_', $attendee_data['date'], $attendee_data['total'], $qty['total'], count( $qty['tickets'] ) );
+		$groups[] = $data->get_ticket_values( $product_id, $attendee_id, $provider_key, $attendee_data['name'], $rsvp_status );
+
+		$properties = $this->get_initial_properties_array( $attendee_data );
+		$properties = array_merge( $properties, ...$groups );
+
+		$order_data = $this->get_order_data_array( $attendee_data, $qty, 'register' );
+
+		$this->maybe_push_to_contact_queue( $attendee_data, $properties, $order_data );
+	}
+
+	/**
+	 * Maybe Update HubSpot Contact.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $attendee_data An array of attendee data.
+	 * @param array $qty           An array of data for total tickets, total number of events, and total types of tickets.
+	 */
+	public function maybe_update_contact( $attendee_data, $qty ) {
+
+		$properties = $this->get_initial_properties_array( $attendee_data );
+		$order_data = $this->get_order_data_array( $attendee_data, $qty, '' );
+
+		$this->maybe_push_to_contact_queue( $attendee_data, $properties, $order_data );
+	}
+
+	/**
+	 * Maybe Update HubSpot Contact
+	 *
+	 * @since 1.0
+	 *
+	 * @param array                                $related_data  An array of order information for an Attendee.
+	 * @param array                                $attendee_data An array of attendee data.
+	 * @param array                                $qty           An array of data for total tickets, total number of events, and total types of tickets.
+	 * @param \Tribe\HubSpot\Properties\Event_Data $data          An event data object used to get and organize values for HubSpot.
+	 */
+	public function maybe_checkin_contact( $related_data, $attendee_data, $qty, $data ) {
+
+		$groups   = [];
+		$groups[] = $data->get_event_values( 'last_attended_', $related_data['post_id'] );
+
+		$properties = $this->get_initial_properties_array( $attendee_data );
+		$properties = array_merge( $properties, ...$groups );
+
+		$order_data = $this->get_order_data_array( $attendee_data, $qty, 'checkin' );
+
+		$this->maybe_push_to_contact_queue( $attendee_data, $properties, $order_data );
 	}
 
 	/**
@@ -175,7 +247,7 @@ abstract class Base {
 	 * @param int    $order_id     ID of an Order.
 	 * @param string $provider_key Key for Provider.
 	 *
-	 * @return int An attendee Id
+	 * @return int An attendee ID.
 	 */
 	public function get_first_attendee_id_from_order( $order_id, $provider_key ) {
 
@@ -200,194 +272,14 @@ abstract class Base {
 	}
 
 	/**
-	 * Connect to Creation of an Attendee for WooCommerce.
-	 *
-	 * @since 1.0
-	 *
-	 * @param object $order WooCommerce order object \WC_Order.
-	 *
-	 * @return array An array of attendee data from a WooCommerce Order.
-	 */
-	public function get_woo_contact_data_from_order( $order ) {
-
-		$attendee_data['email']      = $order->get_billing_email();
-		$attendee_data['name']       = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
-		$attendee_data['first_name'] = $order->get_billing_first_name();
-		$attendee_data['last_name']  = $order->get_billing_last_name();
-		$attendee_data['total']      = $order->get_total();
-		$attendee_data['date']       = $order->get_date_created()->getTimestamp();
-
-		return $attendee_data;
-	}
-
-	/**
-	 * Get WooCommerce Order Related Data by Attendee ID.
-	 *
-	 * @since 1.0
-	 *
-	 * @param int $attendee_id the ID of an attendee.
-	 *
-	 * @return array An array of related data ( Order ID, Order Object, Post ID, and Product ID ).
-	 */
-	public function get_woo_related_data_by_attendee_id( $attendee_id ) {
-
-		/** @var $commerce_woo \Tribe__Tickets_Plus__Commerce__WooCommerce__Main */
-		$commerce_woo = tribe( 'tickets-plus.commerce.woo' );
-
-		$related_data['order_id']  = get_post_meta( $attendee_id, $commerce_woo->attendee_order_key, true );
-		$related_data['order']     = new \WC_Order( $related_data['order_id'] );
-		$related_data['post_id']   = get_post_meta( $attendee_id, $commerce_woo->attendee_event_key, true );
-		$related_data['ticket_id'] = get_post_meta( $attendee_id, $commerce_woo->attendee_product_key, true );
-
-		return $related_data;
-	}
-
-	/**
-	 * Connect to Creation of an Attendee for EDD.
-	 *
-	 * @since 1.0
-	 *
-	 * @param object $order EDD order object \EDD_Payment.
-	 *
-	 * @return array An array of attendee data from a EDD Order.
-	 */
-	public function get_edd_contact_data_from_order( $order, $order_id ) {
-
-		$user_info = edd_get_payment_meta_user_info( $order_id );
-
-		$attendee_data['email']      = $user_info['email'];
-		$attendee_data['name']       = $user_info['first_name'] . ' ' . $user_info['last_name'];
-		$attendee_data['first_name'] = $user_info['first_name'];
-		$attendee_data['last_name']  = $user_info['last_name'];
-		$attendee_data['total']      = $order->total;
-		$attendee_data['date']       = \Tribe__Date_Utils::wp_strtotime( $order->date );
-
-		return $attendee_data;
-	}
-
-	/**
-	 * Get EDD Order Related Data by Attendee ID.
-	 *
-	 * @since 1.0
-	 *
-	 * @param int $attendee_id the ID of an attendee.
-	 *
-	 * @return array An array of related data ( Order ID, Order Object, Post ID, and Product ID ).
-	 */
-	public function get_edd_related_data_by_attendee_id( $attendee_id ) {
-
-		/** @var $commerce_edd \Tribe__Tickets_Plus__Commerce__EDD__Main */
-		$commerce_edd = tribe( 'tickets-plus.commerce.edd' );
-
-		$related_data['order_id']  = get_post_meta( $attendee_id, $commerce_edd->attendee_order_key, true );
-		$related_data['order']     = edd_get_payment( $related_data['order_id'] );
-		$related_data['post_id']   = get_post_meta( $attendee_id, $commerce_edd->attendee_event_key, true );
-		$related_data['ticket_id'] = get_post_meta( $attendee_id, $commerce_edd->attendee_product_key, true );
-
-		return $related_data;
-	}
-
-	/**
-	 * Connect to Creation of an Attendee for RSVP.
-	 *
-	 * @since 1.0
-	 *
-	 * @param array $order Array of Attendees from RSVP Order.
-	 *
-	 * @return array An array of attendee data from a RSVP Order.
-	 */
-	public function get_rsvp_contact_data_from_order( $order ) {
-
-		// Use the First Attendee for the Order Information.
-		$attendee = reset( $order );
-		$names    = $this->split_name( $attendee['holder_name'] );
-
-		$attendee_data['email']      = $attendee['holder_email'];
-		$attendee_data['name']       = $attendee['holder_name'];
-		$attendee_data['first_name'] = $names['first_name'];
-		$attendee_data['last_name']  = $names['last_name'];
-		$attendee_data['total']      = 0;
-		$attendee_data['date']       = get_the_date( 'U', $attendee['attendee_id'] );
-
-		return $attendee_data;
-	}
-
-	/**
-	 * Get RSVP Order Related Data by Attendee ID.
-	 *
-	 * @since 1.0
-	 *
-	 * @param int $attendee_id the ID of an attendee.
-	 *
-	 * @return array An array of related data ( Order ID, Order Object, Post ID, and Product ID ).
-	 */
-	public function get_rsvp_related_data_by_attendee_id( $attendee_id ) {
-
-		/** @var $rsvp \Tribe__Tickets__RSVP */
-		$rsvp = tribe( 'tickets.rsvp' );
-
-		$related_data['order_id']  = get_post_meta( $attendee_id, $rsvp->order_key, true );
-		$related_data['order']     = $rsvp->get_attendees_by_id( $related_data['order_id'] );
-		$related_data['post_id']   = get_post_meta( $attendee_id, $rsvp->attendee_event_key, true );
-		$related_data['ticket_id'] = get_post_meta( $attendee_id, $rsvp->attendee_product_key, true );
-
-		return $related_data;
-	}
-
-	/**
-	 * Connect to Creation of an Attendee for TPP.
-	 *
-	 * @since 1.0
-	 *
-	 * @param \Tribe__Tickets__Commerce__PayPal__Order $order An order object for TPP.
-	 *
-	 * @return array An array of attendee data from a RSVP Order.
-	 */
-	public function get_tpp_contact_data_from_order( $order ) {
-
-		$names = $this->split_name( $order->get_meta( 'address_name' ) );
-
-		$attendee_data['email']      = $order->get_meta( 'payer_email' );
-		$attendee_data['name']       = $order->get_meta( 'address_name' );
-		$attendee_data['first_name'] = $names['first_name'];
-		$attendee_data['last_name']  = $names['last_name'];
-		$attendee_data['total']      = $order->get_line_total();
-		$attendee_data['date']       = \Tribe__Date_Utils::wp_strtotime( $order->get_creation_date() );
-
-		return $attendee_data;
-	}
-
-	/**
-	 * Get TPP Order Related Data by Attendee ID.
-	 *
-	 * @since 1.0
-	 *
-	 * @param int $attendee_id the ID of an attendee.
-	 *
-	 * @return array An array of related data ( Order ID, Order Object, Post ID, and Product ID ).
-	 */
-	public function get_tpp_related_data_by_attendee_id( $attendee_id ) {
-
-		/** @var $commerce_tpp \Tribe__Tickets__Commerce__PayPal__Main */
-		$commerce_tpp = tribe( 'tickets.commerce.paypal' );
-
-		$related_data['order_id']  = get_post_meta( $attendee_id, $commerce_tpp->order_key, true );
-		$related_data['order']     = \Tribe__Tickets__Commerce__PayPal__Order::from_order_id( $related_data['order_id'] );
-		$related_data['post_id']   = get_post_meta( $attendee_id, $commerce_tpp->attendee_event_key, true );
-		$related_data['ticket_id'] = get_post_meta( $attendee_id, $commerce_tpp->attendee_product_key, true );
-
-		return $related_data;
-	}
-
-	/**
 	 * Spilt Full Name into First, Middle, and Last.
 	 * https://stackoverflow.com/a/31330346
 	 *
 	 * @since 1.0
 	 *
-	 * @param $string
+	 * @param string $string The Name to parse.
 	 *
-	 * @return array|bool
+	 * @return array|bool The First, Middle, and Last Name or False if to many names provided.
 	 */
 	public function split_name( $string ) {
 		$arr        = explode( ' ', $string );

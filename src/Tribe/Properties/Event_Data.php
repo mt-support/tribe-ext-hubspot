@@ -82,29 +82,29 @@ class Event_Data {
 	 * @return array An array of attributes with values
 	 */
 	public function get_venue_values( $prefix, $venue ) {
-
+		log_me($venue);
 		// We only support one venue, but we get an array so get the first value
 		$venue      = reset( $venue );
 		$venue_data = [
 			[
 				'property' => $prefix . 'event_venue',
-				'value'    => $venue->post_title,
+				'value'    => isset( $venue->post_title ) ? $venue->post_title : null,
 			],
 			[
 				'property' => $prefix . 'event_venue_address',
-				'value'    => $venue->address,
+				'value'    => isset( $venue->address ) ? $venue->address : null,
 			],
 			[
 				'property' => $prefix . 'event_venue_city',
-				'value'    => $venue->city,
+				'value'    => isset( $venue->city ) ? $venue->city : null,
 			],
 			[
 				'property' => $prefix . 'event_venue_state_province',
-				'value'    => $venue->state_province,
+				'value'    => isset( $venue->state_province ) ? $venue->state_province : null,
 			],
 			[
 				'property' => $prefix . 'event_venue_postal_code',
-				'value'    => $venue->zip,
+				'value'    => isset( $venue->zip ) ? $venue->zip : null,
 			],
 		];
 
