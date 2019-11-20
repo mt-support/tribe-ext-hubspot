@@ -67,7 +67,7 @@ abstract class Base {
 	 * @param int    $post_id     The ID of an event.
 	 * @param int    $ticket_id   The ticket product id.
 	 * @param int    $attendee_id The ID of an attendee.
-	 * @param string $commerce    The commerce key for ET and ET+ (woo,edd,tpp,rsvp).
+	 * @param string $commerce    The commerce key for ET and ET+ (woo, edd, tpp, rsvp).
 	 * @param string $name        The name of the Attendee.
 	 * @param null   $rsvp        The optional RSVP status of going (1) and not going (0).
 	 *
@@ -216,8 +216,8 @@ abstract class Base {
 	 *
 	 * @param array  $attendee_data An array of contact information for the attendee.
 	 * @param string $type_site_id  The name of the site option field of event to create ( Registration, Update, Check-In ).
-	 * @param int    $post_id       the ID of an event.
-	 * @param int    $attendee_id   the ID of an attendee.
+	 * @param int    $post_id       The ID of an event.
+	 * @param int    $attendee_id   The ID of an attendee.
 	 * @param array  $extra_data    An array of event and ticket data to include with the Timeline Event.
 	 */
 	public function maybe_push_to_timeline_queue( $attendee_data, $type_site_id, $post_id, $attendee_id, $extra_data ) {

@@ -82,7 +82,7 @@ class Event_Data {
 	 * @return array An array of attributes with values
 	 */
 	public function get_venue_values( $prefix, $venue ) {
-		log_me($venue);
+
 		// We only support one venue, but we get an array so get the first value
 		$venue      = reset( $venue );
 		$venue_data = [
@@ -153,7 +153,7 @@ class Event_Data {
 	 *
 	 * @since 1.0
 	 *
-	 * @param int       $ticket_id     The ticket product id
+	 * @param int       $ticket_id     The ticket product id.
 	 * @param int       $attendee_id   the ID of an attendee.
 	 * @param string    $commerce      The commerce key for ET and ET+ (woo,edd,tpp,rsvp).
 	 * @param string    $name          The name of the Attendee.
@@ -199,7 +199,7 @@ class Event_Data {
 	 *
 	 * @since 1.0
 	 *
-	 * @param \WC_Order $order WooCommerce order object.
+	 * @param object|\WC_Order $order WooCommerce order object.
 	 *
 	 * @return array An array of data for total tickets, total number of events, and total types of tickets.
 	 */
