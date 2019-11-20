@@ -154,7 +154,7 @@ class Event_Data {
 	 * @since 1.0
 	 *
 	 * @param int    $ticket_id   The ticket product id.
-	 * @param int    $attendee_id the ID of an attendee.
+	 * @param int    $attendee_id The ID of an attendee.
 	 * @param string $commerce    The commerce key for ET and ET+ (woo, edd, tpp, rsvp).
 	 * @param string $name        The name of the Attendee.
 	 *
