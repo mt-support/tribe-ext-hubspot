@@ -12,7 +12,7 @@ use Tribe\HubSpot\Process\Delivery_Queue;
 class Update extends Base {
 
 	/**
-	 * Setup Hooks to SubScribe to Check
+	 * Setup Hooks to SubScribe to Check.
 	 *
 	 * @since 1.0
 	 *
@@ -25,13 +25,13 @@ class Update extends Base {
 	}
 
 	/**
-	 * Connect to Update of an Attendee for WooCommerce
+	 * Connect to Update of an Attendee for WooCommerce.
 	 *
 	 * @since 1.0
 	 *
 	 * @param array $data        An array of information that was saved for the attendee.
-	 * @param int   $attendee_id the ID of an attendee.
-	 * @param int   $post_id     the ID of an event.
+	 * @param int   $attendee_id The ID of an attendee.
+	 * @param int   $post_id     The ID of an event.
 	 */
 	public function woo_subscribe( $data, $attendee_id, $post_id ) {
 
@@ -48,13 +48,13 @@ class Update extends Base {
 	}
 
 	/**
-	 * Connect to Update of an Attendee for WooCommerce
+	 * Connect to Update of an Attendee for WooCommerce.
 	 *
 	 * @since 1.0
 	 *
 	 * @param array $data        An array of information that was saved for the attendee.
-	 * @param int   $attendee_id the ID of an attendee.
-	 * @param int   $post_id     the ID of an event.
+	 * @param int   $attendee_id The ID of an attendee.
+	 * @param int   $post_id     The ID of an event.
 	 */
 	public function woo_timeline( $data, $attendee_id, $post_id ) {
 
