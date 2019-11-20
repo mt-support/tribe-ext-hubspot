@@ -153,9 +153,9 @@ class Event_Data {
 	 *
 	 * @since 1.0
 	 *
-	 * @param int    $ticket_id   The ticket product id
+	 * @param int    $ticket_id   The ticket product id.
 	 * @param int    $attendee_id the ID of an attendee.
-	 * @param string $commerce    The commerce key for ET and ET+ (woo,edd,tpp,rsvp).
+	 * @param string $commerce    The commerce key for ET and ET+ (woo, edd, tpp, rsvp).
 	 * @param string $name        The name of the Attendee.
 	 *
 	 * @return array
@@ -198,9 +198,9 @@ class Event_Data {
 	 *
 	 * @since 1.0
 	 *
-	 * @param object $order WooCommerce order object \WC_Order.
+	 * @param object|\WC_Order $order WooCommerce order object.
 	 *
-	 * @return array An array of data for total tickets, total number of events, and total types of tickets
+	 * @return array An array of data for total tickets, total number of events, and total types of tickets.
 	 */
 	public function get_woo_order_quantities( $order ) {
 
