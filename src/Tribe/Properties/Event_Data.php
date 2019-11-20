@@ -199,9 +199,9 @@ class Event_Data {
 	 *
 	 * @since 1.0
 	 *
-	 * @param object $order WooCommerce order object \WC_Order.
+	 * @param \WC_Order $order WooCommerce order object.
 	 *
-	 * @return array An array of data for total tickets, total number of events, and total types of tickets
+	 * @return array An array of data for total tickets, total number of events, and total types of tickets.
 	 */
 	public function get_woo_order_quantities( $order ) {
 
@@ -244,9 +244,9 @@ class Event_Data {
 	 *
 	 * @since 1.0
 	 *
-	 * @param object $order EDD order object \EDD_Payment.
+	 * @param \EDD_Payment $order EDD order object.
 	 *
-	 * @return array An array of data for total tickets, total number of events, and total types of tickets
+	 * @return array An array of data for total tickets, total number of events, and total types of tickets.
 	 */
 	public function get_edd_order_quantities( $order ) {
 
@@ -287,7 +287,7 @@ class Event_Data {
 	 *
 	 * @param array $order Array of Attendees from RSVP Order.
 	 *
-	 * @return array An array of data for total tickets, total number of events, and total types of tickets
+	 * @return array An array of data for total tickets, total number of events, and total types of tickets.
 	 */
 	public function get_rsvp_order_quantities( $order ) {
 
@@ -298,6 +298,34 @@ class Event_Data {
 		];
 
 		foreach ( $order as $item ) {
+			$ticket_id  = $item['product_id'];
+			$quantities = 1;
+
+			$valid_order_items['total']                 += $quantities;
+			$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+		}
+
+		return $valid_order_items;
+	}
+
+	/**
+	 * Get Order Quantities for TPP Orders
+	 *
+	 * @since 1.0
+	 *
+	 * @param \Tribe__Tickets__Commerce__PayPal__Order $order An order object for TPP.
+	 *
+	 * @return array An array of data for total tickets, total number of events, and total types of tickets.
+	 */
+	public function get_tpp_order_quantities( $order ) {
+
+		$valid_order_items = [
+			'total'            => 0,
+			'tickets'          => [],
+			'events_per_order' => 1,
+		];
+
+		foreach ( $order->get_attendees() as $item ) {
 			$ticket_id  = $item['product_id'];
 			$quantities = 1;
 

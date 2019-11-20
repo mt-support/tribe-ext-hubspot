@@ -168,41 +168,19 @@ abstract class Base {
 	}
 
 	/**
-	 * Get WooCommerce Order Related Data by Attendee ID.
-	 *
-	 * @since 1.0
-	 *
-	 * @param int $attendee_id the ID of an attendee.
-	 *
-	 * @return array An array of related data ( Order ID, Order Object, Post ID, and Product ID )
-	 */
-	public function get_woo_related_data_by_attendee_id( $attendee_id ) {
-
-		/** @var $commerce_woo \Tribe__Tickets_Plus__Commerce__WooCommerce__Main */
-		$commerce_woo = tribe( 'tickets-plus.commerce.woo' );
-
-		$related_data['order_id']  = get_post_meta( $attendee_id, $commerce_woo->attendee_order_key, true );
-		$related_data['order']     = new \WC_Order( $related_data['order_id'] );
-		$related_data['post_id']   = get_post_meta( $attendee_id, $commerce_woo->attendee_event_key, true );
-		$related_data['ticket_id'] = get_post_meta( $attendee_id, $commerce_woo->attendee_product_key, true );
-
-		return $related_data;
-	}
-
-	/**
 	 * Get the First Attendee in an Order.
 	 *
 	 * @since 1.0
 	 *
-	 * @param int $order_id ID of an Order.
+	 * @param int    $order_id     ID of an Order.
 	 * @param string $provider_key Key for Provider.
 	 *
 	 * @return int An attendee Id
 	 */
 	public function get_first_attendee_id_from_order( $order_id, $provider_key ) {
 
-			/** @var $provider \Tribe__Tickets__RSVP */
-			$provider = tribe( 'tickets.rsvp' );
+		/** @var $provider \Tribe__Tickets__RSVP */
+		$provider = tribe( 'tickets.rsvp' );
 		if ( 'woo' === $provider_key ) {
 			/** @var $provider \Tribe__Tickets_Plus__Commerce__WooCommerce__Main */
 			$provider = tribe( 'tickets-plus.commerce.woo' );
@@ -218,7 +196,7 @@ abstract class Base {
 
 		$attendee = reset( $attendees );
 
-		return $attendee[ 'attendee_id' ];
+		return $attendee['attendee_id'];
 	}
 
 	/**
@@ -240,6 +218,28 @@ abstract class Base {
 		$attendee_data['date']       = $order->get_date_created()->getTimestamp();
 
 		return $attendee_data;
+	}
+
+	/**
+	 * Get WooCommerce Order Related Data by Attendee ID.
+	 *
+	 * @since 1.0
+	 *
+	 * @param int $attendee_id the ID of an attendee.
+	 *
+	 * @return array An array of related data ( Order ID, Order Object, Post ID, and Product ID ).
+	 */
+	public function get_woo_related_data_by_attendee_id( $attendee_id ) {
+
+		/** @var $commerce_woo \Tribe__Tickets_Plus__Commerce__WooCommerce__Main */
+		$commerce_woo = tribe( 'tickets-plus.commerce.woo' );
+
+		$related_data['order_id']  = get_post_meta( $attendee_id, $commerce_woo->attendee_order_key, true );
+		$related_data['order']     = new \WC_Order( $related_data['order_id'] );
+		$related_data['post_id']   = get_post_meta( $attendee_id, $commerce_woo->attendee_event_key, true );
+		$related_data['ticket_id'] = get_post_meta( $attendee_id, $commerce_woo->attendee_product_key, true );
+
+		return $related_data;
 	}
 
 	/**
@@ -266,6 +266,28 @@ abstract class Base {
 	}
 
 	/**
+	 * Get EDD Order Related Data by Attendee ID.
+	 *
+	 * @since 1.0
+	 *
+	 * @param int $attendee_id the ID of an attendee.
+	 *
+	 * @return array An array of related data ( Order ID, Order Object, Post ID, and Product ID ).
+	 */
+	public function get_edd_related_data_by_attendee_id( $attendee_id ) {
+
+		/** @var $commerce_edd \Tribe__Tickets_Plus__Commerce__EDD__Main */
+		$commerce_edd = tribe( 'tickets-plus.commerce.edd' );
+
+		$related_data['order_id']  = get_post_meta( $attendee_id, $commerce_edd->attendee_order_key, true );
+		$related_data['order']     = edd_get_payment( $related_data['order_id'] );
+		$related_data['post_id']   = get_post_meta( $attendee_id, $commerce_edd->attendee_event_key, true );
+		$related_data['ticket_id'] = get_post_meta( $attendee_id, $commerce_edd->attendee_product_key, true );
+
+		return $related_data;
+	}
+
+	/**
 	 * Connect to Creation of an Attendee for RSVP.
 	 *
 	 * @since 1.0
@@ -288,6 +310,73 @@ abstract class Base {
 		$attendee_data['date']       = get_the_date( 'U', $attendee['attendee_id'] );
 
 		return $attendee_data;
+	}
+
+	/**
+	 * Get RSVP Order Related Data by Attendee ID.
+	 *
+	 * @since 1.0
+	 *
+	 * @param int $attendee_id the ID of an attendee.
+	 *
+	 * @return array An array of related data ( Order ID, Order Object, Post ID, and Product ID ).
+	 */
+	public function get_rsvp_related_data_by_attendee_id( $attendee_id ) {
+
+		/** @var $rsvp \Tribe__Tickets__RSVP */
+		$rsvp = tribe( 'tickets.rsvp' );
+
+		$related_data['order_id']  = get_post_meta( $attendee_id, $rsvp->order_key, true );
+		$related_data['order']     = $rsvp->get_attendees_by_id( $related_data['order_id'] );
+		$related_data['post_id']   = get_post_meta( $attendee_id, $rsvp->attendee_event_key, true );
+		$related_data['ticket_id'] = get_post_meta( $attendee_id, $rsvp->attendee_product_key, true );
+
+		return $related_data;
+	}
+
+	/**
+	 * Connect to Creation of an Attendee for TPP.
+	 *
+	 * @since 1.0
+	 *
+	 * @param \Tribe__Tickets__Commerce__PayPal__Order $order An order object for TPP.
+	 *
+	 * @return array An array of attendee data from a RSVP Order.
+	 */
+	public function get_tpp_contact_data_from_order( $order ) {
+
+		$names = $this->split_name( $order->get_meta( 'address_name' ) );
+
+		$attendee_data['email']      = $order->get_meta( 'payer_email' );
+		$attendee_data['name']       = $order->get_meta( 'address_name' );
+		$attendee_data['first_name'] = $names['first_name'];
+		$attendee_data['last_name']  = $names['last_name'];
+		$attendee_data['total']      = $order->get_line_total();
+		$attendee_data['date']       = \Tribe__Date_Utils::wp_strtotime( $order->get_creation_date() );
+
+		return $attendee_data;
+	}
+
+	/**
+	 * Get TPP Order Related Data by Attendee ID.
+	 *
+	 * @since 1.0
+	 *
+	 * @param int $attendee_id the ID of an attendee.
+	 *
+	 * @return array An array of related data ( Order ID, Order Object, Post ID, and Product ID ).
+	 */
+	public function get_tpp_related_data_by_attendee_id( $attendee_id ) {
+
+		/** @var $commerce_tpp \Tribe__Tickets__Commerce__PayPal__Main */
+		$commerce_tpp = tribe( 'tickets.commerce.paypal' );
+
+		$related_data['order_id']  = get_post_meta( $attendee_id, $commerce_tpp->order_key, true );
+		$related_data['order']     = \Tribe__Tickets__Commerce__PayPal__Order::from_order_id( $related_data['order_id'] );
+		$related_data['post_id']   = get_post_meta( $attendee_id, $commerce_tpp->attendee_event_key, true );
+		$related_data['ticket_id'] = get_post_meta( $attendee_id, $commerce_tpp->attendee_product_key, true );
+
+		return $related_data;
 	}
 
 	/**
