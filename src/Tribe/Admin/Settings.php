@@ -494,14 +494,15 @@ class Settings {
 		$status['indicator'] = 'warning';
 		$status['text']      = __( 'Setup on hold.', 'tribe-ext-hubspot' );
 		$status['notes']     = '&nbsp;';
+		$status_value   = isset( $options[ $type ] ) ? $options[ $type ] : null;
 
-		if ( 'complete' === $options[ $type ] ) {
+		if ( 'complete' === $status_value ) {
 			$status['indicator'] = 'good';
 			$status['text']      = __( 'Setup Complete.', 'tribe-ext-hubspot' );
-		} elseif ( 'failed' === $options[ $type ] ) {
+		} elseif ( 'failed' === $status_value ) {
 			$status['indicator'] = 'bad';
 			$status['text']      = __( 'Setup incomplete, please refresh your connection to try again.', 'tribe-ext-hubspot' );
-		} elseif ( is_numeric( $options[ $type ] ) ) {
+		} elseif ( is_numeric( $status_value ) ) {
 			$status['text']  = __( 'Setup in Progress.', 'tribe-ext-hubspot' );
 			$status['notes'] = __( 'Setup can take up to 5 minutes. You may navigate away from this page and setup with continue in the background.', 'tribe-ext-hubspot' );
 		}
