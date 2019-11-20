@@ -194,16 +194,27 @@ abstract class Base {
 	 *
 	 * @since 1.0
 	 *
-	 * @param int $order_id ID of the WooCommerce Order.
+	 * @param int $order_id ID of an Order.
+	 * @param string $provider_key Key for Provider.
 	 *
 	 * @return int An attendee Id
 	 */
-	public function get_woo_first_attendee_id_from_order( $order_id ) {
+	public function get_first_attendee_id_from_order( $order_id, $provider_key ) {
 
-		/** @var $commerce_woo \Tribe__Tickets_Plus__Commerce__WooCommerce__Main */
-		$commerce_woo = tribe( 'tickets-plus.commerce.woo' );
+			/** @var $provider \Tribe__Tickets__RSVP */
+			$provider = tribe( 'tickets.rsvp' );
+		if ( 'woo' === $provider_key ) {
+			/** @var $provider \Tribe__Tickets_Plus__Commerce__WooCommerce__Main */
+			$provider = tribe( 'tickets-plus.commerce.woo' );
+		} elseif ( 'edd' === $provider_key ) {
+			/** @var $provider \Tribe__Tickets_Plus__Commerce__EDD__Main */
+			$provider = tribe( 'tickets-plus.commerce.edd' );
+		} elseif ( 'tpp' === $provider_key ) {
+			/** @var $provider \Tribe__Tickets__Commerce__PayPal__Main */
+			$provider = tribe( 'tickets.commerce.paypal' );
+		}
 
-		$attendees = $commerce_woo->get_attendees_by_id( $order_id );
+		$attendees = $provider->get_attendees_by_id( $order_id );
 
 		$attendee = reset( $attendees );
 
@@ -229,5 +240,77 @@ abstract class Base {
 		$attendee_data['date']       = $order->get_date_created()->getTimestamp();
 
 		return $attendee_data;
+	}
+
+	/**
+	 * Connect to Creation of an Attendee for EDD.
+	 *
+	 * @since 1.0
+	 *
+	 * @param object $order EDD order object \EDD_Payment.
+	 *
+	 * @return array An array of attendee data from a EDD Order.
+	 */
+	public function get_edd_contact_data_from_order( $order, $order_id ) {
+
+		$user_info = edd_get_payment_meta_user_info( $order_id );
+
+		$attendee_data['email']      = $user_info['email'];
+		$attendee_data['name']       = $user_info['first_name'] . ' ' . $user_info['last_name'];
+		$attendee_data['first_name'] = $user_info['first_name'];
+		$attendee_data['last_name']  = $user_info['last_name'];
+		$attendee_data['total']      = $order->total;
+		$attendee_data['date']       = \Tribe__Date_Utils::wp_strtotime( $order->date );
+
+		return $attendee_data;
+	}
+
+	/**
+	 * Connect to Creation of an Attendee for RSVP.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $order Array of Attendees from RSVP Order.
+	 *
+	 * @return array An array of attendee data from a RSVP Order.
+	 */
+	public function get_rsvp_contact_data_from_order( $order ) {
+
+		// Use the First Attendee for the Order Information.
+		$attendee = reset( $order );
+		$names    = $this->split_name( $attendee['holder_name'] );
+
+		$attendee_data['email']      = $attendee['holder_email'];
+		$attendee_data['name']       = $attendee['holder_name'];
+		$attendee_data['first_name'] = $names['first_name'];
+		$attendee_data['last_name']  = $names['last_name'];
+		$attendee_data['total']      = 0;
+		$attendee_data['date']       = get_the_date( 'U', $attendee['attendee_id'] );
+
+		return $attendee_data;
+	}
+
+	/**
+	 * Spilt Full Name into First, Middle, and Last.
+	 * https://stackoverflow.com/a/31330346
+	 *
+	 * @since 1.0
+	 *
+	 * @param $string
+	 *
+	 * @return array|bool
+	 */
+	public function split_name( $string ) {
+		$arr        = explode( ' ', $string );
+		$num        = count( $arr );
+		$first_name = $middle_name = $last_name = null;
+
+		if ( $num == 2 ) {
+			list( $first_name, $last_name ) = $arr;
+		} else {
+			list( $first_name, $middle_name, $last_name ) = $arr;
+		}
+
+		return ( empty( $first_name ) || $num > 3 ) ? false : compact( 'first_name', 'middle_name', 'last_name' );
 	}
 }

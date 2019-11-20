@@ -153,14 +153,15 @@ class Event_Data {
 	 *
 	 * @since 1.0
 	 *
-	 * @param int    $ticket_id   The ticket product id
-	 * @param int    $attendee_id the ID of an attendee.
-	 * @param string $commerce    The commerce key for ET and ET+ (woo,edd,tpp,rsvp).
-	 * @param string $name        The name of the Attendee.
+	 * @param int       $ticket_id     The ticket product id
+	 * @param int       $attendee_id   the ID of an attendee.
+	 * @param string    $commerce      The commerce key for ET and ET+ (woo,edd,tpp,rsvp).
+	 * @param string    $name          The name of the Attendee.
+	 * @param null|bool $rsvp_is_going 1|0 whether an Attendee is going or not.
 	 *
 	 * @return array
 	 */
-	public function get_ticket_values( $ticket_id, $attendee_id, $commerce, $name ) {
+	public function get_ticket_values( $ticket_id, $attendee_id, $commerce, $name, $rsvp_is_going = null ) {
 
 		$ticket_data = [
 			[
@@ -185,7 +186,7 @@ class Event_Data {
 			],
 			[
 				'property' => 'last_registered_ticket_rsvp_is_going',
-				'value'    => '', //todo when connecting in the rsvp add the value here
+				'value'    => $rsvp_is_going,
 			],
 		];
 
@@ -238,4 +239,72 @@ class Event_Data {
 
 	}
 
+	/**
+	 * Get Order Quantities for EDD Orders
+	 *
+	 * @since 1.0
+	 *
+	 * @param object $order EDD order object \EDD_Payment.
+	 *
+	 * @return array An array of data for total tickets, total number of events, and total types of tickets
+	 */
+	public function get_edd_order_quantities( $order ) {
+
+		$valid_order_items = [
+			'total'   => 0,
+			'tickets' => []
+		];
+
+		/** @var $commerce_edd \Tribe__Tickets_Plus__Commerce__EDD__Main */
+		$commerce_edd = tribe( 'tickets-plus.commerce.edd' );
+
+		$event_key = $commerce_edd->event_key;
+		foreach ( $order->cart_details as $item ) {
+			$ticket_id       = $item['id'];
+			$ticket_event_id = absint( get_post_meta( $ticket_id, $event_key, true ) );
+
+			// If not a ticket product then do not count
+			if ( empty( $ticket_event_id ) ) {
+				continue;
+			}
+
+			$quantities = empty( $item['quantity'] ) ? 0 : intval( $item['quantity'] );
+
+			$valid_order_items['total']                 += $quantities;
+			$valid_order_items['events_per_order'][]    = $ticket_event_id;
+			$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+		}
+
+		$valid_order_items['events_per_order'] = count( wp_parse_id_list( $valid_order_items['events_per_order'] ) );
+
+		return $valid_order_items;
+	}
+
+	/**
+	 * Get Order Quantities for RSVP Orders
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $order Array of Attendees from RSVP Order.
+	 *
+	 * @return array An array of data for total tickets, total number of events, and total types of tickets
+	 */
+	public function get_rsvp_order_quantities( $order ) {
+
+		$valid_order_items = [
+			'total'            => 0,
+			'tickets'          => [],
+			'events_per_order' => 1,
+		];
+
+		foreach ( $order as $item ) {
+			$ticket_id  = $item['product_id'];
+			$quantities = 1;
+
+			$valid_order_items['total']                 += $quantities;
+			$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+		}
+
+		return $valid_order_items;
+	}
 }
