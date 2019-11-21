@@ -34,37 +34,37 @@ class Last_Registered_Ticket extends Base {
 
 		$this->properties = [
 			'last_registered_ticket_type_id'       => [
-				'label'     => __( 'Last Registered Ticket ID', 'tribe-ext-hubspot' ),
+				'label'     => 'Last Registered Ticket ID',
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
 			'last_registered_ticket_type'          => [
-				'label'     => __( 'Last Registered Ticket Name', 'tribe-ext-hubspot' ),
+				'label'     => 'Last Registered Ticket Name',
 				'groupName' => $this->group_name,
 				'type'      => 'string',
 				'fieldType' => 'text',
 			],
 			'last_registered_ticket_commerce'      => [
-				'label'     => __( 'Last Registered Ticket Commerce', 'tribe-ext-hubspot' ),
+				'label'     => 'Last Registered Ticket Commerce',
 				'groupName' => $this->group_name,
 				'type'      => 'string',
 				'fieldType' => 'text',
 			],
 			'last_registered_ticket_attendee_id'   => [
-				'label'     => __( 'Last Registered Ticket Attendee ID', 'tribe-ext-hubspot' ),
+				'label'     => 'Last Registered Ticket Attendee ID',
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',
 			],
 			'last_registered_ticket_attendee_name' => [
-				'label'     => __( 'Last Registered Ticket Attendee Name', 'tribe-ext-hubspot' ),
+				'label'     => 'Last Registered Ticket Attendee Name',
 				'groupName' => $this->group_name,
 				'type'      => 'string',
 				'fieldType' => 'text',
 			],
 			'last_registered_ticket_rsvp_is_going' => [
-				'label'     => __( 'Last Registered Ticket RSVP\'d is Going', 'tribe-ext-hubspot' ),
+				'label'     => 'Last Registered Ticket RSVP\'d is Going',
 				'groupName' => $this->group_name,
 				'type'      => 'number',
 				'fieldType' => 'number',

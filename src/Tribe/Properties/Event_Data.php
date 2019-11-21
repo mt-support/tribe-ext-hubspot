@@ -40,20 +40,17 @@ class Event_Data {
 				'property' => $prefix . 'event_is_featured',
 				'value'    => $event->featured,
 			],
-			//todo includes html
 			[
 				'property' => $prefix . 'event_cost',
-				'value'    => $event->cost,
+				'value'    => html_entity_decode( $event->cost ),
 			],
-			//todo must be midnight utc in milliseconds sending as 1576800000000 by hubspot uses 1576800000
 			[
 				'property' => $prefix . 'event_start_datetime_utc',
-				'value'    => date( 'U', strtotime( 'midnight', ( \Tribe__Date_Utils::wp_strtotime( $event->start_date_utc ) ) ) ) * 1000,
+				'value'    => ms_timestamp( strtotime( 'midnight', ( \Tribe__Date_Utils::wp_strtotime( $event->start_date_utc ) ) ) ),
 			],
-			//todo it does not show as a time only date
 			[
 				'property' => $prefix . 'event_start_time_utc',
-				'value'    => date( 'U', strtotime( $event->start_date_utc ) ),
+				'value'    =>  ms_timestamp( date( 'U', strtotime( $event->start_date_utc ) ) ),
 			],
 			[
 				'property' => $prefix . 'event_timezone',
@@ -128,7 +125,7 @@ class Event_Data {
 		$order_data = [
 			[
 				'property' => $prefix . 'date_utc',
-				'value'    => $date * 1000, //convert to milliseconds for HubSpot
+				'value'    => ms_timestamp( $date )
 			],
 			[
 				'property' => $prefix . 'total',
