@@ -50,7 +50,7 @@ class Contact_Property_Group {
 		/** @var \Tribe\HubSpot\API\Setup $setup */
 		$setup = tribe( 'tickets.hubspot.setup' );
 		// Clear the setup try for custom properties and timeline event types.
-		$setup->clear_setup();
+		$setup->set_setup_to_pending();
 
 		$hubspot_data = [
 			'type' => $this->setup_name,
@@ -104,7 +104,7 @@ class Contact_Property_Group {
 		];
 
 		try {
-			$hubspot  = Factory::createWithToken( $access_token, $hubspot_api->client );
+			$hubspot  = Factory::createWithOAuth2Token( $access_token, $hubspot_api->client );
 			$response = $hubspot->contactProperties()->createGroup( $properties );
 
 		} catch ( \Exception $e ) {
@@ -144,7 +144,7 @@ class Contact_Property_Group {
 		}
 
 		try {
-			$hubspot  = Factory::createWithToken( $access_token, $hubspot_api->client );
+			$hubspot  = Factory::createWithOAuth2Token( $access_token, $hubspot_api->client );
 			$response = $hubspot->contactProperties()->getGroups( true );
 
 		} catch ( \Exception $e ) {

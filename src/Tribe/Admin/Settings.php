@@ -442,33 +442,33 @@ class Settings {
 			</tr>
 			</thead>
 			<tbody>
-				<?php
+			<?php
 
-				// Connection Status ( checks for access token, refresh token, and expires site options )
-				$indicator = 'warning';
-				$notes     = '&nbsp;';
-				$label     = __( 'HubSpot Connection', 'tribe-ext-hubspot' );
-				$text      = __( 'Not connected.', 'tribe-ext-hubspot' );
+			// Connection Status ( checks for access token, refresh token, and expires site options )
+			$indicator = 'warning';
+			$notes     = '&nbsp;';
+			$label     = _x( 'HubSpot Connection', 'Status Label HubSpot Main Connection.', 'tribe-ext-hubspot' );
+			$text      = _x( 'Not connected.', 'Status for HubSpot Main Connection.', 'tribe-ext-hubspot' );
 
-				if ( ! empty( $options['access_token'] ) && ! empty( $options['refresh_token'] ) && ! empty( $options['access_token'] ) ) {
-					$indicator = 'good';
-					$text      = __( 'Connected!', 'tribe-ext-hubspot' );
-				}
+			if ( ! empty( $options['access_token'] ) && ! empty( $options['refresh_token'] ) && ! empty( $options['access_token'] ) ) {
+				$indicator = 'good';
+				$text      = _x( 'Connected!', 'Status for HubSpot Main Connection.', 'tribe-ext-hubspot' );
+			}
 
-				echo $this->get_status_row( $label, $indicator, $indicator_icons, $text, $notes );
+			echo $this->get_status_row( $label, $indicator, $indicator_icons, $text, $notes );
 
-				// Add Status of Group Name Setup.
-				$status_group = $this->get_status_content( 'Group Name', 'group_name_setup', $options );
-				echo $this->get_status_row( $status_group['label'], $status_group['indicator'], $indicator_icons, $status_group['text'], $status_group['notes'] );
+			// Add Status of Group Name Setup.
+			$status_group = $this->get_status_content( 'Group Name', 'group_name_setup', $options );
+			echo $this->get_status_row( $status_group['label'], $status_group['indicator'], $indicator_icons, $status_group['text'], $status_group['notes'] );
 
-				// Add Status of Custom Properties Setup.
-				$status_properties = $this->get_status_content( 'Custom Properties', 'custom_properties_setup', $options );
-				echo $this->get_status_row( $status_properties['label'], $status_properties['indicator'], $indicator_icons, $status_properties['text'], $status_properties['notes'] );
+			// Add Status of Custom Properties Setup.
+			$status_properties = $this->get_status_content( 'Custom Properties', 'custom_properties_setup', $options );
+			echo $this->get_status_row( $status_properties['label'], $status_properties['indicator'], $indicator_icons, $status_properties['text'], $status_properties['notes'] );
 
-				// Add Status of Timeline Event Type Setup.
-				$status_timeline = $this->get_status_content( 'Timeline Event Types', 'timeline_event_types_setup', $options );
-				echo $this->get_status_row( $status_timeline['label'], $status_timeline['indicator'], $indicator_icons, $status_timeline['text'], $status_timeline['notes'] );
-				?>
+			// Add Status of Timeline Event Type Setup.
+			$status_timeline = $this->get_status_content( 'Timeline Event Types', 'timeline_event_types_setup', $options );
+			echo $this->get_status_row( $status_timeline['label'], $status_timeline['indicator'], $indicator_icons, $status_timeline['text'], $status_timeline['notes'] );
+			?>
 			</tbody>
 		</table>
 		<?php
@@ -490,20 +490,25 @@ class Settings {
 	protected function get_status_content( $label, $type, $options ) {
 
 		$status              = [];
-		$status['label']     = __( $label, 'tribe-ext-hubspot' );
+		$status['label']     = _x( $label, 'Label of the HubSpot Setup.', 'tribe-ext-hubspot' );
 		$status['indicator'] = 'warning';
-		$status['text']      = __( 'Setup on hold.', 'tribe-ext-hubspot' );
+		$status['text']      = _x( 'Setup on hold.', 'Message displayed when HubSpot Setup has not started.', 'tribe-ext-hubspot' );
 		$status['notes']     = '&nbsp;';
+		$status_value        = isset( $options[ $type ] ) ? $options[ $type ] : null;
+		$setup_note          = _x( 'Setup can take up to 5 minutes. You may navigate away from this page and setup with continue in the background.', 'This note is displayed when HubSpot Setup is Pending or In Progress.', 'tribe-ext-hubspot' );
 
-		if ( 'complete' === $options[ $type ] ) {
+		if ( 'complete' === $status_value ) {
 			$status['indicator'] = 'good';
-			$status['text']      = __( 'Setup Complete.', 'tribe-ext-hubspot' );
-		} elseif ( 'failed' === $options[ $type ] ) {
+			$status['text']      = _x( 'Setup Complete.', 'Message displayed when HubSpot Setup is complete.', 'tribe-ext-hubspot' );
+		} elseif ( 'failed' === $status_value ) {
 			$status['indicator'] = 'bad';
-			$status['text']      = __( 'Setup incomplete, please refresh your connection to try again.', 'tribe-ext-hubspot' );
-		} elseif ( is_numeric( $options[ $type ] ) ) {
-			$status['text']  = __( 'Setup in Progress.', 'tribe-ext-hubspot' );
-			$status['notes'] = __( 'Setup can take up to 5 minutes. You may navigate away from this page and setup with continue in the background.', 'tribe-ext-hubspot' );
+			$status['text']      = _x( 'Setup incomplete, please refresh your connection to try again.', 'Message displayed when HubSpot Setup Failed.', 'tribe-ext-hubspot' );
+		} elseif ( 'pending' === $status_value ) {
+			$status['text']  = _x( 'Setup is preparing to begin. ', 'Message displayed when HubSpot Setup has been initialized.', 'tribe-ext-hubspot' );
+			$status['notes'] = $setup_note;
+		} elseif ( is_numeric( $status_value ) ) {
+			$status['text']  = _x( 'Setup in Progress.', 'Message displayed when HubSpot Setup is in Progress.', 'tribe-ext-hubspot' );
+			$status['notes'] = $setup_note;
 		}
 
 		return $status;
@@ -527,10 +532,10 @@ class Settings {
 		ob_start();
 		?>
 		<tr>
-			<td class="label"><?php esc_html_e( $label, 'tribe-ext-hubspot' ); ?></td>
-			<td class="indicator <?php esc_attr_e( $indicator ); ?>"><span class="dashicons dashicons-<?php echo esc_attr( $indicator_icons[ $indicator ] ); ?>"></span></td>
+			<td class="label"><?php echo esc_html( $label ); ?></td>
+			<td class="indicator <?php echo esc_attr( $indicator ); ?>"><span class="dashicons dashicons-<?php echo esc_attr( $indicator_icons[ $indicator ] ); ?>"></span></td>
 			<td><?php echo esc_html( $text ); ?></td>
-			<td><?php echo $notes; ?></td>
+			<td><?php echo esc_html( $notes ); ?></td>
 		</tr>
 		<?php
 

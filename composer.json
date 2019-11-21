@@ -53,6 +53,6 @@
     }
   },
   "require": {
-    "ryanwinchester/hubspot-php": "v1.2.0"
+    "hubspot/hubspot-php": "v1.2.5"
   }
 }
