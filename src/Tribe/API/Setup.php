@@ -188,7 +188,7 @@ class Setup {
 
 		$value = $this->settings->get_option( $type );
 
-		if ( empty( $value ) ) {
+		if ( empty( $value ) || 'pending' === $value ) {
 
 			return 1;
 		}
@@ -241,6 +241,19 @@ class Setup {
 		$queue->push_to_queue( $hubspot_data );
 		$queue->save();
 		$queue->dispatch();
+	}
+
+	/**
+	 * Set the Setup Statuses to Pending
+	 *
+	 * @since 1.0
+	 *
+	 */
+	public function set_setup_to_pending() {
+
+		foreach ( $this->setup_types as $type ) {
+			$this->set_status_value_by_name( $type, 'pending' );
+		}
 	}
 
 	/**

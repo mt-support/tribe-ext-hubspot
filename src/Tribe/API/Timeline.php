@@ -126,7 +126,7 @@ class Timeline {
 	public function create_event_type( $hubspot_options, $access_token, $client, $app_id, $name, $event_type ) {
 
 		try {
-			$hubspot  = Factory::createWithToken( $access_token, $client );
+			$hubspot  = Factory::createWithOAuth2Token( $access_token, $client );
 			$response = $hubspot->Timeline()->createEventType( $app_id, $name, $event_type['headerTemplate'], $event_type['detailTemplate'] );
 		} catch ( Exception $e ) {
 			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );
@@ -168,7 +168,7 @@ class Timeline {
 		$app_id          = isset( $hubspot_options['app_id'] ) ? $hubspot_options['app_id'] : '';
 
 		try {
-			$hubspot  = Factory::createWithToken( $access_token, $client );
+			$hubspot  = Factory::createWithOAuth2Token( $access_token, $client );
 			$response = $hubspot->Timeline()->getEventTypes( $app_id );
 		} catch ( Exception $e ) {
 			$message = sprintf( 'Could not get timeline event types from HubSpot, error code: %s', $e->getMessage() );
@@ -214,7 +214,7 @@ class Timeline {
 		$event_type_id = isset( $hubspot_options[ $type ] ) ? $hubspot_options[ $type ] : '';;
 
 		try {
-			$hubspot  = Factory::createWithToken( $access_token, $client );
+			$hubspot  = Factory::createWithOAuth2Token( $access_token, $client );
 			$response = $hubspot->Timeline()->createOrUpdate( $app_id, $event_type_id, $id, null, $email, null, $extra_data );
 		} catch ( Exception $e ) {
 			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );

@@ -96,7 +96,7 @@ class Contact_Properties {
 		}
 
 		try {
-			$hubspot  = Factory::createWithToken( $access_token, $hubspot_api->client );
+			$hubspot  = Factory::createWithOAuth2Token( $access_token, $hubspot_api->client );
 			$response = $hubspot->contactProperties()->all();
 		} catch ( \Exception $e ) {
 			$message = sprintf( 'Could not access custom properties: %s', $e->getMessage() );
@@ -178,7 +178,7 @@ class Contact_Properties {
 		}
 
 		try {
-			$hubspot = Factory::createWithToken( $access_token, $hubspot_api->client );
+			$hubspot = Factory::createWithOAuth2Token( $access_token, $hubspot_api->client );
 
 			if ( $update ) {
 				$response = $hubspot->contactProperties()->update( $name, $property );
@@ -243,7 +243,7 @@ class Contact_Properties {
 		}
 
 		try {
-			$hubspot  = Factory::createWithToken( $access_token, $client );
+			$hubspot  = Factory::createWithOAuth2Token( $access_token, $client );
 			$response = $hubspot->contacts()->createOrUpdate( $email, $properties );
 		} catch ( Exception $e ) {
 			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );
@@ -320,7 +320,7 @@ class Contact_Properties {
 		];
 
 		try {
-			$hubspot = Factory::createWithToken( $access_token, $client );
+			$hubspot = Factory::createWithOAuth2Token( $access_token, $client );
 
 			// Use get by batch emails to prevent fatal errors in Guzzle when get by email returns 404.
 			$response = $hubspot->contacts()->getBatchByEmails( [ $email ], $properties );
