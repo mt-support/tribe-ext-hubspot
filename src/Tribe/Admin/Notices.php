@@ -7,34 +7,16 @@ use Tribe__Admin__Notices;
 class Notices {
 
 	/**
-	 * Hooks the class method to relevant filters and actions.
+	 * Hooks the actions and filters used by the class.
+	 *
+	 * Too late to use 'plugins_loaded' or 'tribe_plugins_loaded'
+	 * and must be before 'admin_notices' to use tribe_notice().
 	 *
 	 * @since 1.0
-	 *
 	 */
 	public function hook() {
-
-		tribe_notice(
-			$this->slug( 'missing-application-credentials' ),
-			array( $this, 'render_missing_application_credentials_notice' ),
-			array(
-				'type'    => 'warning',
-				'dismiss' => 1,
-				'wrap'    => false,
-			),
-			array( $this, 'should_render_missing_application_credentials_notice' )
-		);
-
-		tribe_notice(
-			$this->slug( 'missing-access-token' ),
-			array( $this, 'render_missing_access_token_notice' ),
-			array(
-				'type'    => 'warning',
-				'dismiss' => 1,
-				'wrap'    => false,
-			),
-			array( $this, 'should_render_missing_access_token_notice' )
-		);
+		add_action( 'admin_init', [ $this, 'show_missing_application_credentials_notice' ] );
+		add_action( 'admin_init', [ $this, 'show_missing_access_token_notice' ], 100 );
 	}
 
 	/**
@@ -56,7 +38,48 @@ class Notices {
 	 * @since 1.0
 	 */
 	public function show_missing_application_credentials_notice() {
-		set_transient( $this->slug( 'show-missing-application-credentials' ), '1', DAY_IN_SECONDS );
+
+		/** @var \Tribe__Settings $settings */
+		$settings = tribe( 'settings' );
+
+		// Bail if user cannot change settings.
+		if ( ! current_user_can( $settings->requiredCap ) ) {
+			return;
+		}
+
+		// Bail if previously dismissed this notice.
+		if ( Tribe__Admin__Notices::instance()->has_user_dimissed( $this->slug( 'missing-application-credentials' ) ) ) {
+			return;
+		}
+
+		// Bail if the Application Credentials are Saved.
+		$options       = tribe( 'tickets.hubspot' )->get_all_options();
+		if (
+			! empty( $options[ 'app_id' ] ) &&
+			! empty( $options[ 'client_id' ] ) &&
+			! empty( $options[ 'client_secret' ] )
+		) {
+			return;
+		}
+
+		// Bail if already at wp-admin > Events > Settings > APIs tab to avoid confusion.
+		if (
+			'tribe-common' === tribe_get_request_var( 'page' )
+			&& 'addons' === tribe_get_request_var( 'tab' )
+		) {
+			return;
+		}
+
+		tribe_notice(
+			$this->slug( 'missing-application-credentials' ),
+			$this->render_missing_application_credentials_notice( $settings ),
+			[
+				'type'    => 'warning',
+				'dismiss' => true,
+			]
+		);
+
+		return;
 	}
 
 	/**
@@ -65,31 +88,22 @@ class Notices {
 	 * @since 1.0
 	 *
 	 */
-	public function render_missing_application_credentials_notice() {
-		Tribe__Admin__Notices::instance()->render_paragraph(
-			$this->slug( 'missing-application-credentials' ),
-			sprintf( '%s, <a href="%s" target="_blank">%s</a>.',
-				esc_html__( 'HubSpot is missing the Application Credentials necessary to authorize your application. Please', 'tribe-ext-hubspot' ),
-				esc_url( admin_url() . '?page=tribe-common&tab=addons#tribe-hubspot-application-credentials' ),
-				esc_html__( 'set it in the settings.', 'tribe-ext-hubspot' )
-			)
+	public function render_missing_application_credentials_notice( $settings ) {
+
+		// Get link to APIs Tab.
+		$url = $settings->get_url( [
+			'page' => 'tribe-common',
+			'tab'  => 'addons',
+		] );
+
+		$message = sprintf( '<div><p>%s, <a href="%s" target="_blank">%s</a>.</p></div>',
+			esc_html_x( 'HubSpot is missing the Credentials necessary to authorize your application. Please', 'first part of notice there is no settings saved for HubSpot.', 'tribe-ext-hubspot' ),
+			esc_url( $url ),
+			esc_html_x( 'set it in the settings', 'link text of notice there is no settings saved for HubSpot.' , 'tribe-ext-hubspot' )
 		);
+
+		return $message;
 	}
-
-	/**
-	 * Whether the missing application credentials token notice should be rendered or not.
-	 *
-	 * @since 1.0
-	 *
-	 * @return bool
-	 */
-	public function should_render_missing_application_credentials_notice() {
-		$transient      = get_transient( $this->slug( 'show-missing-application-credentials' ) );
-		$missing_credentials = tribe( 'tickets.hubspot.api' )->has_required_fields();
-
-		return ! empty( $transient ) && empty( $missing_credentials );
-	}
-
 
 	/**
 	 * Triggers the display of the missing access token notice.
@@ -97,7 +111,60 @@ class Notices {
 	 * @since 1.0
 	 */
 	public function show_missing_access_token_notice() {
-		set_transient( $this->slug( 'show-missing-access-token' ), '1', DAY_IN_SECONDS );
+
+		/** @var \Tribe__Settings $settings */
+		$settings = tribe( 'settings' );
+
+		// Bail if user cannot change settings.
+		if ( ! current_user_can( $settings->requiredCap ) ) {
+			return;
+		}
+
+		// Bail if previously dismissed this notice.
+		if ( Tribe__Admin__Notices::instance()->has_user_dimissed( $this->slug( 'missing-access-token' ) ) ) {
+			return;
+		}
+
+		/** @var \Tribe\HubSpot\Main $options */
+		$options       = tribe( 'tickets.hubspot' )->get_all_options();
+
+		// Bail if the Application Credentials are Empty.
+		if (
+			empty( $options[ 'app_id' ] ) ||
+			empty( $options[ 'client_id' ] ) ||
+			empty( $options[ 'client_secret' ] )
+		) {
+			return;
+		}
+
+
+		// Bail if the Application Credientials are Empty.
+		if (
+			! empty( $options[ 'access_token' ] ) &&
+			! empty( $options[ 'refresh_token' ] ) &&
+			! empty( $options[ 'token_expires' ] )
+		) {
+			return;
+		}
+
+		// Bail if already at wp-admin > Events > Settings > APIs tab to avoid confusion.
+		if (
+			'tribe-common' === tribe_get_request_var( 'page' )
+			&& 'addons' === tribe_get_request_var( 'tab' )
+		) {
+			return;
+		}
+
+		tribe_notice(
+			$this->slug( 'missing-access-token' ),
+			$this->render_missing_access_token_notice( $settings ),
+			[
+				'type'    => 'warning',
+				'dismiss' => 1,
+			]
+		);
+
+		return;
 	}
 
 	/**
@@ -106,30 +173,21 @@ class Notices {
 	 * @since 1.0
 	 *
 	 */
-	public function render_missing_access_token_notice() {
-		Tribe__Admin__Notices::instance()->render_paragraph(
-			$this->slug( 'missing-access-token' ),
-			sprintf( '%s, <a href="%s" target="_blank">%s</a>.',
-				esc_html__( 'HubSpot is not authorized and data is unable to be sent.', 'tribe-ext-hubspot' ),
-				esc_url( admin_url() . '?page=tribe-common&tab=addons#tribe-hubspot-application-credentials' ),
-				esc_html__( 'Please authorize or refresh your token.', 'tribe-ext-hubspot' )
-			)
+	public function render_missing_access_token_notice( $settings ) {
+
+		// Get link to APIs Tab.
+		$url = $settings->get_url( [
+			'page' => 'tribe-common',
+			'tab'  => 'addons',
+		] );
+
+
+		$message = sprintf( '<div><p>%s, <a href="%s" target="_blank">%s</a>.</p></div>',
+			esc_html_x( 'HubSpot is not authorized', 'first part of notice there is no connection with HubSpot.', 'tribe-ext-hubspot' ),
+			esc_url( $url ),
+			esc_html_x( 'Please authorize or refresh your token', 'link text of notice there is no connection with HubSpot.','tribe-ext-hubspot' )
 		);
+
+		return $message;
 	}
-
-	/**
-	 * Whether the missing access token notice should be rendered or not.
-	 *
-	 * @since 1.0
-	 *
-	 * @return bool
-	 */
-	public function should_render_missing_access_token_notice() {
-
-		$transient      = get_transient( $this->slug( 'show-missing-access-token' ) );
-		$access_token =  tribe( 'tickets.hubspot.api' )->is_authorized();
-
-		return ! empty( $transient ) && empty( $access_token );
-	}
-
 }

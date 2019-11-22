@@ -97,7 +97,7 @@ class Settings {
 	 */
 	public function get_options_prefix() {
 		if ( empty( $this->opts_prefix ) ) {
-			$this->set_options_prefix();
+			$this->set_options_prefix( 'tribe_hubspot' );
 		}
 
 		return $this->opts_prefix;
@@ -257,6 +257,8 @@ class Settings {
 		</div>
 		<?php
 
+		echo $this->get_status_table();
+
 		return ob_get_clean();
 	}
 
@@ -292,8 +294,6 @@ class Settings {
 		$missing_hubspot_credentials = ! tribe( 'tickets.hubspot.api' )->is_authorized();
 
 		ob_start();
-
-		echo $this->get_status_table();
 
 		?>
 		<fieldset id="tribe-field-hubspot_token" class="tribe-field tribe-field-text tribe-size-medium">

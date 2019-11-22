@@ -81,6 +81,14 @@ class Delivery_Queue extends Tribe__Process__Queue {
 			return false;
 		}
 
+		/** @var \Tribe\HubSpot\API\Setup $hubspot_api */
+		$setup = tribe( 'tickets.hubspot.setup' );
+
+		// Check if Contact is Setup before Continuing.
+		if ( ! $setup->is_contact_setup() ) {
+			return false;
+		}
+
 		$email      = filter_var( $hubspot_data['email'], FILTER_SANITIZE_EMAIL );
 		$properties = \Tribe__Utils__Array::escape_multidimensional_array( $hubspot_data['properties'] );
 		$order_data = \Tribe__Utils__Array::escape_multidimensional_array( $hubspot_data['order_data'] );
@@ -146,6 +154,14 @@ class Delivery_Queue extends Tribe__Process__Queue {
 		if ( ! isset( $hubspot_data['email'], $hubspot_data['timeline_event_id'], $hubspot_data['event_type'] ) ) {
 			do_action( 'tribe_log', 'error', $this->identifier, [ 'data' => $hubspot_data, ] );
 
+			return false;
+		}
+
+		/** @var \Tribe\HubSpot\API\Setup $hubspot_api */
+		$setup = tribe( 'tickets.hubspot.setup' );
+
+		// Check if Contact is Setup before Continuing.
+		if ( ! $setup->is_timeline_setup() ) {
 			return false;
 		}
 

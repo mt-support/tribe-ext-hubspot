@@ -27,6 +27,7 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 
 		$this->container->singleton( 'tickets.hubspot.admin.settings', Admin\Settings::class );
 		$this->container->singleton( 'tickets.hubspot.admin.notices', Admin\Notices::class, array( 'hook' ) );
+		$this->container->singleton( 'tickets.hubspot.admin.messages', Admin\Messages::class, array( 'hook' ) );
 
 		$this->container->singleton( 'tickets.hubspot.api', API\Connection::class );
 		$this->container->singleton( 'tickets.hubspot.setup', API\Setup::instance() );
@@ -76,7 +77,7 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 
 		if ( is_admin() ) {
 			tribe( 'tickets.hubspot.admin.settings' );
-			tribe( 'tickets.hubspot.admin.notices' );
+			add_action( 'wp_loaded', tribe_callback( 'tickets.hubspot.admin.notices', 'hook' ) );
 		}
 
 	}
