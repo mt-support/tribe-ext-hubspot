@@ -183,7 +183,7 @@ class Notices {
 		] );
 
 
-		$message = sprintf( '<div><p>%s, <a href="%s" target="_blank">%s</a>.</p></div>',
+		$message = sprintf( '<div><p>%1$s, <a href="%2$s" target="_blank">%3$s</a>.</p></div>',
 			esc_html_x( 'HubSpot is not authorized', 'first part of notice there is no connection with HubSpot.', 'tribe-ext-hubspot' ),
 			esc_url( $url ),
 			esc_html_x( 'Please authorize or refresh your token', 'link text of notice there is no connection with HubSpot.','tribe-ext-hubspot' )
