@@ -97,7 +97,7 @@ class Notices {
 			'tab'  => 'addons',
 		] );
 
-		$message = sprintf( '<div><p>%s, <a href="%s" target="_blank">%s</a>.</p></div>',
+		$message = sprintf( '<div><p>%1$s, <a href="%2$s" target="_blank">%3$s</a>.</p></div>',
 			esc_html_x( 'HubSpot is missing the Credentials necessary to authorize your application. Please', 'first part of notice there is no settings saved for HubSpot.', 'tribe-ext-hubspot' ),
 			esc_url( $url ),
 			esc_html_x( 'set it in the settings', 'link text of notice there is no settings saved for HubSpot.' , 'tribe-ext-hubspot' )
