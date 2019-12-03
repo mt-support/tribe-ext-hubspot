@@ -79,7 +79,7 @@ class Timeline {
 
 		$hapi_key        = $hubspot_api->get_hapi_key();
 		$client          = new Client( [ 'key' => $hapi_key ] );
-		$app_id          = isset( $options['app_id'] ) ? (int) $options['app_id'] : '';
+		$app_id          = $hubspot_api->get_app_id();
 		$timeline_events = $this->get_event_types();
 
 		foreach ( $this->timeline_event_types as $name => $event_type ) {
@@ -211,9 +211,9 @@ class Timeline {
 			return false;
 		}
 
-		$client   = $hubspot_api->client;
-		$app_id   = isset( $hubspot_options['app_id'] ) ? $hubspot_options['app_id'] : '';;
-		$event_type_id = isset( $hubspot_options[ $type ] ) ? $hubspot_options[ $type ] : '';;
+		$client        = $hubspot_api->client;
+		$app_id        = $hubspot_api->get_app_id();
+		$event_type_id = isset( $hubspot_options[ $type ] ) ? $hubspot_options[ $type ] : '';
 
 		try {
 			$hubspot  = Factory::createWithOAuth2Token( $access_token, $client );
