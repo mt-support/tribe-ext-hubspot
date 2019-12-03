@@ -63,7 +63,6 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 	 */
 	protected function hook() {
 
-		//todo change these to only load when required during Sprint 4
 		tribe( 'tickets.hubspot.oauth' );
 		add_action( 'tribe_hubspot_authorize_site', tribe_callback( 'tickets.hubspot.api', 'save_access_token' ) );
 
