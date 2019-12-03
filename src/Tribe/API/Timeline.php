@@ -3,6 +3,7 @@
 namespace Tribe\HubSpot\API;
 
 use SevenShores\Hubspot\Factory;
+use SevenShores\Hubspot\Http\Client;
 
 /**
  * Class Timeline
@@ -18,22 +19,22 @@ class Timeline {
 		'eventRegistration'     => [
 			'site_option'    => 'timeline_event_registration_id',
 			'headerTemplate' => 'Ticket purchase occurred at {{#formatDate timestamp}}{{/formatDate}} from the Event Tickets HubSpot Integration app',
-			'detailTemplate' => 'Purchased ticket for {{extraData.event.post_title}} (# {{extraData.event.ID}} )',
+			'detailTemplate' => 'Purchased ticket for {{extraData.event.event_name}} (#{{extraData.event.event_id}} )',
 		],
 		'eventRegistrationRSVP' => [
 			'site_option'    => 'timeline_event_registration_rsvp_id',
 			'headerTemplate' => 'RSVP occurred at {{#formatDate timestamp}}{{/formatDate}} from the Event Tickets HubSpot Integration app',
-			'detailTemplate' => 'RSVP\'d for {{extraData.event.post_title}} (# {{extraData.event.ID}} )',
+			'detailTemplate' => 'RSVP\'d for {{extraData.event.event_name}} (#{{extraData.event.event_id}} )',
 		],
 		'eventAttendeeUpdate'   => [
 			'site_option'    => 'timeline_event_attendee_update_id',
 			'headerTemplate' => 'Attendee Information update occurred at {{#formatDate timestamp}}{{/formatDate}} from the Event Tickets HubSpot Integration app',
-			'detailTemplate' => 'Updated Attendee Information for {{extraData.event.post_title}} (# {{extraData.event.ID}} )',
+			'detailTemplate' => 'Updated Attendee Information for {{extraData.event.event_name}} (#{{extraData.event.event_id}} )',
 		],
 		'eventCheckin'          => [
 			'site_option'    => 'timeline_event_checkin_id',
 			'headerTemplate' => 'Contact was successfully checked in at {{#formatDate timestamp}}{{/formatDate}}',
-			'detailTemplate' => 'Attendee was checked into {{extraData.event.post_title}} (# {{extraData.event.ID}} )',
+			'detailTemplate' => 'Attendee was checked into {{extraData.event.event_name}} (#{{extraData.event.event_id}} )',
 		],
 	];
 
@@ -76,7 +77,8 @@ class Timeline {
 			return false;
 		}
 
-		$client          = $hubspot_api->client;
+		$hapi_key        = $hubspot_api->get_hapi_key();
+		$client          = new Client( [ 'key' => $hapi_key ] );
 		$app_id          = isset( $options['app_id'] ) ? (int) $options['app_id'] : '';
 		$timeline_events = $this->get_event_types();
 
@@ -163,9 +165,9 @@ class Timeline {
 			return [];
 		}
 
-		$hubspot_options = tribe( 'tickets.hubspot' )->get_all_options();
-		$client          = $hubspot_api->client;
-		$app_id          = $hubspot_api->get_app_id();
+		$app_id   = $hubspot_api->get_app_id();
+		$hapi_key = $hubspot_api->get_hapi_key();
+		$client   = new Client( [ 'key' => $hapi_key ] );
 
 		try {
 			$hubspot  = Factory::createWithOAuth2Token( $access_token, $client );
@@ -209,8 +211,8 @@ class Timeline {
 			return false;
 		}
 
-		$client = $hubspot_api->client;
-		$app_id = isset( $hubspot_options['app_id'] ) ? $hubspot_options['app_id'] : '';;
+		$client   = $hubspot_api->client;
+		$app_id   = isset( $hubspot_options['app_id'] ) ? $hubspot_options['app_id'] : '';;
 		$event_type_id = isset( $hubspot_options[ $type ] ) ? $hubspot_options[ $type ] : '';;
 
 		try {

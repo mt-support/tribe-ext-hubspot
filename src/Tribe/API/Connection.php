@@ -25,7 +25,17 @@ class Connection {
 	/**
 	 * @var int
 	 */
+	protected $user_id = '';
+
+	/**
+	 * @var int
+	 */
 	protected $app_id = '';
+
+	/**
+	 * @var string
+	 */
+	protected $hapi_key = '';
 
 	/**
 	 * @var string
@@ -63,7 +73,9 @@ class Connection {
 		$this->callback      = wp_nonce_url( get_home_url( null, '/tribe-hubspot/' ), 'hubspot-oauth-action', 'hubspot-oauth-nonce' );
 		$this->options       = tribe( 'tickets.hubspot' )->get_all_options();
 		$this->opts_prefix   = tribe( 'tickets.hubspot.admin.settings' )->get_options_prefix();
+		$this->user_id       = isset( $this->options['user_id'] ) ? $this->options['user_id'] : '';
 		$this->app_id        = isset( $this->options['app_id'] ) ? $this->options['app_id'] : '';
+		$this->hapi_key      = isset( $this->options['hapi_key'] ) ? $this->options['hapi_key'] : '';
 		$this->client_id     = isset( $this->options['client_id'] ) ? $this->options['client_id'] : '';
 		$this->client_secret = isset( $this->options['client_secret'] ) ? $this->options['client_secret'] : '';
 		$this->access_token  = isset( $this->options['access_token'] ) ? $this->options['access_token'] : '';
@@ -80,6 +92,17 @@ class Connection {
 	}
 
 	/**
+	 * Get the User ID.
+	 *
+	 * @since 1.0
+	 *
+	 * @return int The User ID.
+	 */
+	public function get_user_id() {
+		return $this->user_id;
+	}
+
+	/**
 	 * Get the Application ID.
 	 *
 	 * @since 1.0
@@ -88,6 +111,17 @@ class Connection {
 	 */
 	public function get_app_id() {
 		return $this->app_id;
+	}
+
+	/**
+	 * Get the HAPI Key.
+	 *
+	 * @since 1.0
+	 *
+	 * @return string The HAPI key.
+	 */
+	public function get_hapi_key() {
+		return $this->hapi_key;
 	}
 
 	/**
@@ -100,6 +134,8 @@ class Connection {
 	public function has_required_fields() {
 
 		if (
+			empty( $this->user_id ) ||
+			empty( $this->hapi_key ) ||
 			empty( $this->client_id ) ||
 			empty( $this->client_secret )
 		) {
@@ -122,6 +158,8 @@ class Connection {
 
 		// If missing any of these fields then the site is Not Authorized.
 		if (
+			empty( $this->user_id ) ||
+			empty( $this->hapi_key ) ||
 			empty( $this->client_id ) ||
 			empty( $this->client_secret ) ||
 			empty( $this->access_token ) ||

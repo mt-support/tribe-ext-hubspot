@@ -213,10 +213,22 @@ class Settings {
 				'type' => 'html',
 				'html' => $this->get_authorize_fields(),
 			],
+			$this->opts_prefix . 'user_id' => [
+				'type'            => 'text',
+				'label'           => esc_html__( 'User ID', 'tribe-ext-hubspot' ),
+				'tooltip'         => sprintf( esc_html__( 'Enter the User id for HubSpot', 'tribe-ext-hubspot' ) ),
+				'validation_type' => 'html',
+			],
 			$this->opts_prefix . 'app_id' => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'APP ID', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'Enter the app id from the application created in HubSpot', 'tribe-ext-hubspot' ) ),
+				'validation_type' => 'html',
+			],
+			$this->opts_prefix . 'hapi_key' => [
+				'type'            => 'text',
+				'label'           => esc_html__( 'HAPI Key', 'tribe-ext-hubspot' ),
+				'tooltip'         => sprintf( esc_html__( 'Enter the HAPI Key from the developer account in HubSpot', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			],
 			$this->opts_prefix . 'client_id'      => [
@@ -280,7 +292,7 @@ class Settings {
 			ob_start();
 			?>
 			<fieldset id="tribe-field-hubspot_token" class="tribe-field tribe-field-text tribe-size-medium">
-				<legend class="tribe-field-label"><?php esc_html_e( 'HubSpot Token', 'tribe-ext-hubspot' ) ?></legend>
+				<legend class="tribe-field-label"><?php esc_html_e( 'HubSpot Connection', 'tribe-ext-hubspot' ) ?></legend>
 				<div class="tribe-field-wrap tribe-error">
 					<?php esc_html_e( 'An SSL is required to connect to HubSpot, please enable it on your site.', 'tribe-ext-hubspot' ) ?>
 				</div>

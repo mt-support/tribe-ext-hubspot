@@ -55,7 +55,9 @@ class Notices {
 		// Bail if the Application Credentials are Saved.
 		$options       = tribe( 'tickets.hubspot' )->get_all_options();
 		if (
+			! empty( $options[ 'user_id' ] ) &&
 			! empty( $options[ 'app_id' ] ) &&
+			! empty( $options[ 'hapi_key' ] ) &&
 			! empty( $options[ 'client_id' ] ) &&
 			! empty( $options[ 'client_secret' ] )
 		) {
@@ -130,7 +132,9 @@ class Notices {
 
 		// Bail if the Application Credentials are Empty.
 		if (
+			empty( $options[ 'user_id' ] ) ||
 			empty( $options[ 'app_id' ] ) ||
+			empty( $options[ 'hapi_key' ] ) ||
 			empty( $options[ 'client_id' ] ) ||
 			empty( $options[ 'client_secret' ] )
 		) {
