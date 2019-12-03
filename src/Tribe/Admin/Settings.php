@@ -309,7 +309,7 @@ class Settings {
 
 		?>
 		<fieldset id="tribe-field-hubspot_token" class="tribe-field tribe-field-text tribe-size-medium">
-			<legend class="tribe-field-label"><?php esc_html_e( 'HubSpot Token', 'tribe-ext-hubspot' ) ?></legend>
+			<legend class="tribe-field-label"><?php esc_html_e( 'HubSpot Connection', 'tribe-ext-hubspot' ) ?></legend>
 			<div class="tribe-field-wrap">
 				<?php
 				$authorize_link        = tribe( 'tickets.hubspot.api' )->get_authorized_url();
