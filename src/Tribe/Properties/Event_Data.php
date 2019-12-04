@@ -196,7 +196,7 @@ class Event_Data {
 	 *
 	 * @param string $post_type Post Type Name.
 	 *
-	 * @return bool True or false the post type.
+	 * @return bool Whether a post type is a TEC event.
 	 */
 	protected function is_tribe_event( $post_type ) {
 
