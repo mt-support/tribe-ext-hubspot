@@ -192,7 +192,7 @@ class Event_Data {
 	}
 
 	/**
-	 * Determine if a Post Type is a Tribe Event.
+	 * Determine whether a post type is a TEC event.
 	 *
 	 * @param string $post_type The post type name.
 	 *
