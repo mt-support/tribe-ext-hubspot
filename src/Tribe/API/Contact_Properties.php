@@ -224,11 +224,13 @@ class Contact_Properties {
 
 		// Calculate Aggregate Data
 		$tickets_qty = $order_data['order_ticket_quantity'];
-		$agg_data    = $this->get_aggregate_data( $email, $tickets_qty, $order_data['events_per_order'] );
-		$properties  = array_merge( $properties, $agg_data['values'] );
+		$agg_data    = $this->get_aggregate_data( $email, $order_data['aggregate_type'], $tickets_qty, $order_data['events_per_order'] );
+		if ( isset( $agg_data['values'] ) ) {
+			$properties = array_merge( $properties, $agg_data['values'] );
+		}
 
 		// If this is the first order for a contact, add first order values.
-		if ( 1 === $agg_data['total_registered_events'] ) {
+		if ( isset( $agg_data['total_registered_events'] ) && 1 === $agg_data['total_registered_events'] ) {
 			/** @var \Tribe\HubSpot\Properties\Event_Data $data */
 			$data = tribe( 'tickets.hubspot.properties.event_data' );
 
@@ -263,13 +265,14 @@ class Contact_Properties {
 	 *
 	 * @since 1.0
 	 *
-	 * @param string $email       An email used to get data from HubSpot.
-	 * @param int    $tickets_qty The total number of tickets in this order.
-	 * @param int    $events      The amount of different events in this order.
+	 * @param string $email          An email used to get data from HubSpot.
+	 * @param string $aggregate_type A name for the type of fields to aggregate data from.
+	 * @param int    $tickets_qty    The total number of tickets in this order.
+	 * @param int    $events         The amount of different events in this order.
 	 *
 	 * @return array An array of values for the aggregate data.
 	 */
-	public function get_aggregate_data( $email, $tickets_qty, $events_per_order ) {
+	public function get_aggregate_data( $email, $aggregate_type, $tickets_qty, $events_per_order ) {
 		$contact    = $this->get_contact_by_email( $email );
 		$properties = '';
 		if ( ! empty( $contact->properties ) ) {
@@ -277,7 +280,7 @@ class Contact_Properties {
 		}
 
 		$aggregate_data = tribe( 'tickets.hubspot.properties.aggregate_data' );
-		$agg_data       = $aggregate_data->get_values( 'register', $properties, $tickets_qty, $events_per_order );
+		$agg_data       = $aggregate_data->get_values( $aggregate_type, $properties, $tickets_qty, $events_per_order );
 
 		return $agg_data;
 	}
