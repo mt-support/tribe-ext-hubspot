@@ -280,4 +280,31 @@ class Setup {
 		return $this->setup_types;
 	}
 
+	/**
+	 * Is both Contact Group Name and Contact Properties are Setup in HubSpot.
+	 *
+	 * @since 1.0
+	 *
+	 * @return bool True or False if setup is complete.
+	 */
+	public function is_contact_setup() {
+
+		$options = $this->settings->get_all_options();
+
+		return isset( $options['group_name_setup'] ) && 'complete' === $options['group_name_setup'] && isset( $options['custom_properties_setup'] ) && 'complete' === $options['custom_properties_setup'];
+	}
+
+	/**
+	 * Is Timeline Event Types Setup in HubSpot.
+	 *
+	 * @since 1.0
+	 *
+	 * @return bool True or False if setup is complete.
+	 */
+	public function is_timeline_setup() {
+
+		$options = $this->settings->get_all_options();
+
+		return isset( $options['timeline_event_types_setup'] ) && 'complete' === $options['timeline_event_types_setup'];
+	}
 }

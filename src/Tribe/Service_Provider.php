@@ -27,6 +27,7 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 
 		$this->container->singleton( 'tickets.hubspot.admin.settings', Admin\Settings::class );
 		$this->container->singleton( 'tickets.hubspot.admin.notices', Admin\Notices::class, array( 'hook' ) );
+		$this->container->singleton( 'tickets.hubspot.admin.messages', Admin\Messages::class, array( 'hook' ) );
 
 		$this->container->singleton( 'tickets.hubspot.api', API\Connection::class );
 		$this->container->singleton( 'tickets.hubspot.setup', API\Setup::instance() );
@@ -44,9 +45,10 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 		$this->container->singleton( 'tickets.hubspot.contact.properties', API\Contact_Properties::class, array( 'hook' ) );
 		$this->container->singleton( 'tickets.hubspot.timeline', API\Timeline::class );
 
-		$this->container->singleton( 'tickets.hubspot.subscribe.checkin', Subscribe\Checkin::class, array( 'hook' ) );
-		$this->container->singleton( 'tickets.hubspot.subscribe.purchase', Subscribe\Purchase::class, array( 'hook' ) );
-		$this->container->singleton( 'tickets.hubspot.subscribe.update', Subscribe\Update::class, array( 'hook' ) );
+		$this->container->singleton( 'tickets.hubspot.subscribe.woo', Subscribe\Woo::class, array( 'hook' ) );
+		$this->container->singleton( 'tickets.hubspot.subscribe.edd', Subscribe\EDD::class, array( 'hook' ) );
+		$this->container->singleton( 'tickets.hubspot.subscribe.rsvp', Subscribe\RSVP::class, array( 'hook' ) );
+		$this->container->singleton( 'tickets.hubspot.subscribe.tpp', Subscribe\TPP::class, array( 'hook' ) );
 
 		$this->hook();
 	}
@@ -68,13 +70,14 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 		tribe( 'tickets.hubspot.contact.property.group' );
 		tribe( 'tickets.hubspot.contact.properties' );
 
-		tribe( 'tickets.hubspot.subscribe.checkin' );
-		tribe( 'tickets.hubspot.subscribe.purchase' );
-		tribe( 'tickets.hubspot.subscribe.update' );
+		tribe( 'tickets.hubspot.subscribe.woo' );
+		tribe( 'tickets.hubspot.subscribe.edd' );
+		tribe( 'tickets.hubspot.subscribe.rsvp' );
+		tribe( 'tickets.hubspot.subscribe.tpp' );
 
 		if ( is_admin() ) {
 			tribe( 'tickets.hubspot.admin.settings' );
-			tribe( 'tickets.hubspot.admin.notices' );
+			add_action( 'wp_loaded', tribe_callback( 'tickets.hubspot.admin.notices', 'hook' ) );
 		}
 
 	}

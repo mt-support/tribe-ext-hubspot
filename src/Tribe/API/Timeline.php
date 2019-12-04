@@ -165,7 +165,7 @@ class Timeline {
 
 		$hubspot_options = tribe( 'tickets.hubspot' )->get_all_options();
 		$client          = $hubspot_api->client;
-		$app_id          = isset( $hubspot_options['app_id'] ) ? $hubspot_options['app_id'] : '';
+		$app_id          = $hubspot_api->get_app_id();
 
 		try {
 			$hubspot  = Factory::createWithOAuth2Token( $access_token, $client );

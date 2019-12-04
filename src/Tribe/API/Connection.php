@@ -23,6 +23,11 @@ class Connection {
 	protected $scope = [ 'contacts', 'timeline' ];
 
 	/**
+	 * @var int
+	 */
+	protected $app_id = '';
+
+	/**
 	 * @var string
 	 */
 	protected $client_id = '';
@@ -58,9 +63,10 @@ class Connection {
 		$this->callback      = wp_nonce_url( get_home_url( null, '/tribe-hubspot/' ), 'hubspot-oauth-action', 'hubspot-oauth-nonce' );
 		$this->options       = tribe( 'tickets.hubspot' )->get_all_options();
 		$this->opts_prefix   = tribe( 'tickets.hubspot.admin.settings' )->get_options_prefix();
-		$this->access_token  = isset( $this->options['access_token'] ) ? $this->options['access_token'] : '';
+		$this->app_id        = isset( $this->options['app_id'] ) ? $this->options['app_id'] : '';
 		$this->client_id     = isset( $this->options['client_id'] ) ? $this->options['client_id'] : '';
 		$this->client_secret = isset( $this->options['client_secret'] ) ? $this->options['client_secret'] : '';
+		$this->access_token  = isset( $this->options['access_token'] ) ? $this->options['access_token'] : '';
 		$this->refresh_token = isset( $this->options['refresh_token'] ) ? $this->options['refresh_token'] : '';
 		$this->token_expires = isset( $this->options['token_expires'] ) ? $this->options['token_expires'] : '';
 
@@ -71,6 +77,17 @@ class Connection {
 		$this->client = new Client( [ 'key' => $this->client_secret ] );
 		$this->oauth2 = new OAuth2( $this->client );
 
+	}
+
+	/**
+	 * Get the Application ID.
+	 *
+	 * @since 1.0
+	 *
+	 * @return int The application ID.
+	 */
+	public function get_app_id() {
+		return $this->app_id;
 	}
 
 	/**
@@ -86,7 +103,6 @@ class Connection {
 			empty( $this->client_id ) ||
 			empty( $this->client_secret )
 		) {
-			tribe( 'tickets.hubspot.admin.notices' )->show_missing_application_credentials_notice();
 
 			return false;
 		}
@@ -112,7 +128,6 @@ class Connection {
 			empty( $this->refresh_token ) ||
 			empty( $this->token_expires )
 		) {
-			tribe( 'tickets.hubspot.admin.notices' )->should_render_missing_application_credentials_notice();
 
 			return false;
 		}

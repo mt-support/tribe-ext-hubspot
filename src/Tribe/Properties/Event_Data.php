@@ -40,20 +40,17 @@ class Event_Data {
 				'property' => $prefix . 'event_is_featured',
 				'value'    => $event->featured,
 			],
-			//todo includes html
 			[
 				'property' => $prefix . 'event_cost',
-				'value'    => $event->cost,
+				'value'    => html_entity_decode( $event->cost ),
 			],
-			//todo must be midnight utc in milliseconds sending as 1576800000000 by hubspot uses 1576800000
 			[
 				'property' => $prefix . 'event_start_datetime_utc',
-				'value'    => date( 'U', strtotime( 'midnight', ( \Tribe__Date_Utils::wp_strtotime( $event->start_date_utc ) ) ) ) * 1000,
+				'value'    => ms_timestamp( strtotime( 'midnight', ( \Tribe__Date_Utils::wp_strtotime( $event->start_date_utc ) ) ) ),
 			],
-			//todo it does not show as a time only date
 			[
 				'property' => $prefix . 'event_start_time_utc',
-				'value'    => date( 'U', strtotime( $event->start_date_utc ) ),
+				'value'    =>  ms_timestamp( date( 'U', strtotime( $event->start_date_utc ) ) ),
 			],
 			[
 				'property' => $prefix . 'event_timezone',
@@ -88,23 +85,23 @@ class Event_Data {
 		$venue_data = [
 			[
 				'property' => $prefix . 'event_venue',
-				'value'    => $venue->post_title,
+				'value'    => isset( $venue->post_title ) ? $venue->post_title : null,
 			],
 			[
 				'property' => $prefix . 'event_venue_address',
-				'value'    => $venue->address,
+				'value'    => isset( $venue->address ) ? $venue->address : null,
 			],
 			[
 				'property' => $prefix . 'event_venue_city',
-				'value'    => $venue->city,
+				'value'    => isset( $venue->city ) ? $venue->city : null,
 			],
 			[
 				'property' => $prefix . 'event_venue_state_province',
-				'value'    => $venue->state_province,
+				'value'    => isset( $venue->state_province ) ? $venue->state_province : null,
 			],
 			[
 				'property' => $prefix . 'event_venue_postal_code',
-				'value'    => $venue->zip,
+				'value'    => isset( $venue->zip ) ? $venue->zip : null,
 			],
 		];
 
@@ -128,7 +125,7 @@ class Event_Data {
 		$order_data = [
 			[
 				'property' => $prefix . 'date_utc',
-				'value'    => $date * 1000, //convert to milliseconds for HubSpot
+				'value'    => ms_timestamp( $date )
 			],
 			[
 				'property' => $prefix . 'total',
@@ -153,14 +150,15 @@ class Event_Data {
 	 *
 	 * @since 1.0
 	 *
-	 * @param int    $ticket_id   The ticket product id.
-	 * @param int    $attendee_id The ID of an attendee.
-	 * @param string $commerce    The commerce key for ET and ET+ (woo, edd, tpp, rsvp).
-	 * @param string $name        The name of the Attendee.
+	 * @param int       $ticket_id     The ticket product id.
+	 * @param int       $attendee_id   the ID of an attendee.
+	 * @param string    $commerce      The commerce key for ET and ET+ (woo,edd,tpp,rsvp).
+	 * @param string    $name          The name of the Attendee.
+	 * @param null|bool $rsvp_is_going 1|0 whether an Attendee is going or not.
 	 *
 	 * @return array
 	 */
-	public function get_ticket_values( $ticket_id, $attendee_id, $commerce, $name ) {
+	public function get_ticket_values( $ticket_id, $attendee_id, $commerce, $name, $rsvp_is_going = null ) {
 
 		$ticket_data = [
 			[
@@ -185,7 +183,7 @@ class Event_Data {
 			],
 			[
 				'property' => 'last_registered_ticket_rsvp_is_going',
-				'value'    => '', //todo when connecting in the rsvp add the value here
+				'value'    => $rsvp_is_going,
 			],
 		];
 
@@ -238,4 +236,100 @@ class Event_Data {
 
 	}
 
+	/**
+	 * Get Order Quantities for EDD Orders
+	 *
+	 * @since 1.0
+	 *
+	 * @param \EDD_Payment $order EDD order object.
+	 *
+	 * @return array An array of data for total tickets, total number of events, and total types of tickets.
+	 */
+	public function get_edd_order_quantities( $order ) {
+
+		$valid_order_items = [
+			'total'   => 0,
+			'tickets' => []
+		];
+
+		/** @var $commerce_edd \Tribe__Tickets_Plus__Commerce__EDD__Main */
+		$commerce_edd = tribe( 'tickets-plus.commerce.edd' );
+
+		$event_key = $commerce_edd->event_key;
+		foreach ( $order->cart_details as $item ) {
+			$ticket_id       = $item['id'];
+			$ticket_event_id = absint( get_post_meta( $ticket_id, $event_key, true ) );
+
+			// If not a ticket product then do not count
+			if ( empty( $ticket_event_id ) ) {
+				continue;
+			}
+
+			$quantities = empty( $item['quantity'] ) ? 0 : intval( $item['quantity'] );
+
+			$valid_order_items['total']                 += $quantities;
+			$valid_order_items['events_per_order'][]    = $ticket_event_id;
+			$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+		}
+
+		$valid_order_items['events_per_order'] = count( wp_parse_id_list( $valid_order_items['events_per_order'] ) );
+
+		return $valid_order_items;
+	}
+
+	/**
+	 * Get Order Quantities for RSVP Orders
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $order Array of Attendees from RSVP Order.
+	 *
+	 * @return array An array of data for total tickets, total number of events, and total types of tickets.
+	 */
+	public function get_rsvp_order_quantities( $order ) {
+
+		$valid_order_items = [
+			'total'            => 0,
+			'tickets'          => [],
+			'events_per_order' => 1,
+		];
+
+		foreach ( $order as $item ) {
+			$ticket_id  = $item['product_id'];
+			$quantities = 1;
+
+			$valid_order_items['total']                 += $quantities;
+			$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+		}
+
+		return $valid_order_items;
+	}
+
+	/**
+	 * Get Order Quantities for TPP Orders
+	 *
+	 * @since 1.0
+	 *
+	 * @param \Tribe__Tickets__Commerce__PayPal__Order $order An order object for TPP.
+	 *
+	 * @return array An array of data for total tickets, total number of events, and total types of tickets.
+	 */
+	public function get_tpp_order_quantities( $order ) {
+
+		$valid_order_items = [
+			'total'            => 0,
+			'tickets'          => [],
+			'events_per_order' => 1,
+		];
+
+		foreach ( $order->get_attendees() as $item ) {
+			$ticket_id  = $item['product_id'];
+			$quantities = 1;
+
+			$valid_order_items['total']                 += $quantities;
+			$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+		}
+
+		return $valid_order_items;
+	}
 }

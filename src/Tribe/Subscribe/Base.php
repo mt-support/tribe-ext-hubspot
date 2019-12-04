@@ -83,14 +83,14 @@ abstract class Base {
 			'event'  => [
 				'event_id'                   => $event->ID,
 				'event_name'                 => $event->post_title,
-				'event_venue'                => $venue->post_title,
-				'event_venue_address'        => $venue->event_venue_address,
-				'event_venue_city'           => $venue->event_venue_city,
-				'event_venue_state_province' => $venue->event_venue_state_province,
-				'event_venue_postal_code'    => $venue->event_venue_postal_code,
+				'event_venue'                => isset( $venue->post_title ) ? $venue->post_title : null,
+				'event_venue_address'        => isset( $venue->event_venue_address ) ? $venue->event_venue_address : null,
+				'event_venue_city'           => isset( $venue->event_venue_city ) ? $venue->event_venue_city : null,
+				'event_venue_state_province' => isset( $venue->event_venue_state_province ) ? $venue->event_venue_state_province : null,
+				'event_venue_postal_code'    => isset( $venue->event_venue_postal_code ) ? $venue->event_venue_postal_code : null,
 				'event_organizer'            => implode( ', ', $event->organizers->all() ),
 				'event_is_featured'          => $event->featured,
-				'event_cost'                 => $event->cost,
+				'event_cost'                 => html_entity_decode( $event->cost ),
 				'event_start_datetime_utc'   => date( 'U', strtotime( 'midnight', ( \Tribe__Date_Utils::wp_strtotime( $event->start_date_utc ) ) ) ) * 1000,
 				'event_start_time_utc'       => date( 'U', strtotime( $event->start_date_utc ) ),
 				'event_timezone'             => $event->timezone,
@@ -107,6 +107,78 @@ abstract class Base {
 		];
 
 		return $extra_data;
+	}
+
+	/**
+	 * Maybe Update HubSpot Contact.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string                               $provider_key  The key for the provider.
+	 * @param int                                  $post_id       The ID of the event.
+	 * @param int                                  $product_id    The ID of the product(ticket).
+	 * @param int                                  $attendee_id   The ID of an attendee.
+	 * @param array                                $attendee_data An array of attendee data.
+	 * @param array                                $qty           An array of data for total tickets, total number of events, and total types of tickets.
+	 * @param \Tribe\HubSpot\Properties\Event_Data $data          An event data object used to get and organize values for HubSpot.
+	 */
+	public function maybe_register_contact( $provider_key, $post_id, $product_id, $attendee_id, $attendee_data, $qty, $data ) {
+
+		$rsvp_status = null;
+		if ( 'rsvp' === $provider_key ) {
+			$rsvp_status = $attendee_data['status'];
+		}
+
+		$groups   = [];
+		$groups[] = $data->get_event_values( 'last_registered_', $post_id );
+		$groups[] = $data->get_order_values( 'last_order_', $attendee_data['date'], $attendee_data['total'], $qty['total'], count( $qty['tickets'] ) );
+		$groups[] = $data->get_ticket_values( $product_id, $attendee_id, $provider_key, $attendee_data['name'], $rsvp_status );
+
+		$properties = $this->get_initial_properties_array( $attendee_data );
+		$properties = array_merge( $properties, ...$groups );
+
+		$order_data = $this->get_order_data_array( $attendee_data, $qty, 'register' );
+
+		$this->maybe_push_to_contact_queue( $attendee_data, $properties, $order_data );
+	}
+
+	/**
+	 * Maybe Update HubSpot Contact.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $attendee_data An array of attendee data.
+	 * @param array $qty           An array of data for total tickets, total number of events, and total types of tickets.
+	 */
+	public function maybe_update_contact( $attendee_data, $qty ) {
+
+		$properties = $this->get_initial_properties_array( $attendee_data );
+		$order_data = $this->get_order_data_array( $attendee_data, $qty, '' );
+
+		$this->maybe_push_to_contact_queue( $attendee_data, $properties, $order_data );
+	}
+
+	/**
+	 * Maybe Update HubSpot Contact
+	 *
+	 * @since 1.0
+	 *
+	 * @param array                                $related_data  An array of order information for an Attendee.
+	 * @param array                                $attendee_data An array of attendee data.
+	 * @param array                                $qty           An array of data for total tickets, total number of events, and total types of tickets.
+	 * @param \Tribe\HubSpot\Properties\Event_Data $data          An event data object used to get and organize values for HubSpot.
+	 */
+	public function maybe_checkin_contact( $related_data, $attendee_data, $qty, $data ) {
+
+		$groups   = [];
+		$groups[] = $data->get_event_values( 'last_attended_', $related_data['post_id'] );
+
+		$properties = $this->get_initial_properties_array( $attendee_data );
+		$properties = array_merge( $properties, ...$groups );
+
+		$order_data = $this->get_order_data_array( $attendee_data, $qty, 'checkin' );
+
+		$this->maybe_push_to_contact_queue( $attendee_data, $properties, $order_data );
 	}
 
 	/**
@@ -168,66 +240,58 @@ abstract class Base {
 	}
 
 	/**
-	 * Get WooCommerce Order Related Data by Attendee ID.
-	 *
-	 * @since 1.0
-	 *
-	 * @param int $attendee_id The ID of an attendee.
-	 *
-	 * @return array An array of related data ( Order ID, Order Object, Post ID, and Product ID ).
-	 */
-	public function get_woo_related_data_by_attendee_id( $attendee_id ) {
-
-		/** @var $commerce_woo \Tribe__Tickets_Plus__Commerce__WooCommerce__Main */
-		$commerce_woo = tribe( 'tickets-plus.commerce.woo' );
-
-		$related_data['order_id']  = get_post_meta( $attendee_id, $commerce_woo->attendee_order_key, true );
-		$related_data['order']     = new \WC_Order( $related_data['order_id'] );
-		$related_data['post_id']   = get_post_meta( $attendee_id, $commerce_woo->attendee_event_key, true );
-		$related_data['ticket_id'] = get_post_meta( $attendee_id, $commerce_woo->attendee_product_key, true );
-
-		return $related_data;
-	}
-
-	/**
 	 * Get the First Attendee in an Order.
 	 *
 	 * @since 1.0
 	 *
-	 * @param int $order_id ID of the WooCommerce Order.
+	 * @param int    $order_id     ID of an Order.
+	 * @param string $provider_key Key for Provider.
 	 *
-	 * @return int The attendee ID.
+	 * @return int An attendee ID.
 	 */
-	public function get_woo_first_attendee_id_from_order( $order_id ) {
+	public function get_first_attendee_id_from_order( $order_id, $provider_key ) {
 
-		/** @var $commerce_woo \Tribe__Tickets_Plus__Commerce__WooCommerce__Main */
-		$commerce_woo = tribe( 'tickets-plus.commerce.woo' );
+		/** @var $provider \Tribe__Tickets__RSVP */
+		$provider = tribe( 'tickets.rsvp' );
+		if ( 'woo' === $provider_key ) {
+			/** @var $provider \Tribe__Tickets_Plus__Commerce__WooCommerce__Main */
+			$provider = tribe( 'tickets-plus.commerce.woo' );
+		} elseif ( 'edd' === $provider_key ) {
+			/** @var $provider \Tribe__Tickets_Plus__Commerce__EDD__Main */
+			$provider = tribe( 'tickets-plus.commerce.edd' );
+		} elseif ( 'tpp' === $provider_key ) {
+			/** @var $provider \Tribe__Tickets__Commerce__PayPal__Main */
+			$provider = tribe( 'tickets.commerce.paypal' );
+		}
 
-		$attendees = $commerce_woo->get_attendees_by_id( $order_id );
+		$attendees = $provider->get_attendees_by_id( $order_id );
 
 		$attendee = reset( $attendees );
 
-		return $attendee[ 'attendee_id' ];
+		return $attendee['attendee_id'];
 	}
 
 	/**
-	 * Connect to Creation of an Attendee for WooCommerce.
+	 * Spilt Full Name into First, Middle, and Last.
+	 * https://stackoverflow.com/a/31330346
 	 *
 	 * @since 1.0
 	 *
-	 * @param object|\WC_Order $order WooCommerce order object.
+	 * @param string $string The Name to parse.
 	 *
-	 * @return array An array of attendee data from a WooCommerce Order.
+	 * @return array|bool The First, Middle, and Last Name or False if to many names provided.
 	 */
-	public function get_woo_contact_data_from_order( $order ) {
+	public function split_name( $string ) {
+		$arr        = explode( ' ', $string );
+		$num        = count( $arr );
+		$first_name = $middle_name = $last_name = null;
 
-		$attendee_data['email']      = $order->get_billing_email();
-		$attendee_data['name']       = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
-		$attendee_data['first_name'] = $order->get_billing_first_name();
-		$attendee_data['last_name']  = $order->get_billing_last_name();
-		$attendee_data['total']      = $order->get_total();
-		$attendee_data['date']       = $order->get_date_created()->getTimestamp();
+		if ( $num == 2 ) {
+			list( $first_name, $last_name ) = $arr;
+		} else {
+			list( $first_name, $middle_name, $last_name ) = $arr;
+		}
 
-		return $attendee_data;
+		return ( empty( $first_name ) || $num > 3 ) ? false : compact( 'first_name', 'middle_name', 'last_name' );
 	}
 }
