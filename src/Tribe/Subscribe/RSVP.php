@@ -88,7 +88,8 @@ class RSVP extends Base {
 		$extra_data = $this->get_extra_data( $related_data['post_id'], $related_data['ticket_id'], $order_id, 'rsvp', $attendee_data['name'] );
 
 		// Maybe Queue Creating a Timeline Event in HubSpot.
-		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_attendee_update_id', "attendee-update:{$related_data['post_id']}:{$order_id}", $extra_data );
+		$time = time();
+		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_attendee_update_id', "attendee-update:{$related_data['post_id']}:{$order_id}:{$time}", $extra_data );
 	}
 
 	/**
