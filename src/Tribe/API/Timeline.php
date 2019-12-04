@@ -79,7 +79,7 @@ class Timeline {
 
 		$hapi_key        = $hubspot_api->get_hapi_key();
 		$client          = new Client( [ 'key' => $hapi_key ] );
-		$app_id          = $hubspot_api->get_app_id();
+		$app_id          = (int) $hubspot_api->get_app_id();
 		$timeline_events = $this->get_event_types();
 
 		foreach ( $this->timeline_event_types as $name => $event_type ) {

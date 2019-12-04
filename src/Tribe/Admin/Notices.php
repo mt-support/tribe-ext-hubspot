@@ -99,9 +99,9 @@ class Notices {
 		] );
 
 		$message = sprintf( '<div><p>%s, <a href="%s" target="_blank">%s</a>.</p></div>',
-			esc_html_x( 'HubSpot is missing the Credentials necessary to authorize your application. Please', 'first part of notice there is no settings saved for HubSpot.', 'tribe-ext-hubspot' ),
+			esc_html_x( 'HubSpot is missing the Credentials necessary to authorize your application. Please', 'First part of notice there is no settings saved for HubSpot.', 'tribe-ext-hubspot' ),
 			esc_url( $url ),
-			esc_html_x( 'set it in the settings', 'link text of notice there is no settings saved for HubSpot.' , 'tribe-ext-hubspot' )
+			esc_html_x( 'set it in the settings.', 'Link text of notice there is no settings saved for HubSpot.' , 'tribe-ext-hubspot' )
 		);
 
 		return $message;
@@ -187,9 +187,9 @@ class Notices {
 
 
 		$message = sprintf( '<div><p>%s, <a href="%s" target="_blank">%s</a>.</p></div>',
-			esc_html_x( 'HubSpot is not authorized', 'first part of notice there is no connection with HubSpot.', 'tribe-ext-hubspot' ),
+			esc_html_x( 'HubSpot is not authorized.', 'First part of notice there is no connection with HubSpot.', 'tribe-ext-hubspot' ),
 			esc_url( $url ),
-			esc_html_x( 'Please authorize or refresh your token', 'link text of notice there is no connection with HubSpot.','tribe-ext-hubspot' )
+			esc_html_x( 'Please authorize or refresh your connection.', 'Link text of notice there is no connection with HubSpot.','tribe-ext-hubspot' )
 		);
 
 		return $message;
