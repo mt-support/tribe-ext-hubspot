@@ -2,8 +2,6 @@
 
 namespace Tribe\HubSpot\Subscribe;
 
-use Tribe\HubSpot\Process\Delivery_Queue;
-
 /**
  * Class Checkin
  *

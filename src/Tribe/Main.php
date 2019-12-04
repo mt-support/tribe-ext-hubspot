@@ -65,6 +65,8 @@ class Main {
 	 * @return array
 	 */
 	public function get_all_options() {
+
+		/** @var \Tribe\HubSpot\Admin\Settings $hubspot_options */
 		$settings = tribe( 'tickets.hubspot.admin.settings' );
 
 		return $settings->get_all_options();

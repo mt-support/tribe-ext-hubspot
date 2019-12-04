@@ -2,6 +2,8 @@
 
 namespace Tribe\HubSpot\API;
 
+use Tribe\HubSpot\Process\Setup_Queue;
+
 /**
  * Class Oauth
  *
@@ -55,6 +57,10 @@ class Oauth {
 		) {
 			die();
 		}
+
+		// Clear queue in case a queued setup item is causing an issue.
+		$queue = new Setup_Queue();
+		$queue->delete_all_queues( 'hubspot_setup_queue' );
 
 		/**
 		 * Hook to Save Data During Authorization of Site

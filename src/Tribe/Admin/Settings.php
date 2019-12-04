@@ -2,6 +2,7 @@
 
 namespace Tribe\HubSpot\Admin;
 
+use Tribe\HubSpot\Process\Setup_Queue;
 use Tribe__Settings_Manager;
 
 /**
@@ -212,7 +213,6 @@ class Settings {
 				'type' => 'html',
 				'html' => $this->get_authorize_fields(),
 			],
-
 			$this->opts_prefix . 'app_id' => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'APP ID', 'tribe-ext-hubspot' ),
@@ -231,26 +231,6 @@ class Settings {
 				'tooltip'         => sprintf( esc_html__( 'Enter the client secret from the application created in HubSpot', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			],
-
-			//todo the next 3 fields are visible for development these will be hidden or removed
-			$this->opts_prefix . 'access_token'   => [
-				'type'            => 'text',
-				'label'           => esc_html__( 'Access Token', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'html',
-			],
-			$this->opts_prefix . 'refresh_token'  => [
-				'type'            => 'text',
-				'label'           => esc_html__( 'Refresh Token', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'html',
-			],
-			$this->opts_prefix . 'token_expires'  => [
-				'type'            => 'text',
-				'label'           => esc_html__( 'Expires', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'DESCRIPTION', 'tribe-ext-hubspot' ) ),
-				'validation_type' => 'html',
-			]
 		];
 
 		return array_merge( (array) $fields, $hubspot_fields );
@@ -312,6 +292,9 @@ class Settings {
 		$missing_hubspot_credentials = ! tribe( 'tickets.hubspot.api' )->is_authorized();
 
 		ob_start();
+
+		echo $this->get_status_table();
+
 		?>
 		<fieldset id="tribe-field-hubspot_token" class="tribe-field tribe-field-text tribe-size-medium">
 			<legend class="tribe-field-label"><?php esc_html_e( 'HubSpot Token', 'tribe-ext-hubspot' ) ?></legend>
@@ -418,7 +401,7 @@ class Settings {
 	}
 
 	/**
-	 * Disconnect from Hubspot by deleting all HubSpot options.
+	 * Disconnect from Hubspot by deleting all HubSpot options and clearing the Setup Queue.
 	 *
 	 * @since 1.0
 	 *
@@ -430,5 +413,132 @@ class Settings {
 		foreach ( $hb_options as $key => $option ) {
 			$this->delete_option( $key );
 		}
+
+		$queue = new Setup_Queue();
+		$queue->delete_all_queues( 'hubspot_setup_queue' );
+	}
+
+	/**
+	 * Get the Status Table for HubSpot.
+	 *
+	 * @since 1.0
+	 *
+	 * @return string
+	 */
+	protected function get_status_table() {
+		$options         = $this->get_all_options();
+		$indicator_icons = [
+			'good'    => 'marker',
+			'warning' => 'warning',
+			'bad'     => 'dismiss',
+		];
+
+		ob_start();
+		?>
+		<table class="hubspot-status event-aggregator-status">
+			<thead>
+			<tr class="table-heading">
+				<th colspan="4"><?php esc_html_e( 'HubSpot Services', 'tribe-ext-hubspot' ); ?></th>
+			</tr>
+			</thead>
+			<tbody>
+			<?php
+
+			// Connection Status ( checks for access token, refresh token, and expires site options )
+			$indicator = 'warning';
+			$notes     = '&nbsp;';
+			$label     = _x( 'HubSpot Connection', 'Status Label HubSpot Main Connection.', 'tribe-ext-hubspot' );
+			$text      = _x( 'Not connected.', 'Status for HubSpot Main Connection.', 'tribe-ext-hubspot' );
+
+			if ( ! empty( $options['access_token'] ) && ! empty( $options['refresh_token'] ) && ! empty( $options['access_token'] ) ) {
+				$indicator = 'good';
+				$text      = _x( 'Connected!', 'Status for HubSpot Main Connection.', 'tribe-ext-hubspot' );
+			}
+
+			echo $this->get_status_row( $label, $indicator, $indicator_icons, $text, $notes );
+
+			// Add Status of Group Name Setup.
+			$status_group = $this->get_status_content( 'Group Name', 'group_name_setup', $options );
+			echo $this->get_status_row( $status_group['label'], $status_group['indicator'], $indicator_icons, $status_group['text'], $status_group['notes'] );
+
+			// Add Status of Custom Properties Setup.
+			$status_properties = $this->get_status_content( 'Custom Properties', 'custom_properties_setup', $options );
+			echo $this->get_status_row( $status_properties['label'], $status_properties['indicator'], $indicator_icons, $status_properties['text'], $status_properties['notes'] );
+
+			// Add Status of Timeline Event Type Setup.
+			$status_timeline = $this->get_status_content( 'Timeline Event Types', 'timeline_event_types_setup', $options );
+			echo $this->get_status_row( $status_timeline['label'], $status_timeline['indicator'], $indicator_icons, $status_timeline['text'], $status_timeline['notes'] );
+			?>
+			</tbody>
+		</table>
+		<?php
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Get the Status Table for HubSpot.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $label   The name of the status.
+	 * @param string $type    The setup status key.
+	 * @param array  $options An array of saved HubSpot site options.
+	 *
+	 * @return array The array of information to use for the status.
+	 */
+	protected function get_status_content( $label, $type, $options ) {
+
+		$status              = [];
+		$status['label']     = _x( $label, 'Label of the HubSpot Setup.', 'tribe-ext-hubspot' );
+		$status['indicator'] = 'warning';
+		$status['text']      = _x( 'Setup on hold.', 'Message displayed when HubSpot Setup has not started.', 'tribe-ext-hubspot' );
+		$status['notes']     = '&nbsp;';
+		$status_value        = isset( $options[ $type ] ) ? $options[ $type ] : null;
+		$setup_note          = _x( 'Setup can take up to 5 minutes. You may navigate away from this page and setup with continue in the background.', 'This note is displayed when HubSpot Setup is Pending or In Progress.', 'tribe-ext-hubspot' );
+
+		if ( 'complete' === $status_value ) {
+			$status['indicator'] = 'good';
+			$status['text']      = _x( 'Setup Complete.', 'Message displayed when HubSpot Setup is complete.', 'tribe-ext-hubspot' );
+		} elseif ( 'failed' === $status_value ) {
+			$status['indicator'] = 'bad';
+			$status['text']      = _x( 'Setup incomplete, please refresh your connection to try again.', 'Message displayed when HubSpot Setup Failed.', 'tribe-ext-hubspot' );
+		} elseif ( 'pending' === $status_value ) {
+			$status['text']  = _x( 'Setup is preparing to begin. ', 'Message displayed when HubSpot Setup has been initialized.', 'tribe-ext-hubspot' );
+			$status['notes'] = $setup_note;
+		} elseif ( is_numeric( $status_value ) ) {
+			$status['text']  = _x( 'Setup in Progress.', 'Message displayed when HubSpot Setup is in Progress.', 'tribe-ext-hubspot' );
+			$status['notes'] = $setup_note;
+		}
+
+		return $status;
+	}
+
+	/**
+	 * Get a Status Row HTML.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $label           The name of the status.
+	 * @param string $indicator       The indicator key.
+	 * @param array  $indicator_icons An array of icons to use for the status symbol.
+	 * @param string $text            The description of the status.
+	 * @param string $notes           The additional notes for the status.
+	 *
+	 * @return string The html for the status row.
+	 */
+	protected function get_status_row( $label, $indicator, $indicator_icons, $text, $notes ) {
+
+		ob_start();
+		?>
+		<tr>
+			<td class="label"><?php echo esc_html( $label ); ?></td>
+			<td class="indicator <?php echo esc_attr( $indicator ); ?>"><span class="dashicons dashicons-<?php echo esc_attr( $indicator_icons[ $indicator ] ); ?>"></span></td>
+			<td><?php echo esc_html( $text ); ?></td>
+			<td><?php echo esc_html( $notes ); ?></td>
+		</tr>
+		<?php
+
+		return ob_get_clean();
 	}
 }

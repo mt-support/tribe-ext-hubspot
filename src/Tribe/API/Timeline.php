@@ -3,7 +3,6 @@
 namespace Tribe\HubSpot\API;
 
 use SevenShores\Hubspot\Factory;
-use Tribe\HubSpot\Process\Delivery_Queue;
 
 /**
  * Class Timeline
@@ -39,34 +38,9 @@ class Timeline {
 	];
 
 	/**
-	 * Setup Hooks for Contact_Property
-	 *
-	 * @since 1.0
-	 *
+	 * @var string
 	 */
-	public function hook() {
-
-		add_action( 'tribe_hubspot_authorize_site', [ $this, 'queue_timeline_event_types' ], 30 );
-	}
-
-	/**
-	 * Queue the Creation of Timeline Event Types
-	 *
-	 * @since 1.0
-	 *
-	 */
-	public function queue_timeline_event_types() {
-
-		$hubspot_data = [
-			'type' => 'update_timeline_event_types',
-		];
-
-		$queue = new Delivery_Queue();
-		$queue->push_to_queue( $hubspot_data );
-		$queue->save();
-		$queue->dispatch();
-
-	}
+	public $setup_name = 'timeline_event_types_setup';
 
 	/**
 	 * Create all Timeline Event Types.
@@ -76,6 +50,20 @@ class Timeline {
 	 * @return bool
 	 */
 	public function create_event_types() {
+
+		/** @var \Tribe\HubSpot\API\Setup $setup */
+		$setup = tribe( 'tickets.hubspot.setup' );
+		$setup_status = $setup->get_status_value_by_name( $this->setup_name );
+
+		if ( 'failed' === $setup_status ) {
+			return false;
+		}
+
+		if ( 'complete' === $setup_status ) {
+			return true;
+		}
+
+		$setup->set_status_value_by_name( $this->setup_name, $setup_status );
 
 		/** @var \Tribe\HubSpot\Admin\Settings $hubspot_options */
 		$hubspot_options = tribe( 'tickets.hubspot.admin.settings' );
@@ -116,6 +104,9 @@ class Timeline {
 			}
 
 		}
+
+		// The timeline event types are setup in HubSpot, set status as complete.
+		$setup->set_status_value_by_name( $this->setup_name, 'complete' );
 	}
 
 	/**
@@ -135,7 +126,7 @@ class Timeline {
 	public function create_event_type( $hubspot_options, $access_token, $client, $app_id, $name, $event_type ) {
 
 		try {
-			$hubspot  = Factory::createWithToken( $access_token, $client );
+			$hubspot  = Factory::createWithOAuth2Token( $access_token, $client );
 			$response = $hubspot->Timeline()->createEventType( $app_id, $name, $event_type['headerTemplate'], $event_type['detailTemplate'] );
 		} catch ( Exception $e ) {
 			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );
@@ -174,10 +165,10 @@ class Timeline {
 
 		$hubspot_options = tribe( 'tickets.hubspot' )->get_all_options();
 		$client          = $hubspot_api->client;
-		$app_id           = isset( $hubspot_options['app_id'] ) ? $hubspot_options['app_id'] : '';;
+		$app_id          = isset( $hubspot_options['app_id'] ) ? $hubspot_options['app_id'] : '';
 
 		try {
-			$hubspot  = Factory::createWithToken( $access_token, $client );
+			$hubspot  = Factory::createWithOAuth2Token( $access_token, $client );
 			$response = $hubspot->Timeline()->getEventTypes( $app_id );
 		} catch ( Exception $e ) {
 			$message = sprintf( 'Could not get timeline event types from HubSpot, error code: %s', $e->getMessage() );
@@ -223,7 +214,7 @@ class Timeline {
 		$event_type_id = isset( $hubspot_options[ $type ] ) ? $hubspot_options[ $type ] : '';;
 
 		try {
-			$hubspot  = Factory::createWithToken( $access_token, $client );
+			$hubspot  = Factory::createWithOAuth2Token( $access_token, $client );
 			$response = $hubspot->Timeline()->createOrUpdate( $app_id, $event_type_id, $id, null, $email, null, $extra_data );
 		} catch ( Exception $e ) {
 			$message = sprintf( 'Could not update or create a contact with HubSpot, error code: %s', $e->getMessage() );
