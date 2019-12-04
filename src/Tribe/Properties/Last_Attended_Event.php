@@ -93,15 +93,16 @@ class Last_Attended_Event extends Base {
 				'type'      => 'string',
 				'fieldType' => 'text',
 			],
-			'last_attended_event_start_datetime_utc'   => [
-				'label'     => 'Last Attended Event Start Datetime (UTC)',
+			'last_attended_event_start_date_utc'   => [
+				'label'     => 'Last Attended Event Start Date (UTC)',
 				'groupName' => $this->group_name,
 				'type'      => 'date',
 				'fieldType' => 'date',
 			],
-			'last_attended_event_start_time_utc'       => [
-				'label'     => 'Last Attended Event Start Time (UTC)',
+			'last_attended_event_start_datetime_utc' => [
+				'label'     => 'Last Attended Event Start DateTime (UTC)',
 				'groupName' => $this->group_name,
+				'fieldType' => 'datetime',
 				'type'      => 'datetime',
 			],
 			'last_attended_event_timezone'             => [

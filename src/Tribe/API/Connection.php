@@ -38,6 +38,16 @@ class Connection {
 	protected $client_secret = '';
 
 	/**
+	 * @var int
+	 */
+	protected $user_id = '';
+
+	/**
+	 * @var string
+	 */
+	protected $hapi_key = '';
+
+	/**
 	 * @var string
 	 */
 	protected $access_token = '';
@@ -66,6 +76,8 @@ class Connection {
 		$this->app_id        = isset( $this->options['app_id'] ) ? $this->options['app_id'] : '';
 		$this->client_id     = isset( $this->options['client_id'] ) ? $this->options['client_id'] : '';
 		$this->client_secret = isset( $this->options['client_secret'] ) ? $this->options['client_secret'] : '';
+		$this->user_id       = isset( $this->options['user_id'] ) ? $this->options['user_id'] : '';
+		$this->hapi_key      = isset( $this->options['hapi_key'] ) ? $this->options['hapi_key'] : '';
 		$this->access_token  = isset( $this->options['access_token'] ) ? $this->options['access_token'] : '';
 		$this->refresh_token = isset( $this->options['refresh_token'] ) ? $this->options['refresh_token'] : '';
 		$this->token_expires = isset( $this->options['token_expires'] ) ? $this->options['token_expires'] : '';
@@ -80,6 +92,17 @@ class Connection {
 	}
 
 	/**
+	 * Get the User ID.
+	 *
+	 * @since 1.0
+	 *
+	 * @return int The User ID.
+	 */
+	public function get_user_id() {
+		return $this->user_id;
+	}
+
+	/**
 	 * Get the Application ID.
 	 *
 	 * @since 1.0
@@ -88,6 +111,17 @@ class Connection {
 	 */
 	public function get_app_id() {
 		return $this->app_id;
+	}
+
+	/**
+	 * Get the HAPI Key.
+	 *
+	 * @since 1.0
+	 *
+	 * @return string The HAPI key.
+	 */
+	public function get_hapi_key() {
+		return $this->hapi_key;
 	}
 
 	/**
@@ -101,7 +135,9 @@ class Connection {
 
 		if (
 			empty( $this->client_id ) ||
-			empty( $this->client_secret )
+			empty( $this->client_secret ) ||
+			empty( $this->user_id ) ||
+			empty( $this->hapi_key )
 		) {
 
 			return false;
@@ -124,6 +160,8 @@ class Connection {
 		if (
 			empty( $this->client_id ) ||
 			empty( $this->client_secret ) ||
+			empty( $this->user_id ) ||
+			empty( $this->hapi_key ) ||
 			empty( $this->access_token ) ||
 			empty( $this->refresh_token ) ||
 			empty( $this->token_expires )

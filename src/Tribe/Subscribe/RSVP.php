@@ -54,7 +54,7 @@ class RSVP extends Base {
 		$extra_data = $this->get_extra_data( $post_id, $product_id, $attendee_id, 'rsvp', $attendee_data['name'] );
 
 		// Maybe Queue Creating a Timeline Event in HubSpot.
-		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_registration_id', $post_id, $attendee_id, $extra_data );
+		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_registration_rsvp_id', "event-register:{$post_id}:{$attendee_id}", $extra_data );
 	}
 
 	/**
@@ -88,7 +88,8 @@ class RSVP extends Base {
 		$extra_data = $this->get_extra_data( $related_data['post_id'], $related_data['ticket_id'], $order_id, 'rsvp', $attendee_data['name'] );
 
 		// Maybe Queue Creating a Timeline Event in HubSpot.
-		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_attendee_update_id', $event_id, $order_id, $extra_data );
+		$time = time();
+		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_attendee_update_id', "attendee-update:{$related_data['post_id']}:{$order_id}:{$time}", $extra_data );
 	}
 
 	/**
@@ -114,7 +115,7 @@ class RSVP extends Base {
 		$extra_data = $this->get_extra_data( $related_data['post_id'], $related_data['ticket_id'], $attendee_id, 'rsvp', $attendee_data['name'] );
 
 		// Maybe Queue Creating a Timeline Event in HubSpot.
-		//$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_checkin_id', $related_data['post_id'], $attendee_id, $extra_data );
+		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_checkin_id', "event-checkin:{$related_data['post_id']}:{$attendee_id}", $extra_data );
 	}
 
 	/**
@@ -159,8 +160,8 @@ class RSVP extends Base {
 
 		$related_data['order_id']  = get_post_meta( $attendee_id, $rsvp->order_key, true );
 		$related_data['order']     = $rsvp->get_attendees_by_id( $related_data['order_id'] );
-		$related_data['post_id']   = get_post_meta( $attendee_id, $rsvp->attendee_event_key, true );
-		$related_data['ticket_id'] = get_post_meta( $attendee_id, $rsvp->attendee_product_key, true );
+		$related_data['post_id']   = get_post_meta( $attendee_id, $rsvp::ATTENDEE_EVENT_KEY, true );
+		$related_data['ticket_id'] = get_post_meta( $attendee_id, $rsvp::ATTENDEE_PRODUCT_KEY, true );
 
 		return $related_data;
 	}

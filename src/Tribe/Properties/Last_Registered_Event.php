@@ -93,15 +93,14 @@ class Last_Registered_Event extends Base {
 				'type'      => 'string',
 				'fieldType' => 'text',
 			],
-			'last_registered_event_start_datetime_utc'   => [
-				'label'     => 'Last Registered Event Start Datetime (UTC)',
+			'last_registered_event_start_date_utc'   => [
+				'label'     => 'Last Registered Event Start Date (UTC)',
 				'groupName' => $this->group_name,
 				'type'      => 'date',
 				'fieldType' => 'date',
 			],
-			//todo broken broken
-			'last_registered_event_start_time_utc'       => [
-				'label'     => 'Last Registered Event Start Time (UTC)',
+			'last_registered_event_start_datetime_utc'       => [
+				'label'     => 'Last Registered Event Start DateTime (UTC)',
 				'groupName' => $this->group_name,
 				'type'      => 'datetime',
 				'fieldType' => 'datetime',

@@ -49,7 +49,7 @@ class Woo extends Base {
 		$extra_data = $this->get_extra_data( $post_id, $product_id, $attendee_id, 'woo', $attendee_data['name'] );
 
 		// Maybe Queue Creating a Timeline Event in HubSpot.
-		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_registration_id', $post_id, $attendee_id, $extra_data );
+		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_registration_id', "event-register:{$post_id}:{$attendee_id}", $extra_data );
 	}
 
 	/**
@@ -83,7 +83,8 @@ class Woo extends Base {
 		$extra_data = $this->get_extra_data( $related_data['post_id'], $related_data['ticket_id'], $attendee_id, 'woo', $attendee_data['name'] );
 
 		// Maybe Queue Creating a Timeline Event in HubSpot.
-		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_attendee_update_id', $post_id, $attendee_id, $extra_data );
+		$time = time();
+		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_attendee_update_id', "attendee-update:{$related_data['post_id']}:{$attendee_id}:{$time}", $extra_data );
 	}
 
 	/**
@@ -109,7 +110,7 @@ class Woo extends Base {
 		$extra_data = $this->get_extra_data( $related_data['post_id'], $related_data['ticket_id'], $attendee_id, 'woo', $attendee_data['name'] );
 
 		// Maybe Queue Creating a Timeline Event in HubSpot.
-		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_checkin_id', $related_data['post_id'], $attendee_id, $extra_data );
+		$this->maybe_push_to_timeline_queue( $attendee_data, 'timeline_event_checkin_id', "event-checkin:{$related_data['post_id']}:{$attendee_id}", $extra_data );
 	}
 
 	/**

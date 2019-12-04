@@ -221,14 +221,26 @@ class Settings {
 			],
 			$this->opts_prefix . 'client_id'      => [
 				'type'            => 'text',
-				'label'           => esc_html__( 'Client ID of the OAuth app', 'tribe-ext-hubspot' ),
+				'label'           => esc_html__( 'Client ID', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'Enter the client id from the application created in HubSpot', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			],
 			$this->opts_prefix . 'client_secret'  => [
 				'type'            => 'text',
-				'label'           => esc_html__( 'Client Secret of the OAuth app', 'tribe-ext-hubspot' ),
+				'label'           => esc_html__( 'Client Secret', 'tribe-ext-hubspot' ),
 				'tooltip'         => sprintf( esc_html__( 'Enter the client secret from the application created in HubSpot', 'tribe-ext-hubspot' ) ),
+				'validation_type' => 'html',
+			],
+			$this->opts_prefix . 'user_id' => [
+				'type'            => 'text',
+				'label'           => esc_html__( 'User ID', 'tribe-ext-hubspot' ),
+				'tooltip'         => sprintf( esc_html__( 'Enter the Developer Account User id for HubSpot', 'tribe-ext-hubspot' ) ),
+				'validation_type' => 'html',
+			],
+			$this->opts_prefix . 'hapi_key' => [
+				'type'            => 'text',
+				'label'           => esc_html__( 'HAPI Key', 'tribe-ext-hubspot' ),
+				'tooltip'         => sprintf( esc_html__( 'Enter the Developer Account HAPI Key from the developer account in HubSpot', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			],
 		];
@@ -252,7 +264,7 @@ class Settings {
 		</h3>
 		<div style="margin-left: 20px;">
 			<p>
-				<?php echo esc_html_x( 'You need to connect to your HubSpot account to be able to subscribe to actions.', 'Settings', 'tribe-ext-hubspot' ); ?>
+				<?php echo esc_html_x( 'You need to connect to your HubSpot account to be able to subscribe to actions.', 'Settings Description', 'tribe-ext-hubspot' ); ?>
 			</p>
 		</div>
 		<?php
@@ -280,7 +292,7 @@ class Settings {
 			ob_start();
 			?>
 			<fieldset id="tribe-field-hubspot_token" class="tribe-field tribe-field-text tribe-size-medium">
-				<legend class="tribe-field-label"><?php esc_html_e( 'HubSpot Token', 'tribe-ext-hubspot' ) ?></legend>
+				<legend class="tribe-field-label"><?php esc_html_e( 'HubSpot Connection', 'tribe-ext-hubspot' ) ?></legend>
 				<div class="tribe-field-wrap tribe-error">
 					<?php esc_html_e( 'An SSL is required to connect to HubSpot, please enable it on your site.', 'tribe-ext-hubspot' ) ?>
 				</div>
@@ -297,13 +309,13 @@ class Settings {
 
 		?>
 		<fieldset id="tribe-field-hubspot_token" class="tribe-field tribe-field-text tribe-size-medium">
-			<legend class="tribe-field-label"><?php esc_html_e( 'HubSpot Token', 'tribe-ext-hubspot' ) ?></legend>
+			<legend class="tribe-field-label"><?php esc_html_e( 'HubSpot Connection', 'tribe-ext-hubspot' ) ?></legend>
 			<div class="tribe-field-wrap">
 				<?php
 				$authorize_link        = tribe( 'tickets.hubspot.api' )->get_authorized_url();
 
 				if ( $missing_hubspot_credentials ) {
-					echo '<p>' . esc_html__( 'You need to connect to HubSpot.' ) . '</p>';
+					echo '<p>' . esc_html__( 'You need to connect to HubSpot.', 'tribe-ext-hubspot' ) . '</p>';
 					$hubspot_button_label = __( 'Connect to HubSpot', 'tribe-ext-hubspot' );
 				} else {
 					$hubspot_button_label     = __( 'Refresh your connection to HubSpot', 'tribe-ext-hubspot' );

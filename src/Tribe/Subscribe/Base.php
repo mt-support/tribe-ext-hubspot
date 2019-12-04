@@ -216,18 +216,17 @@ abstract class Base {
 	 *
 	 * @param array  $attendee_data An array of contact information for the attendee.
 	 * @param string $type_site_id  The name of the site option field of event to create ( Registration, Update, Check-In ).
-	 * @param int    $post_id       The ID of an event.
-	 * @param int    $attendee_id   The ID of an attendee.
+	 * @param string $timeline_id   The unique id used in HubSpot.
 	 * @param array  $extra_data    An array of event and ticket data to include with the Timeline Event.
 	 */
-	public function maybe_push_to_timeline_queue( $attendee_data, $type_site_id, $post_id, $attendee_id, $extra_data ) {
+	public function maybe_push_to_timeline_queue( $attendee_data, $type_site_id, $timeline_id, $extra_data ) {
 
 		if ( ! empty( $attendee_data['email'] ) ) {
 
 			$hubspot_data = [
 				'type'              => 'timeline',
 				'event_type'        => $type_site_id,
-				'timeline_event_id' => "event-checkin:{$post_id}:{$attendee_id}",
+				'timeline_event_id' => $timeline_id,
 				'email'             => $attendee_data['email'],
 				'extra_data'        => $extra_data,
 			];

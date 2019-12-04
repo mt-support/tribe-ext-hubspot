@@ -20,10 +20,10 @@ class Event_Data {
 	 */
 	public function get_event_values( $prefix, $post_id ) {
 
-		$event      = tribe_get_event( $post_id );
+		$event = tribe_get_event( $post_id );
+		$is_event = $this->is_tribe_event( $event->post_type );
 
 		$event_data = [
-			//todo number formatting is 16,108 in HubSpot
 			[
 				'property' => $prefix . 'event_id',
 				'value'    => $event->ID,
@@ -45,20 +45,20 @@ class Event_Data {
 				'value'    => html_entity_decode( $event->cost ),
 			],
 			[
-				'property' => $prefix . 'event_start_datetime_utc',
-				'value'    => ms_timestamp( strtotime( 'midnight', ( \Tribe__Date_Utils::wp_strtotime( $event->start_date_utc ) ) ) ),
+				'property' => $prefix . 'event_start_date_utc',
+				'value'    => $is_event ? ms_timestamp( strtotime( 'midnight', ( \Tribe__Date_Utils::wp_strtotime( $event->start_date_utc ) ) ) ) : null,
 			],
 			[
-				'property' => $prefix . 'event_start_time_utc',
-				'value'    =>  ms_timestamp( date( 'U', strtotime( $event->start_date_utc ) ) ),
+				'property' => $prefix . 'event_start_datetime_utc',
+				'value'    => $is_event ? ms_timestamp( date( 'U', strtotime( $event->start_date_utc ) ) ) : null,
 			],
 			[
 				'property' => $prefix . 'event_timezone',
-				'value'    => $event->timezone,
+				'value'    => $is_event ? $event->timezone : null,
 			],
 			[
 				'property' => $prefix . 'event_duration',
-				'value'    => $event->duration,
+				'value'    => $is_event ? $event->duration : null,
 			],
 		];
 
@@ -189,6 +189,22 @@ class Event_Data {
 
 		return $ticket_data;
 
+	}
+
+	/**
+	 * Determine whether a post type is a TEC event.
+	 *
+	 * @param string $post_type The post type name.
+	 *
+	 * @return bool Whether a post type is a TEC event.
+	 */
+	protected function is_tribe_event( $post_type ) {
+
+		 if ( 'tribe_events' === $post_type ) {
+		 	return true;
+         }
+
+         return false;
 	}
 
 	/**
