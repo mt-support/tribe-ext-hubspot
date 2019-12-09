@@ -39,6 +39,6 @@ We're always interested in your feedback and our [Help Desk](https://support.the
 
 == Changelog ==
 
-= [1.0.0] 2019-12-DD =
+= [1.0.0] 2019-12-10 =
 
 * Initial release
