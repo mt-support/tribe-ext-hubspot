@@ -13,11 +13,9 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 == Description ==
 
-Automatically create/update contacts in HubSpot for both the buyer and the attendees when a ticket is purchased
+Updates to a user's attendee meta or RSVP status will be synced with HubSpot.
 
-Updates to user or attendee records should be synced with HubSpot
-
-Event meta for the RSVP/Ticket will be associated with the HubSpot contact and timeline
+When a user is checked into an event, that event will sync to the HubSpot contact and timeline.
 
 == Installation ==
 
@@ -39,6 +37,6 @@ We're always interested in your feedback and our [Help Desk](https://support.the
 
 == Changelog ==
 
-= [1.0.0] YYYY-MM-DD =
+= [1.0.0] 2019-12-11 =
 
 * Initial release
