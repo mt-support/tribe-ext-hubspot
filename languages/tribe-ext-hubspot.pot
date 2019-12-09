@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 "Project-Id-Version: Event Tickets HubSpot Integration\n"
-"POT-Creation-Date: 2019-12-03 18:01-0500\n"
+"POT-Creation-Date: 2019-12-09 15:51-0500\n"
 "PO-Revision-Date: 2019-12-03 18:00-0500\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -21,25 +21,26 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 "X-Poedit-SearchPathExcluded-1: vendor\n"
+"X-Poedit-SearchPathExcluded-2: node_modules\n"
 
-#: src/Tribe/Admin/Notices.php:102
+#: src/Tribe/Admin/Notices.php:103
 msgctxt "First part of notice there is no settings saved for HubSpot."
 msgid ""
 "HubSpot is missing the Credentials necessary to authorize your application. "
 "Please"
 msgstr ""
 
-#: src/Tribe/Admin/Notices.php:104
+#: src/Tribe/Admin/Notices.php:105
 msgctxt "Link text of notice there is no settings saved for HubSpot."
-msgid "set it in the settings."
+msgid "configure it in the settings."
 msgstr ""
 
-#: src/Tribe/Admin/Notices.php:190
+#: src/Tribe/Admin/Notices.php:191
 msgctxt "First part of notice there is no connection with HubSpot."
 msgid "HubSpot is not authorized."
 msgstr ""
 
-#: src/Tribe/Admin/Notices.php:192
+#: src/Tribe/Admin/Notices.php:193
 msgctxt "Link text of notice there is no connection with HubSpot."
 msgid "Please authorize or refresh your connection."
 msgstr ""
@@ -49,7 +50,7 @@ msgid "APP ID"
 msgstr ""
 
 #: src/Tribe/Admin/Settings.php:219
-msgid "Enter the app id from the application created in HubSpot"
+msgid "Enter the App ID from the application created in HubSpot"
 msgstr ""
 
 #: src/Tribe/Admin/Settings.php:224
@@ -57,7 +58,7 @@ msgid "Client ID"
 msgstr ""
 
 #: src/Tribe/Admin/Settings.php:225
-msgid "Enter the client id from the application created in HubSpot"
+msgid "Enter the Client ID from the application created in HubSpot"
 msgstr ""
 
 #: src/Tribe/Admin/Settings.php:230
@@ -65,7 +66,7 @@ msgid "Client Secret"
 msgstr ""
 
 #: src/Tribe/Admin/Settings.php:231
-msgid "Enter the client secret from the application created in HubSpot"
+msgid "Enter the Client Secret from the application created in HubSpot"
 msgstr ""
 
 #: src/Tribe/Admin/Settings.php:236
@@ -73,16 +74,16 @@ msgid "User ID"
 msgstr ""
 
 #: src/Tribe/Admin/Settings.php:237
-msgid "Enter the Developer Account User id for HubSpot"
+msgid "Enter the Developer Account User ID for HubSpot"
 msgstr ""
 
 #: src/Tribe/Admin/Settings.php:242
-msgid "HAPI Key"
+msgid "API Key"
 msgstr ""
 
 #: src/Tribe/Admin/Settings.php:243
 msgid ""
-"Enter the Developer Account HAPI Key from the developer account in HubSpot"
+"Enter the Developer Account API Key from the Developer Account in HubSpot"
 msgstr ""
 
 #: src/Tribe/Admin/Settings.php:263
@@ -149,8 +150,8 @@ msgstr ""
 #: src/Tribe/Admin/Settings.php:510
 msgctxt "This note is displayed when HubSpot Setup is Pending or In Progress."
 msgid ""
-"Setup can take up to 5 minutes. You may navigate away from this page and "
-"setup with continue in the background."
+"Setup can take up to 5 minutes. You may navigate away from this page—setup "
+"with continue in the background."
 msgstr ""
 
 #: src/Tribe/Admin/Settings.php:514
@@ -173,7 +174,7 @@ msgctxt "Message displayed when HubSpot Setup is in Progress."
 msgid "Setup in Progress."
 msgstr ""
 
-#: src/Tribe/Setup.php:77
+#: src/Tribe/Setup.php:78
 #, php-format
 msgid ""
 "%1$s requires PHP version %2$s or newer to work. Please contact your website "
