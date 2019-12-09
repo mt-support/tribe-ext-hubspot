@@ -10,15 +10,17 @@ $I->loginAsAdmin();
 $I->amOnPluginsPage();
 $I->seePluginDeactivated( 'event-tickets' );
 $I->seePluginDeactivated( 'event-tickets-plus' );
+$I->seePluginDeactivated( 'the-events-calendar' );
 $I->seePluginDeactivated( 'event-tickets-hubspot-integration' );
 
-$I->activatePlugin( [ 'event-tickets', 'event-tickets-plus', 'event-tickets-hubspot-integration' ] );
+$I->activatePlugin( [ 'event-tickets', 'event-tickets-plus', 'the-events-calendar', 'event-tickets-hubspot-integration' ] );
 
 // to get back to the plugins page if redirected after the plugin activation
 $I->amOnPluginsPage();
 
 $I->seePluginActivated( 'event-tickets' );
 $I->seePluginActivated( 'event-tickets-plus' );
+$I->seePluginActivated( 'the-events-calendar' );
 $I->seePluginActivated( 'event-tickets-hubspot-integration' );
 
 $I->deactivatePlugin( 'event-tickets-hubspot-integration' );
