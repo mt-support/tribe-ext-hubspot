@@ -216,31 +216,31 @@ class Settings {
 			$this->opts_prefix . 'app_id' => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'APP ID', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'Enter the app id from the application created in HubSpot', 'tribe-ext-hubspot' ) ),
+				'tooltip'         => sprintf( esc_html__( 'Enter the App ID from the application created in HubSpot', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			],
 			$this->opts_prefix . 'client_id'      => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Client ID', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'Enter the client id from the application created in HubSpot', 'tribe-ext-hubspot' ) ),
+				'tooltip'         => sprintf( esc_html__( 'Enter the Client ID from the application created in HubSpot', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			],
 			$this->opts_prefix . 'client_secret'  => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'Client Secret', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'Enter the client secret from the application created in HubSpot', 'tribe-ext-hubspot' ) ),
+				'tooltip'         => sprintf( esc_html__( 'Enter the Client Secret from the application created in HubSpot', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			],
 			$this->opts_prefix . 'user_id' => [
 				'type'            => 'text',
 				'label'           => esc_html__( 'User ID', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'Enter the Developer Account User id for HubSpot', 'tribe-ext-hubspot' ) ),
+				'tooltip'         => sprintf( esc_html__( 'Enter the Developer Account User ID for HubSpot', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			],
 			$this->opts_prefix . 'hapi_key' => [
 				'type'            => 'text',
-				'label'           => esc_html__( 'HAPI Key', 'tribe-ext-hubspot' ),
-				'tooltip'         => sprintf( esc_html__( 'Enter the Developer Account HAPI Key from the developer account in HubSpot', 'tribe-ext-hubspot' ) ),
+				'label'           => esc_html__( 'API Key', 'tribe-ext-hubspot' ),
+				'tooltip'         => sprintf( esc_html__( 'Enter the Developer Account API Key from the Developer Account in HubSpot', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			],
 		];
@@ -507,7 +507,7 @@ class Settings {
 		$status['text']      = _x( 'Setup on hold.', 'Message displayed when HubSpot Setup has not started.', 'tribe-ext-hubspot' );
 		$status['notes']     = '&nbsp;';
 		$status_value        = isset( $options[ $type ] ) ? $options[ $type ] : null;
-		$setup_note          = _x( 'Setup can take up to 5 minutes. You may navigate away from this page and setup with continue in the background.', 'This note is displayed when HubSpot Setup is Pending or In Progress.', 'tribe-ext-hubspot' );
+		$setup_note          = _x( 'Setup can take up to 5 minutes. You may navigate away from this page—setup with continue in the background.', 'This note is displayed when HubSpot Setup is Pending or In Progress.', 'tribe-ext-hubspot' );
 
 		if ( 'complete' === $status_value ) {
 			$status['indicator'] = 'good';

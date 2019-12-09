@@ -34,7 +34,7 @@ class Timeline {
 		'eventCheckin'          => [
 			'site_option'    => 'timeline_event_checkin_id',
 			'headerTemplate' => 'Contact was successfully checked in at {{#formatDate timestamp}}{{/formatDate}}',
-			'detailTemplate' => 'Attendee was checked into {{extraData.event.event_name}} (#{{extraData.event.event_id}} )',
+			'detailTemplate' => 'Attendee was checked into {{extraData.event.event_name}} (#{{extraData.event.event_id}} ) at {{#formatDate timestamp}}{{/formatDate}} from the Event Tickets HubSpot Integration app',
 		],
 	];
 
