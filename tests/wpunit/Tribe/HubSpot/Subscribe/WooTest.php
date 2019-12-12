@@ -1,6 +1,6 @@
 <?php
 
-namespace Tribe\HubSpot;
+namespace Tribe\HubSpot\Subscribe;
 
 use Tribe\Events\Test\Factories\Event;
 use Tribe\Tickets_Plus\Test\Commerce\WooCommerce\Order_Maker;

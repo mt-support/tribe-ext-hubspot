@@ -1,8 +1,7 @@
 <?php
 
-namespace Tribe\HubSpot;
+namespace Tribe\HubSpot\Subscribe;
 
-use Tribe\Events\Test\Factories\Event;
 use Tribe\Tickets\Test\Commerce\Attendee_Maker;
 use Tribe\Tickets\Test\Commerce\RSVP\Ticket_Maker as RSVP_Ticket_Maker;
 use Tribe__Tickets__RSVP as Main_RSVP;

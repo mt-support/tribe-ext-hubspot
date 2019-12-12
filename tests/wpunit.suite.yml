@@ -13,12 +13,14 @@ modules:
       adminEmail: admin@%WP_DOMAIN%
       title: 'Tribe Events HubSpot Tests'
       plugins:
-        - the-events-calendar/the-events-calendar.php
-        - woocommerce/woocommerce.php
         - event-tickets/event-tickets.php
         - event-tickets-plus/event-tickets-plus.php
+        - the-events-calendar/the-events-calendar.php
+        - easy-digital-downloads/easy-digital-downloads.php
+        - woocommerce/woocommerce.php
       activatePlugins:
-        - the-events-calendar/the-events-calendar.php
-        - woocommerce/woocommerce.php
         - event-tickets/event-tickets.php
         - event-tickets-plus/event-tickets-plus.php
+        - the-events-calendar/the-events-calendar.php
+        - easy-digital-downloads/easy-digital-downloads.php
+        - woocommerce/woocommerce.php
