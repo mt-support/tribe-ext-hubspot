@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Event Tickets HubSpot Integration
- * Plugin URI:        https://theeventscalendar.com/extensions/---the-extension-article-url---/
+ * Plugin URI:        http://m.tri.be/hubspot
  * GitHub Plugin URI: https://github.com/mt-support/tribe-ext-hubspot
  * Description:       Event Tickets and Event Tickets Plus HubSpot Integration
  * Version:           1.0.0
