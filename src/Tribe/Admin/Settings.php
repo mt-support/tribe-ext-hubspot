@@ -257,6 +257,13 @@ class Settings {
 	 */
 	private function get_intro_text() {
 
+		$guide = sprintf( '%s <a href="%s" target="_blank">%s</a> %s',
+			esc_html_x( 'Review our', 'Intro text to the setup guide link.','tribe-ext-hubspot' ),
+			esc_url( 'http://m.tri.be/hubspotkb' ),
+			esc_html_x( 'setup guide', 'Link text to the setup guide.','tribe-ext-hubspot' ),
+			esc_html_x( 'to help you get started.', 'Ending text to the setup guide link.','tribe-ext-hubspot' )
+		);
+
 		ob_start();
 		?>
 		<h3 id="tribe-hubspot-application-credientials">
@@ -265,6 +272,9 @@ class Settings {
 		<div style="margin-left: 20px;">
 			<p>
 				<?php echo esc_html_x( 'You need to connect to your HubSpot account to be able to subscribe to actions.', 'Settings Description', 'tribe-ext-hubspot' ); ?>
+			</p>
+			<p>
+				<?php echo $guide; ?>
 			</p>
 		</div>
 		<?php
