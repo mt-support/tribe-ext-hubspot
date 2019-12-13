@@ -73,7 +73,7 @@ class Timeline {
 		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
 		$hubspot_api = tribe( 'tickets.hubspot.api' );
 
-		if ( ! $access_token = $hubspot_api->is_ready() ) {
+		if ( ! $access_token = $hubspot_api->is_ready_for_setup() ) {
 			return false;
 		}
 
@@ -161,7 +161,7 @@ class Timeline {
 		/** @var \Tribe\HubSpot\API\Connection $hubspot_api */
 		$hubspot_api = tribe( 'tickets.hubspot.api' );
 
-		if ( ! $access_token = $hubspot_api->is_ready() ) {
+		if ( ! $access_token = $hubspot_api->is_ready_for_setup() ) {
 			return [];
 		}
 

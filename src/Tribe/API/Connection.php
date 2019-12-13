@@ -73,11 +73,11 @@ class Connection {
 		$this->callback                   = wp_nonce_url( get_home_url( null, '/tribe-hubspot/' ), 'hubspot-oauth-action', 'hubspot-oauth-nonce' );
 		$this->options                    = tribe( 'tickets.hubspot' )->get_all_options();
 		$this->opts_prefix                = tribe( 'tickets.hubspot.admin.settings' )->get_options_prefix();
-		$this->app_id                     = isset( $this->options['app_id'] ) ? $this->options['app_id'] : '';
-		$this->client_id                  = isset( $this->options['client_id'] ) ? $this->options['client_id'] : '';
-		$this->client_secret              = isset( $this->options['client_secret'] ) ? $this->options['client_secret'] : '';
-		$this->user_id                    = isset( $this->options['user_id'] ) ? $this->options['user_id'] : '';
-		$this->hapi_key                   = isset( $this->options['hapi_key'] ) ? $this->options['hapi_key'] : '';
+		$this->app_id                     = isset( $this->options['app_id'] ) ? trim( $this->options['app_id'] ) : '';
+		$this->client_id                  = isset( $this->options['client_id'] ) ? trim( $this->options['client_id'] ) : '';
+		$this->client_secret              = isset( $this->options['client_secret'] ) ? trim( $this->options['client_secret'] ) : '';
+		$this->user_id                    = isset( $this->options['user_id'] ) ? trim( $this->options['user_id'] ) : '';
+		$this->hapi_key                   = isset( $this->options['hapi_key'] ) ? trim( $this->options['hapi_key'] ) : '';
 		$this->access_token               = isset( $this->options['access_token'] ) ? $this->options['access_token'] : '';
 		$this->refresh_token              = isset( $this->options['refresh_token'] ) ? $this->options['refresh_token'] : '';
 		$this->token_expires              = isset( $this->options['token_expires'] ) ? $this->options['token_expires'] : '';
@@ -311,6 +311,31 @@ class Connection {
 			'complete' !== $this->custom_properties_setup ||
 			'complete' !== $this->timeline_event_types_setup
 		) {
+			return false;
+		}
+
+		$this->client->key    = $access_token;
+		$this->client->oauth2 = true;
+
+		return $access_token;
+	}
+
+	/**
+	 * Determine if the API has Valid Access Token and Ready to Attempt Setup
+	 *
+	 * @since 1.0
+	 *
+	 * @return string|false Refreshed access token or false if not ready.
+	 */
+	public function is_ready_for_setup() {
+
+		if ( ! $this->is_authorized() ) {
+			return false;
+		}
+
+		$access_token = $this->maybe_refresh( $this->access_token );
+
+		if ( ! $access_token ) {
 			return false;
 		}
 

@@ -517,7 +517,7 @@ class Settings {
 		$status['text']      = _x( 'Setup on hold.', 'Message displayed when HubSpot Setup has not started.', 'tribe-ext-hubspot' );
 		$status['notes']     = '&nbsp;';
 		$status_value        = isset( $options[ $type ] ) ? $options[ $type ] : null;
-		$setup_note          = _x( 'Setup can take up to 5 minutes. You may navigate away from this page—setup with continue in the background.', 'This note is displayed when HubSpot Setup is Pending or In Progress.', 'tribe-ext-hubspot' );
+		$setup_note          = _x( 'Setup can take up to 5 minutes. You may navigate away from this page, setup will continue in the background.', 'This note is displayed when HubSpot Setup is Pending or In Progress.', 'tribe-ext-hubspot' );
 
 		if ( 'complete' === $status_value ) {
 			$status['indicator'] = 'good';
