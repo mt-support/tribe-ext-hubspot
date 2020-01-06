@@ -2,6 +2,8 @@
 
 namespace Tribe\HubSpot\Subscribe;
 
+use Codeception\TestCase\WPTestCase;
+use ReflectionClass;
 use Tribe\Tickets\Test\Commerce\Attendee_Maker;
 use Tribe\Tickets\Test\Commerce\RSVP\Ticket_Maker as RSVP_Ticket_Maker;
 use Tribe__Tickets__RSVP as Main_RSVP;
@@ -9,7 +11,7 @@ use Tribe__Tickets__Tickets_View as Tickets_View;
 use Tribe\HubSpot\Subscribe\RSVP as RSVP_Subscribe;
 use Tribe\HubSpot\Properties\Event_Data as Data;
 
-class RsvpTest extends \Codeception\TestCase\WPTestCase {
+class RsvpTest extends WPTestCase {
 
 	use Attendee_Maker;
 	use RSVP_Ticket_Maker;
@@ -18,7 +20,6 @@ class RsvpTest extends \Codeception\TestCase\WPTestCase {
 		// before
 		parent::setUp();
 
-		// your set up methods here
 		$this->tickets_view = new Tickets_View();
 
 		$this->rsvp_subscribe = new RSVP_Subscribe();
@@ -36,14 +37,6 @@ class RsvpTest extends \Codeception\TestCase\WPTestCase {
 		// your tear down methods here
 		// then
 		parent::tearDown();
-	}
-
-	private function make_instance() {
-		/** @var Main_RSVP $instance */
-		$instance = ( new \ReflectionClass( Main_RSVP::class ) )->newInstanceWithoutConstructor();
-		$instance->set_tickets_view( $this->tickets_view );
-
-		return $instance;
 	}
 
 	/**
@@ -64,11 +57,45 @@ class RsvpTest extends \Codeception\TestCase\WPTestCase {
 		self::assertEquals( $attendee_data['last_name'], $properties[1]['value'] );
 	}
 
+	protected function make_base_data() {
+		$post_id   = $this->factory->post->create();
+		$ticket_id = $this->create_rsvp_ticket( $post_id );
+
+		$sut = $this->make_instance();
+		$sut->generate_tickets_for( $ticket_id, 1, $this->fake_attendee_details( [ 'order_status' => 'yes' ] ) );
+		$test_attendees = $sut->get_attendees_array( $post_id );
+		$test_attendee  = current( $test_attendees );
+
+		return [
+			'post_id'       => $post_id,
+			'ticket_id'     => $ticket_id,
+			'test_attendee' => $test_attendee,
+		];
+	}
+
+	private function make_instance() {
+		/** @var Main_RSVP $instance */
+		$instance = ( new ReflectionClass( Main_RSVP::class ) )->newInstanceWithoutConstructor();
+		$instance->set_tickets_view( $this->tickets_view );
+
+		return $instance;
+	}
+
+	protected function fake_attendee_details( array $overrides = [] ) {
+		return array_merge( [
+			'full_name'    => 'Jane Doe',
+			'email'        => 'jane@doe.com',
+			'order_status' => 'yes',
+			'optout'       => 'no',
+			'order_id'     => Main_RSVP::generate_order_id(),
+		], $overrides );
+	}
+
 	/**
 	 * @test
 	 */
 	public function it_should_return_order_data_array_from_attendee_data() {
-		$data           = new Data();
+		$data = new Data();
 
 		$base_data     = $this->make_base_data();
 		$test_attendee = $base_data['test_attendee'];
@@ -113,7 +140,7 @@ class RsvpTest extends \Codeception\TestCase\WPTestCase {
 	 * @test
 	 */
 	public function it_should_return_first_attendee_id_from_order() {
-		$Main_RSVP      = new Main_RSVP();
+		$Main_RSVP = new Main_RSVP();
 
 		$base_data     = $this->make_base_data();
 		$post_id       = $base_data['post_id'];
@@ -163,31 +190,5 @@ class RsvpTest extends \Codeception\TestCase\WPTestCase {
 
 		self::assertEquals( $post_id, $related_data['post_id'] );
 		self::assertEquals( $ticket_id, $related_data['ticket_id'] );
-	}
-
-	protected function make_base_data() {
-		$post_id   = $this->factory->post->create();
-		$ticket_id = $this->create_rsvp_ticket( $post_id );
-
-		$sut = $this->make_instance();
-		$sut->generate_tickets_for( $ticket_id, 1, $this->fake_attendee_details( [ 'order_status' => 'yes' ] ) );
-		$test_attendees = $sut->get_attendees_array( $post_id );
-		$test_attendee  = current( $test_attendees );
-
-		return [
-			'post_id'       => $post_id,
-			'ticket_id'     => $ticket_id,
-			'test_attendee' => $test_attendee,
-		];
-	}
-
-	protected function fake_attendee_details( array $overrides = [] ) {
-		return array_merge( [
-			'full_name'    => 'Jane Doe',
-			'email'        => 'jane@doe.com',
-			'order_status' => 'yes',
-			'optout'       => 'no',
-			'order_id'     => Main_RSVP::generate_order_id(),
-		], $overrides );
 	}
 }

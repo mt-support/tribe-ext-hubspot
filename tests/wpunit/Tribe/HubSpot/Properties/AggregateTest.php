@@ -2,6 +2,8 @@
 
 namespace Tribe\HubSpot\Properties;
 
+use Codeception\TestCase\WPTestCase;
+use stdClass;
 use Tribe\Events\Test\Factories\Event;
 use Tribe\Tickets_Plus\Test\Commerce\WooCommerce\Order_Maker;
 use Tribe\Tickets_Plus\Test\Commerce\WooCommerce\Ticket_Maker;
@@ -10,7 +12,7 @@ use Tribe\HubSpot\Subscribe\Woo as Woo_Subscribe;
 use Tribe\HubSpot\Properties\Event_Data as Data;
 use Tribe\HubSpot\Properties\Aggregate_Data as Aggregate_Data;
 
-class AggregateTest extends \Codeception\TestCase\WPTestCase {
+class AggregateTest extends WPTestCase {
 
 	use Ticket_Maker;
 	use Order_Maker;
@@ -69,6 +71,39 @@ class AggregateTest extends \Codeception\TestCase\WPTestCase {
 		//average_events_per_order
 		self::assertEquals( 'average_events_per_order', $agg_data['values'][5]['property'] );
 		self::assertEquals( 2, $agg_data['values'][5]['value'] );
+	}
+
+	protected function make_base_data( $values = [] ) {
+		$current_properties = new stdClass();
+
+		$properties = [
+			'total_registered_events',
+			'total_number_of_orders',
+			'average_tickets_per_order',
+			'average_tickets_per_order_list',
+			'average_events_per_order',
+			'average_events_per_order_list',
+			'total_attended_events',
+		];
+
+		if ( empty( $values ) ) {
+			$values = [
+				4,
+				5,
+				1,
+				'1,1,1',
+				1,
+				'2,2,2',
+				2,
+			];
+		}
+
+		foreach ( $properties as $key => $property ) {
+			$current_properties->{$property}        = new stdClass();
+			$current_properties->{$property}->value = $values[ $key ];
+		}
+
+		return $current_properties;
 	}
 
 	/**
@@ -376,38 +411,5 @@ class AggregateTest extends \Codeception\TestCase\WPTestCase {
 
 		self::assertEquals( '2,1,2,3,2,1,1,2,3,1', $values['list'] );
 		self::assertEquals( 1.8, $values['current_value'] );
-	}
-
-	protected function make_base_data( $values = [] ) {
-		$current_properties = new \stdClass();
-
-		$properties = [
-			'total_registered_events',
-			'total_number_of_orders',
-			'average_tickets_per_order',
-			'average_tickets_per_order_list',
-			'average_events_per_order',
-			'average_events_per_order_list',
-			'total_attended_events',
-		];
-
-		if ( empty( $values ) ) {
-			$values = [
-				4,
-				5,
-				1,
-				'1,1,1',
-				1,
-				'2,2,2',
-				2,
-			];
-		}
-
-		foreach ( $properties as $key => $property ) {
-			$current_properties->{$property}        = new \stdClass();
-			$current_properties->{$property}->value = $values[ $key ];
-		}
-
-		return $current_properties;
 	}
 }

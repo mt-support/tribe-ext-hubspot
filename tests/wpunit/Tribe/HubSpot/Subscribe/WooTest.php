@@ -2,14 +2,16 @@
 
 namespace Tribe\HubSpot\Subscribe;
 
+use Codeception\TestCase\WPTestCase;
 use Tribe\Events\Test\Factories\Event;
 use Tribe\Tickets_Plus\Test\Commerce\WooCommerce\Order_Maker;
 use Tribe\Tickets_Plus\Test\Commerce\WooCommerce\Ticket_Maker;
 use Tribe__Tickets_Plus__Commerce__WooCommerce__Main as Main_Woo;
 use Tribe\HubSpot\Subscribe\Woo as Woo_Subscribe;
 use Tribe\HubSpot\Properties\Event_Data as Data;
+use WC_Order;
 
-class WooTest extends \Codeception\TestCase\WPTestCase {
+class WooTest extends WPTestCase {
 
 	use Ticket_Maker;
 	use Order_Maker;
@@ -46,11 +48,25 @@ class WooTest extends \Codeception\TestCase\WPTestCase {
 		self::assertEquals( $attendee_data['last_name'], $properties[1]['value'] );
 	}
 
+	protected function make_base_data() {
+		$event_id  = $this->factory()->event->create();
+		$ticket_id = $this->create_woocommerce_ticket( $event_id, 5 );
+		$order_id  = $this->create_woocommerce_order( $ticket_id, 2, [ 'status' => 'completed' ] );
+		$order     = new WC_Order( $order_id );
+
+		return [
+			'event_id'  => $event_id,
+			'ticket_id' => $ticket_id,
+			'order_id'  => $order_id,
+			'order'     => $order,
+		];
+	}
+
 	/**
 	 * @test
 	 */
 	public function it_should_return_order_data_array_from_attendee_data() {
-		$data          = new Data();
+		$data = new Data();
 
 		$base_data = $this->make_base_data();
 		$order     = $base_data['order'];
@@ -94,7 +110,7 @@ class WooTest extends \Codeception\TestCase\WPTestCase {
 	 * @test
 	 */
 	public function it_should_return_first_attendee_id_from_order() {
-		$main_woo      = new Main_Woo();
+		$main_woo = new Main_Woo();
 
 		$base_data = $this->make_base_data();
 		$event_id  = $base_data['event_id'];
@@ -113,7 +129,7 @@ class WooTest extends \Codeception\TestCase\WPTestCase {
 	 * @test
 	 */
 	public function it_should_return_related_order_data_with_attendee_id() {
-		$main_woo      = new Main_Woo();
+		$main_woo = new Main_Woo();
 
 		$base_data = $this->make_base_data();
 		$event_id  = $base_data['event_id'];
@@ -130,19 +146,5 @@ class WooTest extends \Codeception\TestCase\WPTestCase {
 		self::assertEquals( $order, $related_data['order'] );
 		self::assertEquals( $event_id, $related_data['post_id'] );
 		self::assertEquals( $ticket_id, $related_data['ticket_id'] );
-	}
-
-	protected function make_base_data() {
-		$event_id  = $this->factory()->event->create();
-		$ticket_id = $this->create_woocommerce_ticket( $event_id, 5 );
-		$order_id  = $this->create_woocommerce_order( $ticket_id, 2, [ 'status' => 'completed' ] );
-		$order     = new \WC_Order( $order_id );
-
-		return [
-			'event_id'  => $event_id,
-			'ticket_id' => $ticket_id,
-			'order_id'  => $order_id,
-			'order'     => $order,
-		];
 	}
 }

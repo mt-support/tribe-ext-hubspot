@@ -2,6 +2,7 @@
 
 namespace Tribe\HubSpot\Subscribe;
 
+use Codeception\TestCase\WPTestCase;
 use Tribe\Events\Test\Factories\Event;
 use Tribe\Tickets_Plus\Test\Commerce\EDD\Ticket_Maker as EDD_Ticket_Maker;
 use Tribe\Tickets_Plus\Test\Commerce\EDD\Order_Maker as EDD_Order_Maker;
@@ -9,7 +10,7 @@ use Tribe__Tickets_Plus__Commerce__EDD__Main as Main_EDD;
 use Tribe\HubSpot\Subscribe\EDD as EDD_Subscribe;
 use Tribe\HubSpot\Properties\Event_Data as Data;
 
-class EDDTest extends \Codeception\TestCase\WPTestCase {
+class EDDTest extends WPTestCase {
 
 	use EDD_Ticket_Maker;
 	use EDD_Order_Maker;
@@ -19,7 +20,7 @@ class EDDTest extends \Codeception\TestCase\WPTestCase {
 		parent::setUp();
 
 		$this->factory()->event = new Event();
-		
+
 		$this->edd_subscribe = new EDD_Subscribe();
 	}
 
@@ -47,12 +48,26 @@ class EDDTest extends \Codeception\TestCase\WPTestCase {
 		self::assertEquals( $attendee_data['last_name'], $properties[1]['value'] );
 	}
 
+	protected function make_base_data() {
+		$event_id  = $this->factory()->event->create();
+		$ticket_id = $this->create_edd_ticket( $event_id, 5 );
+		$order_id  = $this->create_edd_order( $ticket_id, 2, [ 'status' => 'completed' ] );
+		$order     = edd_get_payment( $order_id );
+
+		return [
+			'event_id'  => $event_id,
+			'ticket_id' => $ticket_id,
+			'order_id'  => $order_id,
+			'order'     => $order,
+		];
+	}
+
 	/**
 	 * @test
 	 */
 	public function it_should_return_order_data_array_from_attendee_data() {
-		$data          = new Data();
-		
+		$data = new Data();
+
 		$base_data = $this->make_base_data();
 		$order_id  = $base_data['order_id'];
 		$order     = $base_data['order'];
@@ -96,8 +111,8 @@ class EDDTest extends \Codeception\TestCase\WPTestCase {
 	 * @test
 	 */
 	public function it_should_return_first_attendee_id_from_order() {
-		$Main_EDD      = new Main_EDD();
-		
+		$Main_EDD = new Main_EDD();
+
 		$base_data = $this->make_base_data();
 		$event_id  = $base_data['event_id'];
 		$order_id  = $base_data['order_id'];
@@ -115,8 +130,8 @@ class EDDTest extends \Codeception\TestCase\WPTestCase {
 	 * @test
 	 */
 	public function it_should_return_related_order_data_with_attendee_id() {
-		$Main_EDD      = new Main_EDD();
-		
+		$Main_EDD = new Main_EDD();
+
 		$base_data = $this->make_base_data();
 		$event_id  = $base_data['event_id'];
 		$ticket_id = $base_data['ticket_id'];
@@ -132,19 +147,5 @@ class EDDTest extends \Codeception\TestCase\WPTestCase {
 		self::assertEquals( $order, $related_data['order'] );
 		self::assertEquals( $event_id, $related_data['post_id'] );
 		self::assertEquals( $ticket_id, $related_data['ticket_id'] );
-	}
-	
-	protected function make_base_data() {
-		$event_id = $this->factory()->event->create();
-		$ticket_id   = $this->create_edd_ticket( $event_id, 5 );
-		$order_id = $this->create_edd_order( $ticket_id, 2, [ 'status' => 'completed' ] );
-		$order    = edd_get_payment( $order_id );
-
-		return [
-			'event_id'  => $event_id,
-			'ticket_id' => $ticket_id,
-			'order_id'  => $order_id,
-			'order'     => $order,
-		];
 	}
 }

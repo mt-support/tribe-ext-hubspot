@@ -2,16 +2,19 @@
 
 namespace Tribe\HubSpot\Subscribe;
 
+use Codeception\TestCase\WPTestCase;
+use ReflectionClass;
 use Tribe\Events\Test\Factories\Event;
 use Tribe\Tickets\Test\Commerce\PayPal\Ticket_Maker as PayPal_Ticket_Maker;
 use Tribe\Tickets\Test\Commerce\PayPal\Order_Maker as PayPal_Order_Maker;
 use Tribe__Tickets__Commerce__PayPal__Main as Main_TPP;
+use Tribe__Tickets__Commerce__PayPal__Order;
 use Tribe__Tickets__Commerce__PayPal__Tickets_View as Tickets_View;
 use Tribe__Tickets__Data_API as Data_API;
 use Tribe\HubSpot\Subscribe\TPP as TPP_Subscribe;
 use Tribe\HubSpot\Properties\Event_Data as Data;
 
-class TPPTest extends \Codeception\TestCase\WPTestCase {
+class TPPTest extends WPTestCase {
 
 	use PayPal_Ticket_Maker;
 	use PayPal_Order_Maker;
@@ -53,14 +56,6 @@ class TPPTest extends \Codeception\TestCase\WPTestCase {
 		parent::tearDown();
 	}
 
-	private function make_instance() {
-		/** @var Main_TPP $instance */
-		$instance = ( new \ReflectionClass( Main_TPP::class ) )->newInstanceWithoutConstructor();
-		$instance->set_tickets_view( $this->tickets_view );
-
-		return $instance;
-	}
-
 	/**
 	 * @test
 	 */
@@ -79,11 +74,36 @@ class TPPTest extends \Codeception\TestCase\WPTestCase {
 		self::assertEquals( $attendee_data['last_name'], $properties[1]['value'] );
 	}
 
+	protected function make_base_data( $sales = 0, $stock = 10 ) {
+		$post_id = $this->factory()->post->create();
+
+		$ticket_id = $this->create_paypal_ticket( $post_id, 1, [
+			'meta_input' => [
+				'total_sales' => $sales,
+				'_stock'      => $stock,
+				'_capacity'   => $stock + $sales,
+			],
+		] );
+
+		$generated      = $this->create_paypal_orders( $post_id, $ticket_id, 2, 1 );
+		$order          = Tribe__Tickets__Commerce__PayPal__Order::from_order_id( $generated[0]['Order ID'] );
+		$test_attendees = $order->get_attendees();
+		$test_attendee  = current( $test_attendees );
+
+		return [
+			'post_id'       => $post_id,
+			'ticket_id'     => $ticket_id,
+			'order_id'      => $generated[0]['Order ID'],
+			'order'         => $order,
+			'test_attendee' => $test_attendee,
+		];
+	}
+
 	/**
 	 * @test
 	 */
 	public function it_should_return_order_data_array_from_attendee_data() {
-		$data          = new Data();
+		$data = new Data();
 
 		$base_data     = $this->make_base_data();
 		$test_attendee = $base_data['test_attendee'];
@@ -128,7 +148,7 @@ class TPPTest extends \Codeception\TestCase\WPTestCase {
 	 * @test
 	 */
 	public function it_should_return_first_attendee_id_from_order() {
-		$Main_TPP      = new Main_TPP();
+		$Main_TPP = new Main_TPP();
 
 		$base_data     = $this->make_base_data();
 		$post_id       = $base_data['post_id'];
@@ -184,28 +204,11 @@ class TPPTest extends \Codeception\TestCase\WPTestCase {
 		self::assertEquals( $ticket_id, $related_data['ticket_id'] );
 	}
 
-	protected function make_base_data( $sales = 0, $stock = 10 ) {
-		$post_id = $this->factory()->post->create();
+	private function make_instance() {
+		/** @var Main_TPP $instance */
+		$instance = ( new ReflectionClass( Main_TPP::class ) )->newInstanceWithoutConstructor();
+		$instance->set_tickets_view( $this->tickets_view );
 
-		$ticket_id = $this->create_paypal_ticket( $post_id, 1, [
-			'meta_input' => [
-				'total_sales' => $sales,
-				'_stock'      => $stock,
-				'_capacity'   => $stock + $sales,
-			],
-		] );
-
-		$generated      = $this->create_paypal_orders( $post_id, $ticket_id, 2, 1 );
-		$order          = \Tribe__Tickets__Commerce__PayPal__Order::from_order_id( $generated[0]['Order ID'] );
-		$test_attendees = $order->get_attendees();
-		$test_attendee  = current( $test_attendees );
-
-		return [
-			'post_id'       => $post_id,
-			'ticket_id'     => $ticket_id,
-			'order_id'      => $generated[0]['Order ID'],
-			'order'         => $order,
-			'test_attendee' => $test_attendee,
-		];
+		return $instance;
 	}
 }
