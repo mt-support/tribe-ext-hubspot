@@ -243,7 +243,12 @@ class Event_Data {
 
 			$valid_order_items['total']                 += $quantities;
 			$valid_order_items['events_per_order'][]    = $ticket_event_id;
-			$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+
+			if ( isset( $valid_order_items['tickets'][ $ticket_id ] ) ) {
+				$valid_order_items['tickets'][ $ticket_id ] += $quantities;
+			} else {
+				$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+			}
 		}
 
 		$valid_order_items['events_per_order'] = count( wp_parse_id_list( $valid_order_items['events_per_order'] ) );
@@ -285,7 +290,12 @@ class Event_Data {
 
 			$valid_order_items['total']                 += $quantities;
 			$valid_order_items['events_per_order'][]    = $ticket_event_id;
-			$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+
+			if ( isset( $valid_order_items['tickets'][ $ticket_id ] ) ) {
+				$valid_order_items['tickets'][ $ticket_id ] += $quantities;
+			} else {
+				$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+			}
 		}
 
 		$valid_order_items['events_per_order'] = count( wp_parse_id_list( $valid_order_items['events_per_order'] ) );
@@ -315,7 +325,12 @@ class Event_Data {
 			$quantities = 1;
 
 			$valid_order_items['total']                 += $quantities;
-			$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+
+			if ( isset( $valid_order_items['tickets'][ $ticket_id ] ) ) {
+				$valid_order_items['tickets'][ $ticket_id ] += $quantities;
+			} else {
+				$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+			}
 		}
 
 		return $valid_order_items;
@@ -343,7 +358,12 @@ class Event_Data {
 			$quantities = 1;
 
 			$valid_order_items['total']                 += $quantities;
-			$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+
+			if ( isset( $valid_order_items['tickets'][ $ticket_id ] ) ) {
+				$valid_order_items['tickets'][ $ticket_id ] += $quantities;
+			} else {
+				$valid_order_items['tickets'][ $ticket_id ] = $quantities;
+			}
 		}
 
 		return $valid_order_items;
