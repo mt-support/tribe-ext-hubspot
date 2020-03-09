@@ -1,0 +1,19 @@
+[
+  "tribe-ext-hubspot.php",
+  "src/**/*",
+  "languages/**/*.mo",
+  "languages/**/*.pot",
+  "languages/**/*.txt",
+  "license.txt",
+  "readme.txt",
+  "vendor/autoload.php",
+  "vendor/autoload_commands.php",
+  "vendor/autoload_framework.php",
+  "vendor/composer/*",
+  "vendor/guzzlehttp/**/*",
+  "vendor/hubspot/**/*",
+  "vendor/psr/**/*",
+  "vendor/ralouphie/**/*",
+  "data_collection_disclosure.html",
+  "site_owner_data_collection_statement.html"
+]

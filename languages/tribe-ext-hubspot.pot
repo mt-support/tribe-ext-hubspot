@@ -1,0 +1,217 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"Project-Id-Version: Event Tickets HubSpot Integration\n"
+"POT-Creation-Date: 2019-12-13 12:03-0500\n"
+"PO-Revision-Date: 2019-12-03 18:00-0500\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2.4\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-Flags-xgettext: --add-comments=translators:\n"
+"X-Poedit-WPHeader: tribe-ext-hubspot.php\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.min.js\n"
+"X-Poedit-SearchPathExcluded-1: vendor\n"
+"X-Poedit-SearchPathExcluded-2: node_modules\n"
+
+#: src/Tribe/Admin/Notices.php:103
+msgctxt "First part of notice there is no settings saved for HubSpot."
+msgid ""
+"HubSpot is missing the Credentials necessary to authorize your application. "
+"Please"
+msgstr ""
+
+#: src/Tribe/Admin/Notices.php:105
+msgctxt "Link text of notice there is no settings saved for HubSpot."
+msgid "configure it in the settings."
+msgstr ""
+
+#: src/Tribe/Admin/Notices.php:191
+msgctxt "First part of notice there is no connection with HubSpot."
+msgid "HubSpot is not authorized."
+msgstr ""
+
+#: src/Tribe/Admin/Notices.php:193
+msgctxt "Link text of notice there is no connection with HubSpot."
+msgid "Please authorize or refresh your connection."
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:218
+msgid "APP ID"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:219
+msgid "Enter the App ID from the application created in HubSpot"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:224
+msgid "Client ID"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:225
+msgid "Enter the Client ID from the application created in HubSpot"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:230
+msgid "Client Secret"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:231
+msgid "Enter the Client Secret from the application created in HubSpot"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:236
+msgid "User ID"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:237
+msgid "Enter the Developer Account User ID for HubSpot"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:242
+msgid "API Key"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:243
+msgid ""
+"Enter the Developer Account API Key from the Developer Account in HubSpot"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:261
+msgctxt "Intro text to the setup guide link."
+msgid "Review our"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:263
+msgctxt "Link text to the setup guide."
+msgid "setup guide"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:264
+msgctxt "Ending text to the setup guide link."
+msgid "to help you get started."
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:270
+msgctxt "API connection header"
+msgid "HubSpot"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:274
+msgctxt "Settings Description"
+msgid ""
+"You need to connect to your HubSpot account to be able to subscribe to "
+"actions."
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:305 src/Tribe/Admin/Settings.php:322
+msgid "HubSpot Connection"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:307
+msgid ""
+"An SSL is required to connect to HubSpot, please enable it on your site."
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:328
+msgid "You need to connect to HubSpot."
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:329
+msgid "Connect to HubSpot"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:331
+msgid "Refresh your connection to HubSpot"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:332
+msgid "Disconnect"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:463
+msgid "HubSpot Services"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:472
+msgctxt "Status Label HubSpot Main Connection."
+msgid "HubSpot Connection"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:473
+msgctxt "Status for HubSpot Main Connection."
+msgid "Not connected."
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:477
+msgctxt "Status for HubSpot Main Connection."
+msgid "Connected!"
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:517
+msgctxt "Message displayed when HubSpot Setup has not started."
+msgid "Setup on hold."
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:520
+msgctxt "This note is displayed when HubSpot Setup is Pending or In Progress."
+msgid ""
+"Setup can take up to 5 minutes. You may navigate away from this page, setup "
+"will continue in the background."
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:524
+msgctxt "Message displayed when HubSpot Setup is complete."
+msgid "Setup Complete."
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:527
+msgctxt "Message displayed when HubSpot Setup Failed."
+msgid "Setup incomplete, please refresh your connection to try again."
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:529
+msgctxt "Message displayed when HubSpot Setup has been initialized."
+msgid "Setup is preparing to begin. "
+msgstr ""
+
+#: src/Tribe/Admin/Settings.php:532
+msgctxt "Message displayed when HubSpot Setup is in Progress."
+msgid "Setup in Progress."
+msgstr ""
+
+#: src/Tribe/Setup.php:78
+#, php-format
+msgid ""
+"%1$s requires PHP version %2$s or newer to work. Please contact your website "
+"host and inquire about updating PHP."
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "Event Tickets HubSpot Integration"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://m.tri.be/hubspot"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "Event Tickets and Event Tickets Plus HubSpot Integration"
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Modern Tribe, Inc."
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://m.tri.be/1971"
+msgstr ""

@@ -1,0 +1,26 @@
+class_name: WpunitTester
+modules:
+  enabled: [WPLoader, \Helper\Wpunit]
+  config:
+    WPLoader:
+      wpRootFolder: %WP_ROOT_FOLDER%
+      dbName: %WP_TEST_DB_NAME%
+      dbHost: %WP_TEST_DB_HOST%
+      dbUser: %WP_TEST_DB_USER%
+      dbPassword: %WP_TEST_DB_PASSWORD%
+      tablePrefix: test_
+      domain: %WP_DOMAIN%
+      adminEmail: admin@%WP_DOMAIN%
+      title: 'Tribe Events HubSpot Tests'
+      plugins:
+        - event-tickets/event-tickets.php
+        - event-tickets-plus/event-tickets-plus.php
+        - the-events-calendar/the-events-calendar.php
+        - easy-digital-downloads/easy-digital-downloads.php
+        - woocommerce/woocommerce.php
+      activatePlugins:
+        - event-tickets/event-tickets.php
+        - event-tickets-plus/event-tickets-plus.php
+        - the-events-calendar/the-events-calendar.php
+        - easy-digital-downloads/easy-digital-downloads.php
+        - woocommerce/woocommerce.php
