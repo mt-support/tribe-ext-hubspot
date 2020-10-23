@@ -31,7 +31,7 @@ class Setup extends Tribe__Extension {
 
 		$this->add_required_plugin( 'Tribe__Tickets__Main', '4.11' );
 		$this->add_required_plugin( 'Tribe__Tickets_Plus__Main', '4.11' );
-		$this->add_required_plugin( 'Tribe__Events__Main', '4.9' );
+		$this->add_required_plugin( 'Tribe__Events__Main', '5.4' );
 
 		// Connect into Queue Filter, if done later it does not add the handler.
 		add_action( 'tribe_process_queues', [ $this, 'queue_handlers' ] );

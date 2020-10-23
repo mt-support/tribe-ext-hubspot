@@ -88,7 +88,7 @@ abstract class Base {
 				'event_venue_city'           => isset( $venue->event_venue_city ) ? $venue->event_venue_city : null,
 				'event_venue_state_province' => isset( $venue->event_venue_state_province ) ? $venue->event_venue_state_province : null,
 				'event_venue_postal_code'    => isset( $venue->event_venue_postal_code ) ? $venue->event_venue_postal_code : null,
-				'event_organizer'            => implode( ', ', $event->organizers->all() ),
+				'event_organizer'            => implode( ', ', $event->organizer_names->all() ),
 				'event_is_featured'          => $event->featured,
 				'event_cost'                 => html_entity_decode( $event->cost ),
 				'event_start_datetime_utc'   => date( 'U', strtotime( 'midnight', ( \Tribe__Date_Utils::wp_strtotime( $event->start_date_utc ) ) ) ) * 1000,
