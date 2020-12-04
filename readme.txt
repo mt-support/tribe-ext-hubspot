@@ -37,6 +37,10 @@ We're always interested in your feedback and our [Help Desk](https://support.the
 
 == Changelog ==
 
+= [1.0.1] TBD =
+
+* Tweak - Update code following update ons The Events Calendar 5.4.0
+
 = [1.0.0] 2019-12-17 =
 
 * Initial release
