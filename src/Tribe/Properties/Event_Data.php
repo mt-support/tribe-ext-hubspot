@@ -34,7 +34,7 @@ class Event_Data {
 			],
 			[
 				'property' => $prefix . 'event_organizer',
-				'value'    => implode( ', ', $event->organizers->all() ),
+				'value'    => implode( ', ', $event->organizer_names->all() ),
 			],
 			[
 				'property' => $prefix . 'event_is_featured',
