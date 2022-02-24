@@ -20,7 +20,7 @@ class Connection {
 	/**
 	 * @var array
 	 */
-	protected $scope = [ 'contacts', 'timeline' ];
+	protected $scope = [ 'crm.schemas.contacts.read', 'crm.schemas.contacts.write', 'timeline' ];
 
 	/**
 	 * @var int
