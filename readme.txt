@@ -3,9 +3,9 @@ Contributors: ModernTribe, brianjessee
 Donate link: http://m.tri.be/29
 Tags: events, calendar
 Requires at least: 4.7
-Tested up to: 5.2
+Tested up to: 5.9
 Requires PHP: 5.6
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPL version 3 or any later version
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -37,9 +37,9 @@ We're always interested in your feedback and our [Help Desk](https://support.the
 
 == Changelog ==
 
-= [1.0.1] TBD =
+= [1.0.1] 2022-02-02 =
 
-* Tweak - Update code following update ons The Events Calendar 5.4.0
+* Tweak - Update code to get organizer names following update ons The Events Calendar 5.4.0
 
 = [1.0.0] 2019-12-17 =
 
