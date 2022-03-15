@@ -37,9 +37,10 @@ We're always interested in your feedback and our [Help Desk](https://support.the
 
 == Changelog ==
 
-= [1.0.1] 2022-02-02 =
+= [1.0.1] 2022-03-15 =
 
-* Tweak - Update code to get organizer names following update ons The Events Calendar 5.4.0
+* Fix - Prevent authorization error by changing to the crm.schemas.contacts.read and crm.schemas.contacts.write scopes. [EXT-246]
+* Tweak - Update code to get organizer names following update ons The Events Calendar. [EXT-246]
 
 = [1.0.0] 2019-12-17 =
 
