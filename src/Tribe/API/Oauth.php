@@ -2,6 +2,7 @@
 
 namespace Tribe\HubSpot\API;
 
+use Tribe\Events\Admin\Settings as TEC_Settings;
 use Tribe\HubSpot\Process\Setup_Queue;
 
 /**
@@ -69,7 +70,7 @@ class Oauth {
 		 */
 		do_action( 'tribe_hubspot_authorize_site' );
 
-		wp_safe_redirect( \Tribe__Settings::instance()->get_url( [ 'tab' => 'addons' ] ) );
+		wp_safe_redirect( tribe( TEC_Settings::class )->get_url( [ 'tab' => 'addons' ] ) );
 
 		tribe_exit();
 	}

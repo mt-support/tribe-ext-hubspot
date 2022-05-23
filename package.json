@@ -1,6 +1,6 @@
 {
   "name": "tribe-ext-hubspot",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "repository": "git@github.com/mt-support/tribe-ext-hubspot",
   "_zipname": "tribe-ext-hubspot",
   "_zipfoldername": "tribe-ext-hubspot",
@@ -19,15 +19,8 @@
     "minimum_percentage": 30,
     "waiting_strings": false
   },
-  "engines": {
-    "node": "0.10.30",
-    "npm": "1.4.23"
-  },
+  "engines": { "node": "16.6.1", "npm": "7.20.3" },
   "devDependencies": {
-    "archiver": "^0.10.1",
-    "glob": "~4.0.5",
-    "gulp": "^3.9.1",
-    "product-taskmaster": "git+https://github.com/moderntribe/product-taskmaster.git",
-    "require-dir": "^0.3.0"
+    "@the-events-calendar/product-taskmaster": "2.1.1"
   }
 }
