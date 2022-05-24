@@ -27,7 +27,6 @@ class Service_Provider extends \tad_DI52_ServiceProvider {
 
 		$this->container->singleton( 'tickets.hubspot.admin.settings', Admin\Settings::class );
 		$this->container->singleton( 'tickets.hubspot.admin.notices', Admin\Notices::class, array( 'hook' ) );
-		$this->container->singleton( 'tickets.hubspot.admin.messages', Admin\Messages::class, array( 'hook' ) );
 
 		$this->container->singleton( 'tickets.hubspot.api', API\Connection::class );
 		$this->container->singleton( 'tickets.hubspot.setup', API\Setup::instance() );

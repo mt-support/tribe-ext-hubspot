@@ -1,13 +1,13 @@
 === Event Tickets HubSpot Integration ===
-Contributors: ModernTribe, brianjessee
-Donate link: http://m.tri.be/29
+Contributors: theeventscalendar, brianjessee
+Donate link: https://evnt.is/29
 Tags: events, calendar
-Requires at least: 4.7
-Tested up to: 5.9
-Requires PHP: 5.6
-Stable tag: 1.0.1
-License: GPL version 3 or any later version
-License URI: https://www.gnu.org/licenses/gpl-3.0.html
+Requires at least: 5.6
+Stable tag: 1.0.2
+Tested up to: 5.9.3
+Requires PHP: 7.1
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 [Extension Description]
 
@@ -36,6 +36,10 @@ Please visit our [extension library](https://theeventscalendar.com/extensions/) 
 We're always interested in your feedback and our [Help Desk](https://support.theeventscalendar.com/) are the best place to flag any issues. Do note, however, that the degree of support we provide for extensions like this one tends to be very limited.
 
 == Changelog ==
+
+= [1.0.2] 2022-05-23 =
+
+* Tweak - Utilize new settings class to link to the integration tab for authorization, disconnect, and notices. [EXT-283]
 
 = [1.0.1] 2022-03-15 =
 

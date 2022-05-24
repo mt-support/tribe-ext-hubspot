@@ -2,6 +2,7 @@
 
 namespace Tribe\HubSpot\Admin;
 
+use Tribe\Events\Admin\Settings as TEC_Settings;
 use Tribe\HubSpot\Process\Setup_Queue;
 use Tribe__Settings_Manager;
 
@@ -330,7 +331,7 @@ class Settings {
 				} else {
 					$hubspot_button_label     = __( 'Refresh your connection to HubSpot', 'tribe-ext-hubspot' );
 					$hubspot_disconnect_label = __( 'Disconnect', 'tribe-ext-hubspot' );
-					$current_url              = \Tribe__Settings::instance()->get_url( [ 'tab' => 'addons' ] );
+					$current_url              = tribe( TEC_Settings::class )->get_url( [ 'tab' => 'addons' ] );
 					$hubspot_disconnect_url   = $this->build_disconnect_hubspot_url( $current_url );
 				}
 				?>
@@ -375,7 +376,7 @@ class Settings {
 	 * @param WP_Screen $screen
 	 */
 	public function maybe_clear_hubspot_credentials( $screen ) {
-		if ( 'tribe_events_page_tribe-common' !== $screen->base ) {
+		if ( 'tribe_events_page_tec-events-settings' !== $screen->base ) {
 			return;
 		}
 
@@ -397,7 +398,7 @@ class Settings {
 		$this->clear_hubspot_credentials();
 
 		wp_redirect(
-			\Tribe__Settings::instance()->get_url( [ 'tab' => 'addons' ] )
+			tribe( TEC_Settings::class )->get_url( [ 'tab' => 'addons' ] )
 		);
 		die;
 	}

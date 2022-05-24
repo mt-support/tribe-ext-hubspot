@@ -3,6 +3,7 @@
 namespace Tribe\HubSpot\Admin;
 
 use Tribe__Admin__Notices;
+use \Tribe\Events\Admin\Settings as TEC_Settings;
 
 class Notices {
 
@@ -48,7 +49,7 @@ class Notices {
 		}
 
 		// Bail if previously dismissed this notice.
-		if ( Tribe__Admin__Notices::instance()->has_user_dimissed( $this->slug( 'missing-application-credentials' ) ) ) {
+		if ( Tribe__Admin__Notices::instance()->has_user_dismissed( $this->slug( 'missing-application-credentials' ) ) ) {
 			return;
 		}
 
@@ -93,11 +94,7 @@ class Notices {
 	 */
 	public function render_missing_application_credentials_notice( $settings ) {
 
-		// Get link to APIs Tab.
-		$url = $settings->get_url( [
-			'page' => 'tribe-common',
-			'tab'  => 'addons',
-		] );
+		$url = tribe( TEC_Settings::class )->get_url( [ 'tab' => 'addons' ] );
 
 		$message = sprintf( '<div><p>%s, <a href="%s" target="_blank">%s</a>.</p></div>',
 			esc_html_x( 'HubSpot is missing the Credentials necessary to authorize your application. Please', 'First part of notice there is no settings saved for HubSpot.', 'tribe-ext-hubspot' ),
@@ -124,7 +121,7 @@ class Notices {
 		}
 
 		// Bail if previously dismissed this notice.
-		if ( Tribe__Admin__Notices::instance()->has_user_dimissed( $this->slug( 'missing-access-token' ) ) ) {
+		if ( Tribe__Admin__Notices::instance()->has_user_dismissed( $this->slug( 'missing-access-token' ) ) ) {
 			return;
 		}
 
@@ -180,14 +177,9 @@ class Notices {
 	 */
 	public function render_missing_access_token_notice( $settings ) {
 
-		// Get link to APIs Tab.
-		$url = $settings->get_url( [
-			'page' => 'tribe-common',
-			'tab'  => 'addons',
-		] );
+		$url = tribe( TEC_Settings::class )->get_url( [ 'tab' => 'addons' ] );
 
-
-		$message = sprintf( '<div><p>%s, <a href="%s" target="_blank">%s</a>.</p></div>',
+		$message = sprintf( '<div><p>%s <a href="%s" target="_blank">%s</a>.</p></div>',
 			esc_html_x( 'HubSpot is not authorized.', 'First part of notice there is no connection with HubSpot.', 'tribe-ext-hubspot' ),
 			esc_url( $url ),
 			esc_html_x( 'Please authorize or refresh your connection.', 'Link text of notice there is no connection with HubSpot.','tribe-ext-hubspot' )
