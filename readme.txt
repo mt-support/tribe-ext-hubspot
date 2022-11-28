@@ -3,7 +3,7 @@ Contributors: theeventscalendar, brianjessee
 Donate link: https://evnt.is/29
 Tags: events, calendar
 Requires at least: 5.6
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 Tested up to: 5.9.3
 Requires PHP: 7.1
 License: GPLv2 or later
@@ -36,6 +36,10 @@ Please visit our [extension library](https://theeventscalendar.com/extensions/) 
 We're always interested in your feedback and our [Help Desk](https://support.theeventscalendar.com/) are the best place to flag any issues. Do note, however, that the degree of support we provide for extensions like this one tends to be very limited.
 
 == Changelog ==
+
+= [1.0.3] TBD =
+
+* Fix - Modify the redirect url for app authorization to support the latest standards from Hubspot. [EXT-283]
 
 = [1.0.2] 2022-05-23 =
 
