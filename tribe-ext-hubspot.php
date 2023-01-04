@@ -6,8 +6,8 @@
  * Description:       Event Tickets and Event Tickets Plus HubSpot Integration
  * Version:           1.0.3
  * Extension Class:   Tribe\HubSpot\Setup
- * Author:            Modern Tribe, Inc.
- * Author URI:        http://m.tri.be/1971
+ * Author:            The Events Calendar
+ * Author URI:        https://evnt.is/1aor
  * License:           GPL version 3 or any later version
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain:       tribe-ext-hubspot
