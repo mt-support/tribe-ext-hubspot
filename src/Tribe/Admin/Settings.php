@@ -244,6 +244,10 @@ class Settings {
 				'tooltip'         => sprintf( esc_html__( 'Enter the Developer Account API Key from the Developer Account in HubSpot', 'tribe-ext-hubspot' ) ),
 				'validation_type' => 'html',
 			],
+			$this->opts_prefix . 'redirect_url' => [
+				'type'    => 'html',
+				'html'    => $this->get_redirect_field(),
+			],
 		];
 
 		return array_merge( (array) $fields, $hubspot_fields );
@@ -281,6 +285,29 @@ class Settings {
 		<?php
 
 		echo $this->get_status_table();
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Get the redirect field url.
+	 *
+	 * @since 1.0.3
+	 *
+	 * @return string The redirect field url.
+	 */
+	public function get_redirect_field() {
+		$redirect_url = get_home_url( null, '/tribe-hubspot/' );
+		ob_start();
+		?>
+		<fieldset id="tribe-field-hubspot_token" class="tribe-field tribe-field-text tribe-size-medium">
+			<legend class="tribe-field-label"><?php echo esc_html_x( 'Redirect URL', 'The label for the redirct url in the settings.', 'tribe-ext-hubspot' ) ?></legend>
+			<div class="tribe-field-wrap">
+				<?php echo trim( esc_url( $redirect_url ) ); ?>
+				<p class="tooltip description"><?php echo esc_html_x( 'Add this url to the Redirect URLs field in your HubSpot App.', 'The tooltip for the redirct url in the settings.', 'tribe-ext-hubspot' ) ?></p>
+			</div>
+		</fieldset>
+		<?php
 
 		return ob_get_clean();
 	}

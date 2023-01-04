@@ -37,6 +37,7 @@ class Oauth {
 	 * Detect if HubSpot Endpoint and Save Access Token then Redirect to Settings
 	 *
 	 * @since 1.0
+	 * @since 1.0.3 - Remove the check for the nonce as query string is not supported with Hubspot redirect url.
 	 *
 	 * @param object $wp An object of the WordPress Query.
 	 */
@@ -48,14 +49,6 @@ class Oauth {
 
 		// Stop if we are missing the OAuth code.
 		if ( empty( $_GET['code'] ) ) {
-			die();
-		}
-
-		// Stop if the nonce is missing or is not valid.
-		if (
-			! isset( $_GET['hubspot-oauth-nonce'] ) ||
-			! wp_verify_nonce( $_GET['hubspot-oauth-nonce'], 'hubspot-oauth-action' )
-		) {
 			die();
 		}
 
