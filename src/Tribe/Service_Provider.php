@@ -2,6 +2,8 @@
 
 namespace Tribe\HubSpot;
 
+use TEC\Common\Contracts\Service_Provider;
+
 /**
  * Class Tribe\HubSpot\Service_Provider
  *
@@ -13,7 +15,7 @@ namespace Tribe\HubSpot;
  * @since 1.0
  *
  */
-class Service_Provider extends \tad_DI52_ServiceProvider {
+class Service_Provider extends Service_Provider {
 
 	/**
 	 * Binds and sets up implementations.

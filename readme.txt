@@ -3,7 +3,7 @@ Contributors: theeventscalendar, brianjessee
 Donate link: https://evnt.is/29
 Tags: events, calendar
 Requires at least: 5.8.6
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 Tested up to: 6.1.1
 Requires PHP: 7.3
 License: GPLv2 or later
@@ -36,6 +36,10 @@ Please visit our [extension library](https://theeventscalendar.com/extensions/) 
 We're always interested in your feedback and our [Help Desk](https://support.theeventscalendar.com/) are the best place to flag any issues. Do note, however, that the degree of support we provide for extensions like this one tends to be very limited.
 
 == Changelog ==
+
+= [1.0.4] 2023-06-24 =
+
+* Fix - Update to use the new Service_Provider contract in common.
 
 = [1.0.3] 2023-01-04 =
 

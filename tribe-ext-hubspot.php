@@ -4,7 +4,7 @@
  * Plugin URI:        http://m.tri.be/hubspot
  * GitHub Plugin URI: https://github.com/mt-support/tribe-ext-hubspot
  * Description:       Event Tickets and Event Tickets Plus HubSpot Integration
- * Version:           1.0.3
+ * Version:           1.0.4
  * Extension Class:   Tribe\HubSpot\Setup
  * Author:            The Events Calendar
  * Author URI:        https://evnt.is/1aor
