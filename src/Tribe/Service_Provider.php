@@ -2,20 +2,20 @@
 
 namespace Tribe\HubSpot;
 
-use TEC\Common\Contracts\Service_Provider;
+use TEC\Common\Contracts\Service_Provider as Provider_Contract;
 
 /**
  * Class Tribe\HubSpot\Service_Provider
  *
  * Provides the Event Tickets HubSpot Integration service.
  *
- * This class should handle implementation binding, builder functions and hooking for any first-level hook and be
- * devoid of business logic.
+ * This class should handle implementation binding, builder functions and hooking for any first-level hook
+ * and be devoid of business logic.
  *
  * @since 1.0
  *
  */
-class Service_Provider extends Service_Provider {
+class Service_Provider extends Provider_Contract {
 
 	/**
 	 * Binds and sets up implementations.
